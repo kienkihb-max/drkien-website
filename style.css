@@ -350,18 +350,25 @@ h4 { font-size: 1.1rem; }
   gap: 56px;
   align-items: center;
 }
-.runner-media { position: relative; }
-.runner-media img:first-child {
+.runner-media-featured img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
 }
-.runner-media-secondary {
-  position: absolute;
-  width: 55%;
-  bottom: -30px;
-  right: -30px;
-  border: 6px solid #fff;
-  border-radius: var(--radius);
+.runner-media-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.runner-media-strip img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
   box-shadow: var(--shadow-card);
 }
 
@@ -625,7 +632,7 @@ h4 { font-size: 1.1rem; }
   .services-grid { grid-template-columns: repeat(2, 1fr); }
   .cards-2col, .quotes-grid { grid-template-columns: 1fr; }
   .awards-grid { grid-template-columns: repeat(2, 1fr); }
-  .runner-media-secondary { position: static; width: 100%; margin-top: 16px; border: none; }
+  .runner-media-strip { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .about-section { padding-top: 96px; }
 }
 

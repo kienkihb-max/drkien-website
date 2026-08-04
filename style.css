@@ -221,7 +221,10 @@ h4 { font-size: 1.1rem; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  transform: translateY(60px);
+  margin-top: -60px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
 }
 .feature-card {
   background: #fff;
@@ -258,7 +261,7 @@ h4 { font-size: 1.1rem; }
 .hours-list li:last-child { border-bottom: none; }
 
 /* About */
-.about-section { padding-top: 140px; }
+.about-section { padding-top: 96px; }
 .about-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
@@ -591,7 +594,7 @@ h4 { font-size: 1.1rem; }
   .hero-inner, .about-grid, .runner-grid, .contact-grid, .case-study { grid-template-columns: 1fr; }
   .hero-media { order: -1; margin-bottom: 24px; }
   .about-media { order: -1; }
-  .feature-cards { grid-template-columns: 1fr; transform: none; margin-top: 40px; }
+  .feature-cards { grid-template-columns: 1fr; margin-top: 40px; }
   .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 32px 0; }
   .services-grid { grid-template-columns: repeat(2, 1fr); }
   .cards-2col, .quotes-grid { grid-template-columns: 1fr; }

@@ -485,24 +485,9 @@ h4 { font-size: 1.1rem; }
   gap: 24px;
   margin-bottom: 24px;
 }
-.award-featured { position: relative; border: 2px solid var(--primary-2); }
+.award-featured { border: 2px solid var(--primary-2); }
 .award-featured .award-img { height: 340px; }
 .award-featured figcaption { font-size: 1rem; font-weight: 700; color: var(--primary); }
-.award-badge {
-  position: absolute;
-  top: 16px; left: 16px;
-  z-index: 1;
-  background: var(--primary-2);
-  color: #fff;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  padding: 6px 14px;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0,42,106,0.25);
-}
 
 .awards-grid {
   display: grid;

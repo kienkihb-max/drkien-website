@@ -53,15 +53,23 @@ function closeLightbox() {
   document.body.style.overflow = "";
 }
 
-document.querySelectorAll(".shots-grid").forEach((gallery) => {
-  const cards = Array.from(gallery.querySelectorAll(".shot-card"));
-  const shots = cards.map((card) => ({
-    src: card.querySelector("img").src,
-    alt: card.querySelector("img").alt,
-    caption: card.querySelector("figcaption").textContent.trim(),
-  }));
-  cards.forEach((card, index) => {
-    card.addEventListener("click", () => openLightbox(shots, index));
+document.querySelectorAll("main section").forEach((scope) => {
+  const imgs = Array.from(scope.querySelectorAll("img")).filter(
+    (img) => !img.closest('[aria-hidden="true"]')
+  );
+  if (imgs.length === 0) return;
+  const shots = imgs.map((img) => {
+    const figure = img.closest("figure");
+    const figcaption = figure ? figure.querySelector("figcaption") : null;
+    return {
+      src: img.src,
+      alt: img.alt,
+      caption: figcaption ? figcaption.textContent.trim() : img.alt,
+    };
+  });
+  imgs.forEach((img, index) => {
+    img.classList.add("zoomable");
+    img.addEventListener("click", () => openLightbox(shots, index));
   });
 });
 

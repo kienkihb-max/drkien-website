@@ -29,22 +29,32 @@
   <symbol id="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol>
   <symbol id="ic-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></symbol>
   <symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="ic-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
 </svg>
 
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a href="#top" class="brand">
-      <span class="brand-mark">LTK</span>
+      <img class="brand-mark" src="assets/img/logo-chay-bo-cung-bs-kien.jpg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
       <span class="brand-text">ThS.BS Lê Trung Kiên</span>
     </a>
     <button class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <nav class="site-nav" id="siteNav">
-      <a href="#services">Chuyên môn</a>
-      <a href="#activities">Hoạt động</a>
-      <a href="#stories">Bệnh nhân</a>
-      <a href="#credibility">Ghi nhận</a>
+      <div class="nav-dropdown">
+        <a href="#top">Trang chủ <svg class="icon icon-sm nav-dropdown-arrow"><use href="#ic-chevron-down"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="#home">Giới thiệu</a>
+          <a href="#offerings">Dịch vụ</a>
+          <a href="#experience">Nền tảng chuyên môn</a>
+          <a href="#stories">Chia sẻ từ bệnh nhân</a>
+          <a href="#credibility">Uy tín chuyên môn</a>
+        </div>
+      </div>
+      <a href="y-te-su-kien.html">Y tế sự kiện</a>
+      <a href="dien-gia-seminar.html">Diễn giả</a>
+      <a href="dieu-tri.html">Điều trị</a>
       <a href="https://zalo.me/0345901772" target="_blank" rel="noopener" class="nav-cta">Liên hệ</a>
     </nav>
   </div>
@@ -94,14 +104,16 @@
           <p>Hỗ trợ y tế, sơ cứu chấn thương cho các giải chạy, giải đấu thể thao phong trào.</p>
           <div class="offer-actions">
             <a class="btn btn-main btn-sm" href="https://zalo.me/0345901772" target="_blank" rel="noopener">Liên hệ hợp tác</a>
+            <a class="btn btn-outline btn-sm" href="y-te-su-kien.html">Xem chi tiết</a>
           </div>
         </div>
         <div class="offer-card">
-          <div class="offer-img"><img src="assets/img/community-seminar-tigren.jpg" alt="Diễn giả tại seminar sức khỏe" loading="lazy"></div>
+          <div class="offer-img"><img src="assets/img/offer-dien-gia-tigren.jpg" alt="Diễn giả tại seminar sức khỏe" loading="lazy"></div>
           <h3>Diễn giả tại seminar</h3>
           <p>Chia sẻ chuyên môn tại workshop, seminar chăm sóc sức khỏe cho doanh nghiệp, trường học.</p>
           <div class="offer-actions">
             <a class="btn btn-main btn-sm" href="https://zalo.me/0345901772" target="_blank" rel="noopener">Liên hệ hợp tác</a>
+            <a class="btn btn-outline btn-sm" href="dien-gia-seminar.html">Xem chi tiết</a>
           </div>
         </div>
         <div class="offer-card">
@@ -110,72 +122,8 @@
           <p>Châm cứu, vật lý trị liệu cho đau cơ xương khớp và chấn thương thể thao.</p>
           <div class="offer-actions">
             <a class="btn btn-main btn-sm" href="https://zalo.me/0345901772" target="_blank" rel="noopener">Tư vấn điều trị</a>
+            <a class="btn btn-outline btn-sm" href="dieu-tri.html">Xem chi tiết</a>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="stats-section">
-    <div class="container">
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span class="stat-number">6+</span>
-          <p>Năm công tác tại BV YHCT Hà Nội</p>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">7</span>
-          <p>Chứng chỉ chuyên môn</p>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">6</span>
-          <p>Giải thưởng &amp; bằng khen</p>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">3</span>
-          <p>Bài viết &amp; nghiên cứu đã đăng</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="services" class="section section-alt">
-    <div class="container">
-      <div class="section-title text-center">
-        <p class="section-label">Chuyên môn</p>
-        <h2>Các lĩnh vực điều trị</h2>
-        <div class="divider mx-auto"></div>
-      </div>
-      <div class="services-grid">
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-activity"/></svg></div>
-          <h4>Châm cứu cổ truyền</h4>
-          <p>Điện châm, hào châm kết hợp y học cổ truyền trong điều trị đau và phục hồi chức năng.</p>
-        </div>
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-bone"/></svg></div>
-          <h4>Đau cơ xương khớp</h4>
-          <p>Đau cổ vai gáy, đau lưng, thoát vị đĩa đệm, viêm gân — điều trị vào đúng nguyên nhân.</p>
-        </div>
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-run"/></svg></div>
-          <h4>Chấn thương thể thao</h4>
-          <p>Phục hồi chấn thương khi tập luyện, thi đấu — bóng đá, chạy bộ và nhiều môn thể thao khác.</p>
-        </div>
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-scan"/></svg></div>
-          <h4>Siêu âm chẩn đoán</h4>
-          <p>Siêu âm cơ xương khớp và siêu âm tổng quát hỗ trợ chẩn đoán chính xác.</p>
-        </div>
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-shield"/></svg></div>
-          <h4>Phòng ngừa chấn thương</h4>
-          <p>Tư vấn kế hoạch tập luyện, phòng tránh chấn thương trước khi xảy ra.</p>
-        </div>
-        <div class="service-item">
-          <div class="feature-icon"><svg class="icon"><use href="#ic-clock"/></svg></div>
-          <h4>Vật lý trị liệu</h4>
-          <p>Phục hồi chức năng sau chấn thương, sau phẫu thuật với lộ trình cá nhân hóa.</p>
         </div>
       </div>
     </div>
@@ -188,6 +136,10 @@
         <h2>Nền tảng chuyên môn</h2>
         <div class="divider mx-auto"></div>
       </div>
+      <figure class="cv-photo">
+        <img src="assets/img/graduation.jpg" alt="Lễ tốt nghiệp và trao bằng Thạc sĩ, Trường Đại học Y Hà Nội, 07-08/04/2026" loading="lazy">
+        <figcaption>Lễ tốt nghiệp &amp; trao bằng Thạc sĩ Y học cổ truyền — Trường Đại học Y Hà Nội, 04/2026</figcaption>
+      </figure>
       <div class="cards-2col">
         <div class="info-card">
           <h3>Công tác</h3>
@@ -212,41 +164,11 @@
     </div>
   </section>
 
-  <section id="activities" class="section section-alt runner-section">
-    <div class="container runner-grid">
-      <div class="runner-media">
-        <div class="runner-media-featured">
-          <img src="assets/img/sports-football-injury.jpg" alt="ThS.BS Lê Trung Kiên sơ cứu chấn thương cho cầu thủ ngay trên sân bóng" loading="lazy">
-        </div>
-        <div class="runner-media-strip">
-          <img src="assets/img/sports-seagames31.jpg" alt="ThS.BS Lê Trung Kiên làm nhân viên y tế tại Lễ bế mạc SEA Games 31, Việt Nam 2022" loading="lazy">
-          <img src="assets/img/community-seminar-tigren.jpg" alt="ThS.BS Lê Trung Kiên cùng toàn thể nhân viên Tigren sau seminar Các vấn đề về cột sống của dân văn phòng" loading="lazy">
-          <img src="assets/img/community-thay-thuoc-tre.jpg" alt="Ngày hội Thầy thuốc trẻ Thủ đô, khám bệnh Vì một Việt Nam khỏe mạnh hơn, 2024" loading="lazy">
-        </div>
-      </div>
-      <div>
-        <p class="section-label">Hoạt động thực tế</p>
-        <h2>Y tế sự kiện, diễn giả &amp; cộng đồng</h2>
-        <p class="lead">
-          Bên cạnh công việc khám chữa bệnh tại bệnh viện, mình thường xuyên hỗ trợ y tế tại
-          các sự kiện thể thao, chia sẻ chuyên môn tại các buổi seminar sức khỏe, và tham gia
-          các hoạt động vì sức khỏe cộng đồng.
-        </p>
-        <ul class="list-check">
-          <li>Nhân viên y tế tại các sự kiện thể thao lớn (SEA Games 31) và giải chạy phong trào</li>
-          <li>Sơ cứu, xử trí chấn thương trực tiếp tại sân tập, sân thi đấu</li>
-          <li>Diễn giả tại các seminar, workshop chăm sóc sức khỏe cho doanh nghiệp</li>
-          <li>Tập huấn sơ cấp cứu và khám sức khỏe miễn phí cho cộng đồng</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
   <section id="stories" class="section">
     <div class="container">
       <div class="section-title text-center">
         <p class="section-label">Bệnh nhân nói gì</p>
-        <h2>Chia sẻ từ người bệnh &amp; runner</h2>
+        <h2>Chia sẻ từ bệnh nhân</h2>
         <div class="divider mx-auto"></div>
       </div>
       <div class="shots-marquee">
@@ -346,13 +268,37 @@
 </main>
 
 <footer class="site-footer">
-  <div class="container footer-inner">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href="#top" class="brand">
+        <img class="brand-mark" src="assets/img/logo-chay-bo-cung-bs-kien.jpg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
+        <span class="brand-text">ThS.BS Lê Trung Kiên</span>
+      </a>
+      <p>Y học cổ truyền · Y tế thể thao · Diễn giả sức khỏe</p>
+      <ul class="footer-socials">
+        <li><a href="https://zalo.me/0345901772" target="_blank" rel="noopener" aria-label="Zalo"><svg class="icon"><use href="#ic-chat"/></svg></a></li>
+        <li><a href="https://www.facebook.com/bskienyhcthn/" target="_blank" rel="noopener" aria-label="Facebook"><svg class="icon"><use href="#ic-facebook"/></svg></a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Địa chỉ</h4>
+      <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội</p>
+    </div>
+    <div class="footer-col">
+      <h4>Giờ làm việc</h4>
+      <ul class="footer-hours">
+        <li><span>Thứ 2 – Thứ 6</span><span>17h30 – 19h30</span></li>
+        <li><span>Thứ 7 – Chủ nhật</span><span>9h00 – 17h00</span></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Liên hệ</h4>
+      <a class="footer-link" href="https://zalo.me/0345901772" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: 034 590 1772</a>
+      <a class="footer-link" href="https://www.facebook.com/bskienyhcthn/" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
     <p>© <span id="year"></span> ThS.BS Lê Trung Kiên — Y học cổ truyền.</p>
-    <p class="footer-meta">Ngõ 8, Ngô Quyền, Hà Đông · T2–T6: 17h30–19h30 · T7–CN: 9h00–17h00</p>
-    <ul class="footer-socials">
-      <li><a href="https://zalo.me/0345901772" target="_blank" rel="noopener" aria-label="Zalo"><svg class="icon"><use href="#ic-chat"/></svg></a></li>
-      <li><a href="#" aria-label="Facebook"><svg class="icon"><use href="#ic-facebook"/></svg></a></li>
-    </ul>
   </div>
 </footer>
 

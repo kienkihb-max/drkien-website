@@ -905,7 +905,7 @@ main img.zoomable:hover {
   /* Lề 2 bên: mọi thứ cách mép màn hình đúng 16px */
   .container { padding: 0 16px; }
   .site-nav { padding: 12px 16px 24px; }
-  .back-to-top { right: 16px; bottom: 16px; }
+  .floating-actions { right: 16px; bottom: 16px; }
 
   /* Khoảng cách dọc giữa các section — 32px mỗi đầu, khoảng hở 64px */
   .section { padding: 32px 0; }
@@ -978,6 +978,8 @@ main img.zoomable:hover {
     transition: transform .25s ease, visibility 0s;
   }
   .sticky-cta .btn { display: flex; width: 100%; justify-content: center; }
+  /* Stack FAB nổi ở góc phải phải nhường chỗ khi thanh CTA bật lên */
+  body.sticky-cta-on .floating-actions { bottom: calc(16px + 76px); }
   /* Chừa chỗ sẵn để thanh không đè lên footer khi nó hiện ở cuối trang */
   body.has-sticky-cta .site-footer { padding-bottom: 76px; }
 }

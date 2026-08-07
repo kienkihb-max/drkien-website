@@ -671,6 +671,40 @@ main img.zoomable:hover {
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 .article-refs li { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
 
+/* Related posts — horizontal scroller at the foot of an article.
+   Vertical padding leaves room for the cards' shadow, which would
+   otherwise be clipped: overflow-x:auto forces overflow-y to auto too. */
+.related-scroller {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 0 14px;
+}
+.related-scroller::-webkit-scrollbar { height: 6px; }
+.related-scroller::-webkit-scrollbar-thumb { background: #cdd8e6; border-radius: 3px; }
+.related-scroller::-webkit-scrollbar-track { background: transparent; }
+.related-card {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .25s ease;
+}
+.related-card:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
+.related-card p { flex: 1; }
+.related-more {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 18px 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--primary);
+}
+.related-card:hover .related-more { color: var(--primary-2); }
+
 /* Press */
 .press-list { display: flex; flex-direction: column; gap: 16px; }
 .press-list-spaced { margin-top: 32px; }
@@ -890,6 +924,11 @@ main img.zoomable:hover {
   .press-source { flex: 1; width: auto; order: 1; }
   .press-arrow { order: 2; }
   .press-title { flex: 0 0 100%; order: 3; min-width: 0; }
+  /* Bleed to the screen edges so the next card peeks in, hinting the swipe.
+     scroll-padding keeps the snap point inside the padding, so the resting
+     card lines up with the heading instead of hugging the screen edge. */
+  .related-scroller { gap: 14px; margin: 0 -24px; padding: 8px 24px 14px; scroll-padding-left: 24px; }
+  .related-card { flex-basis: 78%; }
   .services-grid, .offer-grid { grid-template-columns: 1fr; }
   .awards-featured { grid-template-columns: 1fr; }
   .award-featured .award-img { height: 220px; }

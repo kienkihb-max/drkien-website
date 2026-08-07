@@ -874,8 +874,17 @@ main img.zoomable:hover {
   }
   .nav-dropdown-menu a { padding: 10px 0; }
   .hero { padding-top: 58px; }
-  .press-item { flex-wrap: wrap; }
-  .press-source { width: auto; }
+  /* Stack: source + arrow share the top row, title gets a full row below.
+     DOM order is source, title, arrow — so reorder to pull the arrow up. */
+  .press-item {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 18px 20px;
+  }
+  .press-source { flex: 1; width: auto; order: 1; }
+  .press-arrow { order: 2; }
+  .press-title { flex: 0 0 100%; order: 3; min-width: 0; }
   .services-grid, .offer-grid { grid-template-columns: 1fr; }
   .awards-featured { grid-template-columns: 1fr; }
   .award-featured .award-img { height: 220px; }

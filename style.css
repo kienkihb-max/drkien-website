@@ -896,3 +896,52 @@ main img.zoomable:hover {
   .awards-grid { grid-template-columns: repeat(2, 1fr); }
   .case-study { padding: 20px; }
 }
+
+/* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */
+@media (max-width: 720px) {
+  /* Lề 2 bên: mọi thứ cách mép màn hình đúng 16px */
+  .container { padding: 0 16px; }
+  .site-nav { padding: 12px 16px 24px; }
+  .back-to-top { right: 16px; bottom: 16px; }
+
+  /* Khoảng cách dọc giữa các section */
+  .section { padding: 48px 0; }
+  .section-title { margin-bottom: 28px; }
+  .offerings-section { padding-top: 40px; }
+
+  /* Hero full-bleed: bleed phải khớp gutter 16px, không thì tràn ngang 8px/bên */
+  .hero-media { margin: 0 -16px; width: calc(100% + 32px); }
+  .hero h1 { padding: 0 16px 28px; }
+  .hero-inner { gap: 0; padding-bottom: 0; }
+  .hero-lead { margin: 16px 0 22px; }
+  .lead { margin: 12px 0; }
+
+  .cv-photo { margin-bottom: 24px; }
+
+  /* Gap trong các lưới thẻ */
+  .services-grid,
+  .offer-grid,
+  .events-grid,
+  .cards-2col,
+  .cards-3col { gap: 16px; }
+  .runner-grid { gap: 28px; }
+  .events-featured-grid,
+  .awards-featured { gap: 16px; margin-bottom: 16px; }
+  .awards-grid,
+  .cv-awards-grid { gap: 14px; }
+  .cv-awards-grid { margin-top: 20px; }
+  .press-list-spaced { margin-top: 20px; }
+  .shots-marquee { margin-bottom: 24px; }
+
+  /* Padding trong thẻ — thẻ đã cách lề 16px nên ruột không cần dày */
+  .info-card { padding: 24px 20px; }
+  .service-item { padding: 26px 20px; }
+  .press-item { padding: 18px 20px; }
+  .offer-card h3,
+  .offer-card p,
+  .offer-actions { padding-left: 18px; padding-right: 18px; }
+
+  /* Footer */
+  .site-footer { padding-top: 44px; }
+  .footer-grid { gap: 28px; padding-bottom: 28px; }
+}

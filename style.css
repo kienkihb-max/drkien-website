@@ -760,16 +760,6 @@ main img.zoomable:hover {
 }
 .footer-link:hover { color: var(--primary); }
 .footer-link .icon { color: var(--primary-2); }
-.footer-socials { display: flex; gap: 10px; }
-.footer-socials a {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  background: var(--primary-2);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-}
-.footer-socials a:hover { background: var(--primary); }
-.footer-socials .icon { width: 1.1em; height: 1.1em; }
 .footer-bottom {
   border-top: 1px solid #e3ebf3;
   padding: 20px 0;
@@ -784,25 +774,43 @@ main img.zoomable:hover {
   .footer-grid { grid-template-columns: 1fr; }
 }
 
-.back-to-top {
+/* Floating action stack: Zalo / Facebook / back-to-top */
+.floating-actions {
   position: fixed;
   right: 24px; bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 90;
+}
+.fab {
   width: 48px; height: 48px;
   border-radius: 50%;
-  background: var(--primary-2);
-  color: #fff;
+  background: #fff;
+  color: var(--text-dark);
   border: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0,42,106,0.25);
+  box-shadow: 0 6px 20px rgba(0, 42, 106, 0.18), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform .2s ease, box-shadow .2s ease, color .2s ease;
+}
+.fab:hover {
+  color: var(--primary-2);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 42, 106, 0.24), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+/* Contact buttons carry the brand colour; back-to-top stays neutral white */
+.fab-brand { background: var(--primary-2); color: #fff; }
+.fab-brand:hover { background: var(--primary); color: #fff; }
+/* Back-to-top only appears once the page has scrolled, but keeps its slot
+   so the social buttons above it never shift. */
+.back-to-top {
   opacity: 0;
   visibility: hidden;
   transform: translateY(10px);
-  transition: all .25s ease;
-  z-index: 90;
 }
 .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-.back-to-top:hover { background: var(--primary); }
+.back-to-top.visible:hover { transform: translateY(-2px); }
 
 /* Responsive */
 @media (max-width: 960px) {

@@ -810,16 +810,10 @@ main img.zoomable:hover {
   h2 { font-size: 1.8rem; }
   .hero { padding-top: 84px; }
   .hero-inner, .runner-grid { grid-template-columns: 1fr; }
-  .hero-inner {
-    grid-template-areas:
-      "media"
-      "eyebrow"
-      "lead"
-      "actions";
-  }
-  .hero-text { display: contents; }
+  /* Hero collapses to a single stacking cell: image below, text on top */
+  .hero-inner { gap: 0; padding-bottom: 0; }
   .hero-media {
-    grid-area: media;
+    grid-area: 1 / 1;
     margin: 0 -24px;
     width: calc(100% + 48px);
   }
@@ -829,22 +823,20 @@ main img.zoomable:hover {
     display: block;
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.55) 25%, transparent 50%);
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.7) 28%, rgba(0,0,0,0.3) 52%, transparent 72%);
     z-index: 2;
   }
-  .hero h1 {
-    grid-area: media;
+  .hero-text {
+    grid-area: 1 / 1;
     align-self: end;
-    justify-self: stretch;
     position: relative;
     z-index: 3;
-    color: #fff;
-    margin: 0;
-    padding: 0 24px 28px;
+    padding-bottom: 30px;
   }
-  .eyebrow-row { grid-area: eyebrow; margin-top: 24px; }
-  .hero-lead { grid-area: lead; }
-  .hero-actions { grid-area: actions; margin-bottom: 40px; }
+  .eyebrow-row, .hero-lead { display: none; }
+  .hero h1 { color: #fff; margin: 0 0 20px; }
+  .hero-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hero .btn-outline { border-color: rgba(255,255,255,0.6); color: #fff; }
   .services-grid, .offer-grid { grid-template-columns: repeat(2, 1fr); }
   .cards-2col, .quotes-grid { grid-template-columns: 1fr; }
   .runner-media-strip { grid-template-columns: repeat(3, 1fr); gap: 8px; }

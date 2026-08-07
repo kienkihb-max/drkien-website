@@ -910,7 +910,9 @@ main img.zoomable:hover {
 
   /* Hero full-bleed: bleed phải khớp gutter 16px, không thì tràn ngang 8px/bên */
   .hero-media { margin: 0 -16px; width: calc(100% + 32px); }
-  .hero h1 { padding: 0 16px 28px; }
+  /* h1 phủ trên ảnh: bleed ra sát mép rồi padding 16px, nếu chỉ để padding
+     thì cộng dồn với 16px của .container thành 32px */
+  .hero h1 { margin: 0 -16px; padding: 0 16px 28px; }
   .hero-inner { gap: 0; padding-bottom: 0; }
   .hero-lead { margin: 16px 0 22px; }
   .lead { margin: 12px 0; }

@@ -19,25 +19,20 @@
   var ctas = [].slice.call(document.querySelectorAll('main a.btn[href*="zalo.me"]'));
   if (ctas.length === 0) return;
 
-  if (!("IntersectionObserver" in window)) {
-    document.body.classList.add("sticky-cta-on");
-    return;
+  function coCTAtrongTam() {
+    var cao = window.innerHeight || document.documentElement.clientHeight;
+    return ctas.some(function (cta) {
+      var r = cta.getBoundingClientRect();
+      return r.bottom > 0 && r.top < cao;
+    });
   }
 
-  var onScreen = [];
-  var observer = new IntersectionObserver(
-    function (entries) {
-      entries.forEach(function (entry) {
-        var at = onScreen.indexOf(entry.target);
-        if (entry.isIntersecting && at === -1) onScreen.push(entry.target);
-        if (!entry.isIntersecting && at !== -1) onScreen.splice(at, 1);
-      });
-      document.body.classList.toggle("sticky-cta-on", onScreen.length === 0);
-    },
-    { threshold: 0 }
-  );
+  function capNhat() {
+    document.body.classList.toggle("sticky-cta-on", !coCTAtrongTam());
+  }
 
-  ctas.forEach(function (cta) {
-    observer.observe(cta);
-  });
+  window.addEventListener("scroll", capNhat, { passive: true });
+  window.addEventListener("resize", capNhat);
+  window.addEventListener("load", capNhat);
+  capNhat();
 })();

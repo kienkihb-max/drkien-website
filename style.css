@@ -774,6 +774,9 @@ main img.zoomable:hover {
   .footer-grid { grid-template-columns: 1fr; }
 }
 
+/* Sticky CTA (trang dịch vụ) — chỉ dùng trên mobile, xem @media bên dưới */
+.sticky-cta { display: none; }
+
 /* Floating action stack: Zalo / Facebook / back-to-top */
 /* The whole stack fades in together once the page has scrolled. */
 .floating-actions {
@@ -953,4 +956,28 @@ main img.zoomable:hover {
   /* Footer */
   .site-footer { padding-top: 44px; }
   .footer-grid { gap: 28px; padding-bottom: 28px; }
+
+  /* Thanh CTA dính đáy màn hình */
+  .sticky-cta {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 95;
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -2px 16px rgba(0, 42, 106, 0.12);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform .25s ease, visibility 0s linear .25s;
+  }
+  body.sticky-cta-on .sticky-cta {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform .25s ease, visibility 0s;
+  }
+  .sticky-cta .btn { display: flex; width: 100%; justify-content: center; }
+  /* Chừa chỗ sẵn để thanh không đè lên footer khi nó hiện ở cuối trang */
+  body.has-sticky-cta .site-footer { padding-bottom: 76px; }
 }

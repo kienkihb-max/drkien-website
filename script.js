@@ -16,9 +16,10 @@ siteNav.querySelectorAll("a").forEach((link) => {
 });
 
 const backToTop = document.getElementById("backToTop");
+const floatingActions = document.querySelector(".floating-actions");
 
 window.addEventListener("scroll", () => {
-  backToTop.classList.toggle("visible", window.scrollY > 400);
+  floatingActions.classList.toggle("visible", window.scrollY > 400);
 });
 
 backToTop.addEventListener("click", () => {

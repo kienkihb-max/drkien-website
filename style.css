@@ -12,6 +12,32 @@
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
 
+  /* ---- Thang cỡ chữ ----------------------------------------------------
+     Mọi cỡ chữ trong file này phải lấy từ 9 bậc dưới đây — không viết
+     thẳng số rem vào từng rule nữa. Trước đây site có 26 cỡ chữ khác
+     nhau, trong đó 5 cỡ chen nhau trong khoảng 13.6–15.2px mà mắt không
+     phân biệt được; gom về một thang giúp các trang nhất quán và sửa một
+     chỗ là đổi toàn site.
+
+     Quy tắc dựng thang: mọi bậc đều chia hết cho 4, riêng 14px là ngoại
+     lệ vì cần một bậc nằm giữa 12 và 16.
+
+     Sàn là 12px (--fs-xs) và CHỈ dùng cho chú thích — chú thích ảnh,
+     nguồn trích dẫn, số chú thích trong bài, dòng bản quyền. Chữ để đọc
+     không bao giờ nhỏ hơn 14px, vì người xem site này phần nhiều là bệnh
+     nhân lớn tuổi dùng điện thoại.
+
+     Gốc 1rem = 16px, nên px ghi ở mỗi dòng là cỡ thật khi hiển thị. */
+  --fs-xs: 0.75rem;     /* 12px — CHỈ chú thích, không dùng cho chữ đọc */
+  --fs-sm: 0.875rem;    /* 14px — chữ nền mobile, nhãn, menu, nút, chân trang */
+  --fs-base: 1rem;      /* 16px — chữ nền desktop, chữ trong bài viết */
+  --fs-lg: 1.25rem;     /* 20px — h3, tiêu đề thẻ, đoạn dẫn */
+  --fs-xl: 1.5rem;      /* 24px — tiêu đề thẻ nổi bật */
+  --fs-2xl: 1.75rem;    /* 28px — h1 mobile, h2 tablet/mobile */
+  --fs-3xl: 2rem;       /* 32px — h1 tablet */
+  --fs-4xl: 2.25rem;    /* 36px — h2 desktop */
+  --fs-5xl: 2.5rem;     /* 40px — h1 desktop */
+
   /* Khoảng cách dọc của các trang phụ (blog, bài viết, dịch vụ).
      Sửa 4 số này là đổi nhịp cho toàn bộ trang phụ; số cho mobile nằm
      trong @media (max-width: 720px) ở cuối file. Trang chủ không dùng

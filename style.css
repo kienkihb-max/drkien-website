@@ -447,9 +447,16 @@ h4 { font-size: var(--fs-base); }
 /* Đoạn tiểu sử mở đầu trang hồ sơ. Giới hạn bề rộng dòng cho dễ đọc —
    chữ chạy hết chiều ngang container thì mắt khó bắt được đầu dòng sau. */
 .cv-bio { max-width: 760px; margin-top: 36px; }
-.cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 22px; }
+/* Căn đều hai lề cho khối tiểu sử. text-wrap: pretty giúp trình duyệt chia
+   dòng cân đối hơn, đỡ bị khoảng trắng giãn rộng bất thường ở dòng cuối. */
+.cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 22px; text-align: justify; text-wrap: pretty; }
 .cv-bio p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
 .cv-bio p:last-child { margin-bottom: 0; }
+/* Khổ hẹp thì bỏ căn đều: chỉ còn hơn 300px mỗi dòng nên chữ bị giãn thành
+   những khoảng trắng rộng bất thường, đọc mệt hơn là lề phải so le. */
+@media (max-width: 620px) {
+  .cv-bio p { text-align: start; }
+}
 /* Tiêu đề mục nằm giữa đoạn tiểu sử và lưới thẻ trên trang hồ sơ. */
 .cv-section-title { margin-top: 44px; }
 

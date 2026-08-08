@@ -30,6 +30,9 @@
   if (!header) return;
 
   var trang = location.pathname.split("/").pop() || TRANG_CHU;
+  // Một số host (và npx serve khi dev) bỏ đuôi .html khỏi URL — thêm lại để
+  // mọi phép so sánh tên trang trong file này luôn dùng dạng "ten-trang.html".
+  if (trang.indexOf(".") === -1) trang += ".html";
   var laTrangChu = trang === TRANG_CHU;
 
   // Trên trang chủ neo thẳng tới section; ở trang con phải quay về index trước.
@@ -77,6 +80,8 @@
   var ICONS = {
     "ic-chevron-down":
       '<symbol id="ic-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>',
+    "ic-home":
+      '<symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></symbol>',
   };
 
   var thieu = Object.keys(ICONS).filter(function (id) {
@@ -102,6 +107,41 @@
   // Trang chủ có nút "lên đầu trang" trỏ tới #top.
   if (laTrangChu) header.id = "top";
   header.innerHTML = HEADER;
+
+  // ——— Breadcrumb trang phụ ———
+  // Biến dòng nhãn <p class="section-label"> trên cùng của trang phụ thành
+  // breadcrumb: icon nhà (về trang chủ) › Blog (nếu là bài viết) › mục hiện
+  // tại. Các trang giữ nguyên markup nhãn cũ — script tự đổi, nên tạo trang
+  // mới không cần nhớ thêm gì; nhãn dạng "Blog · Chuyên mục" tách theo "·".
+  function bocChu(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  var nhan = document.querySelector(".cv-hero .section-label");
+  if (nhan) {
+    var manh = nhan.textContent.split("·").map(function (s) {
+      return s.trim();
+    });
+    var crumbs = [
+      '<a class="breadcrumb-home" href="' +
+        TRANG_CHU +
+        '" aria-label="Trang chủ"><svg class="icon icon-sm"><use href="#ic-home"/></svg></a>',
+    ];
+    manh.forEach(function (chu, i) {
+      crumbs.push('<span class="breadcrumb-sep" aria-hidden="true">›</span>');
+      if (chu === "Blog" && trang !== "blog.html") {
+        crumbs.push('<a href="blog.html">' + bocChu(chu) + "</a>");
+      } else if (i === manh.length - 1) {
+        crumbs.push('<span aria-current="page">' + bocChu(chu) + "</span>");
+      } else {
+        crumbs.push("<span>" + bocChu(chu) + "</span>");
+      }
+    });
+    var duongDan = document.createElement("nav");
+    duongDan.className = "breadcrumb";
+    duongDan.setAttribute("aria-label", "Breadcrumb");
+    duongDan.innerHTML = crumbs.join("");
+    nhan.replaceWith(duongDan);
+  }
 
   // Nút hamburger trên mobile. Để ở đây thay vì script.js, vì script.js chỉ
   // được nạp ở trang chủ còn menu thì trang nào cũng có.

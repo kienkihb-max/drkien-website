@@ -173,6 +173,26 @@ h4 { font-size: var(--fs-base); }
 .section-title { margin-bottom: 40px; }
 .text-center { text-align: center; }
 
+/* ---- Breadcrumb đầu trang phụ ----
+   site-header.js biến <p class="section-label"> đầu tiên trong .cv-hero
+   thành thanh điều hướng này: icon nhà › Blog › mục hiện tại. Giữ đúng cỡ
+   chữ và nhịp của .section-label để không xô lệch phần mở đầu trang. */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.breadcrumb a { color: var(--text-muted); display: inline-flex; align-items: center; }
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb-sep { color: var(--text-muted); }
+
 .divider {
   width: 40px;
   height: 4px;

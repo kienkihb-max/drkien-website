@@ -648,10 +648,14 @@ main img.zoomable { cursor: zoom-in; }
 .shots-track:hover {
   animation-play-state: paused;
 }
+/* margin-right = gap giữa các thẻ, để chỗ nối giữa 2 bản sao rộng đúng
+   bằng khoảng cách thường — vòng lặp liền mạch, không bị khựng một nhịp.
+   Track gồm 2 bản sao + 2 margin nên translateX(-50%) vẫn khớp chính xác. */
 .shots-grid {
   display: flex;
   gap: 20px;
-  padding: 4px 4px 20px;
+  padding: 4px 0 20px;
+  margin-right: 20px;
 }
 .shots-grid[aria-hidden="true"] {
   pointer-events: none;
@@ -660,10 +664,9 @@ main img.zoomable { cursor: zoom-in; }
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .shots-track { animation: none; }
-  .shots-marquee { overflow-x: auto; }
-}
+/* Chủ site muốn dải ảnh luôn chạy, kể cả khi hệ điều hành bật giảm chuyển
+   động — nên cố ý KHÔNG tắt animation này trong prefers-reduced-motion.
+   Ai muốn dừng để xem kỹ thì rê chuột vào (hover pause ở .shots-track). */
 .shot-card {
   flex: 0 0 320px;
   display: flex;
@@ -690,7 +693,8 @@ main img.zoomable { cursor: zoom-in; }
 
 @media (max-width: 640px) {
   .shot-card { flex-basis: 240px; }
-  .shots-grid { gap: 14px; }
+  /* margin-right theo gap — xem chú thích ở .shots-grid phía trên */
+  .shots-grid { gap: 14px; margin-right: 14px; }
 }
 
 /* Lightbox */

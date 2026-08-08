@@ -926,8 +926,9 @@ main img.zoomable { cursor: zoom-in; }
 
 /* Contact */
 
-/* Footer */
-.site-footer { background: var(--gray-bg); padding: 64px 0 0; }
+/* Footer. Nền đậm hơn --gray-bg một chút để tách hẳn khỏi các section
+   xen kẽ dùng cùng màu nền xám. */
+.site-footer { background: #e8f0f8; padding: 64px 0 0; }
 .footer-inner {
   display: flex;
   justify-content: space-between;
@@ -956,11 +957,22 @@ main img.zoomable { cursor: zoom-in; }
   gap: 8px;
 }
 .footer-col p .icon { flex-shrink: 0; margin-top: 3px; color: var(--primary-2); }
-.footer-hours { display: flex; flex-direction: column; gap: 8px; }
+/* Bản đồ nhỏ dưới dòng địa chỉ — src dựng từ DIA_CHI trong site-footer.js */
+.footer-map { margin-top: 14px; }
+.footer-map iframe {
+  display: block;
+  width: 100%;
+  height: 140px;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+.footer-hours { display: flex; flex-direction: column; gap: 10px; }
+/* Giờ nằm ngay dưới thứ, xếp dọc trong từng dòng */
 .footer-hours li {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 2px;
   font-size: var(--fs-sm);
 }
 .footer-hours li span:first-child { color: var(--text-heading); }

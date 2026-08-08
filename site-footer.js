@@ -9,6 +9,11 @@
   var TRANG_CHU = "index.html";
   var ZALO = "https://zalo.me/0345901772";
   var FACEBOOK = "https://www.facebook.com/bskienyhcthn/";
+  // Địa chỉ dùng cho cả dòng chữ lẫn bản đồ Google bên dưới — sửa một chỗ
+  // là cả hai cùng đổi theo.
+  var DIA_CHI = "Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội";
+  var BAN_DO =
+    "https://www.google.com/maps?q=" + encodeURIComponent(DIA_CHI) + "&output=embed";
 
   var FOOTER = [
     '<div class="container footer-grid">',
@@ -20,8 +25,11 @@
     "    <p>Y học cổ truyền · Y tế thể thao · Diễn giả sức khỏe</p>",
     "  </div>",
     '  <div class="footer-col">',
-    "    <h4>Địa chỉ</h4>",
-    '    <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội</p>',
+    "    <h4>Địa chỉ phòng khám</h4>",
+    '    <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> ' + DIA_CHI + "</p>",
+    '    <div class="footer-map"><iframe src="' +
+      BAN_DO +
+      '" title="Bản đồ tới phòng khám" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>',
     "  </div>",
     '  <div class="footer-col">',
     "    <h4>Giờ làm việc</h4>",

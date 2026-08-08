@@ -842,6 +842,9 @@ main img.zoomable { cursor: zoom-in; }
 .article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
 .article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
 .article-body h3 { margin: 40px 0 16px; font-size: var(--fs-lg); }
+/* Danh sách trong bài viết cần khoảng cách dưới bằng đoạn văn, nếu không
+   đoạn văn kế tiếp sẽ dính sát vào mục cuối cùng của danh sách. */
+.article-body ul, .article-body ol { margin-bottom: 22px; }
 .article-body sup { font-size: var(--fs-xs); color: var(--primary-2); }
 .article-inline-img { margin: 36px 0; }
 .article-inline-img img {

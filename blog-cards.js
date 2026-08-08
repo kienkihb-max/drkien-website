@@ -9,50 +9,74 @@
 //   Cuối bài viết: <section class="section blog-related"></section>
 //   rồi nạp <script src="blog-cards.js"></script>
 //
-// Thêm bài mới: thêm một mục vào DANH_SACH bên dưới, đặt noi_bat: true nếu
-// muốn bài đó nằm ở khối nổi bật đầu trang blog.
+// Thêm bài mới: dùng trang admin (admin.html) cho nhanh và khỏi sót, hoặc
+// thêm tay một mục vào DANH_SACH bên dưới.
 (function () {
   // ——— Danh sách bài viết, sửa ở đây ———
   // Thứ tự trong mảng là thứ tự hiển thị.
+  //
+  // Trang admin đọc và ghi đè vùng nằm giữa hai dòng mốc bên dưới, nên vùng
+  // đó phải luôn là JSON hợp lệ: khóa và chuỗi đều dùng nháy kép, không có
+  // dấu phẩy thừa ở phần tử cuối, và không chèn ghi chú vào giữa. Sửa tay
+  // vẫn được, chỉ cần giữ đúng dạng đó và đừng xóa hai dòng mốc.
+  //
+  //   href     tên file bài viết, bỏ đuôi .html
+  //   ngay     ngày đăng, dạng NĂM-THÁNG-NGÀY
+  //   noi_bat  true thì bài nằm ở khối nổi bật đầu trang blog
+  //   an       true thì bài biến khỏi mọi danh sách nhưng link cũ vẫn sống
+  /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
-      href: "chuot-rut-khi-chay-bo",
-      tieu_de: "Chuột rút khi chạy bộ: Chuối hay tập tạ?",
-      mo_ta: "Nghiên cứu trên 98 vận động viên marathon cho thấy điều khác biệt không nằm ở nước hay điện giải.",
-      anh: "assets/img/sports-marathon-expert.jpg",
-      alt: "ThS.BS Lê Trung Kiên cùng chuyên gia Karl Gunter Lange tại Viettel Marathon Hà Nội 2024",
-      noi_bat: true,
+      "href": "chuot-rut-khi-chay-bo",
+      "tieu_de": "Chuột rút khi chạy bộ: Chuối hay tập tạ?",
+      "mo_ta": "Nghiên cứu trên 98 vận động viên marathon cho thấy điều khác biệt không nằm ở nước hay điện giải.",
+      "anh": "assets/img/sports-marathon-expert.jpg",
+      "alt": "ThS.BS Lê Trung Kiên cùng chuyên gia Karl Gunter Lange tại Viettel Marathon Hà Nội 2024",
+      "ngay": "2026-08-08",
+      "noi_bat": true
     },
     {
-      href: "van-dong-phuc-hoi-cot-song",
-      tieu_de: "Thoát vị đĩa đệm: 6 sự thật",
-      mo_ta: 'Đĩa đệm không hề "trượt", MRI bất thường gặp cả ở người không đau, và khối thoát vị có thể tự tiêu biến.',
-      anh: "assets/img/offer-treatment.jpg",
-      alt: "Điện châm vùng thắt lưng kết hợp đèn hồng ngoại tại khoa Y học cổ truyền",
-      noi_bat: true,
+      "href": "van-dong-phuc-hoi-cot-song",
+      "tieu_de": "Thoát vị đĩa đệm: 6 sự thật",
+      "mo_ta": "Đĩa đệm không hề \"trượt\", MRI bất thường gặp cả ở người không đau, và khối thoát vị có thể tự tiêu biến.",
+      "anh": "assets/img/offer-treatment.jpg",
+      "alt": "Điện châm vùng thắt lưng kết hợp đèn hồng ngoại tại khoa Y học cổ truyền",
+      "ngay": "2026-08-07",
+      "noi_bat": true
     },
     {
-      href: "chuot-rut-khi-van-dong",
-      tieu_de: "Chạy lại sau tái tạo dây chằng chéo trước",
-      mo_ta: "Vì sao mốc 12 tuần không đủ để quyết định cho chạy lại, và những tiêu chí chức năng cần đạt trước đó.",
-      anh: "assets/img/sports-football-injury.jpg",
-      alt: "Bác sĩ xử trí chấn thương chân cho cầu thủ ngay trên sân bóng",
+      "href": "chuot-rut-khi-van-dong",
+      "tieu_de": "Chạy lại sau tái tạo dây chằng chéo trước",
+      "mo_ta": "Vì sao mốc 12 tuần không đủ để quyết định cho chạy lại, và những tiêu chí chức năng cần đạt trước đó.",
+      "anh": "assets/img/sports-football-injury.jpg",
+      "alt": "Bác sĩ xử trí chấn thương chân cho cầu thủ ngay trên sân bóng",
+      "ngay": "2026-08-08"
     },
     {
-      href: "shin-splints-dau-xuong-chay",
-      tieu_de: "Hiểu đúng về hội chứng quá tải thường gặp ở người chạy bộ",
-      mo_ta: "Nhận diện hội chứng quá tải thường gặp ở người chạy bộ, và vì sao điều chỉnh tải vận động quan trọng hơn nghỉ ngơi đơn thuần.",
-      anh: "assets/img/blog-run-with-me-cong-dong-khoe.jpg",
-      alt: "Nhóm vận động viên phong trào tại giải chạy Run With Me — Cộng đồng khỏe, Hà Nội",
+      "href": "shin-splints-dau-xuong-chay",
+      "tieu_de": "Hiểu đúng về hội chứng quá tải thường gặp ở người chạy bộ",
+      "mo_ta": "Nhận diện hội chứng quá tải thường gặp ở người chạy bộ, và vì sao điều chỉnh tải vận động quan trọng hơn nghỉ ngơi đơn thuần.",
+      "anh": "assets/img/blog-run-with-me-cong-dong-khoe.jpg",
+      "alt": "Nhóm vận động viên phong trào tại giải chạy Run With Me — Cộng đồng khỏe, Hà Nội",
+      "ngay": "2026-08-08"
     },
     {
-      href: "xu-huong-phat-trien-yhct",
-      tieu_de: "Đi làm cả ngày đã đủ vận động chưa?",
-      mo_ta: "Nghịch lý hoạt động thể chất: vì sao lao động chân tay cả ngày không thay được một buổi tập có chủ đích.",
-      anh: "assets/img/sports-run-to-future.jpg",
-      alt: "ThS.BS Lê Trung Kiên trực y tế tại một giải chạy phong trào",
-    },
+      "href": "xu-huong-phat-trien-yhct",
+      "tieu_de": "Đi làm cả ngày đã đủ vận động chưa?",
+      "mo_ta": "Nghịch lý hoạt động thể chất: vì sao lao động chân tay cả ngày không thay được một buổi tập có chủ đích.",
+      "anh": "assets/img/sports-run-to-future.jpg",
+      "alt": "ThS.BS Lê Trung Kiên trực y tế tại một giải chạy phong trào",
+      "ngay": "2026-08-07"
+    }
   ];
+  /* DANH_SACH:KET_THUC */
+
+  // Bài đã "gỡ khỏi danh sách" thì không hiện ở đâu nữa, nhưng file vẫn còn
+  // nên link cũ đã lỡ chia sẻ hoặc đã lên Google vẫn mở được — không thành
+  // lỗi 404.
+  DANH_SACH = DANH_SACH.filter(function (b) {
+    return !b.an;
+  });
 
   // Chữ trên nút và tiêu đề khối "Xem thêm" ở cuối bài viết
   var CHU_NUT = "Đọc bài viết";

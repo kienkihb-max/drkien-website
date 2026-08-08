@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Trang quản trị: không cho công cụ tìm kiếm đụng vào. Ai mở cũng được
+     nhưng không có token GitHub thì không làm được gì. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Quản trị blog — Bác sĩ Lê Trung Kiên</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ————— Màn hình đăng nhập ————— -->
+<section class="qt-vao" id="man-vao">
+  <div class="qt-vao-hop">
+    <h1>Quản trị blog</h1>
+    <p class="qt-phu">Trang này ghi bài thẳng vào kho GitHub của site. Cần dán token một lần, trình duyệt sẽ nhớ cho những lần sau.</p>
+
+    <form id="form-vao">
+      <label class="qt-nhan" for="o-token">Token GitHub</label>
+      <input class="qt-o" type="password" id="o-token" autocomplete="off" spellcheck="false" placeholder="github_pat_…" required>
+      <p class="qt-loi" id="loi-vao" hidden></p>
+      <button class="qt-nut qt-nut-chinh qt-nut-rong" type="submit" id="nut-vao">Vào trang quản trị</button>
+    </form>
+
+    <details class="qt-huong-dan">
+      <summary>Chưa có token? Xem cách tạo (khoảng 2 phút)</summary>
+      <ol>
+        <li>Mở <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">trang tạo token của GitHub</a> (đăng nhập bằng tài khoản GitHub của bạn).</li>
+        <li><strong>Token name:</strong> gõ gì cũng được, ví dụ <code>Quản trị blog</code>.</li>
+        <li><strong>Expiration:</strong> chọn ngày hết hạn xa nhất có thể. Hết hạn thì quay lại đây tạo cái mới.</li>
+        <li><strong>Repository access:</strong> chọn <em>Only select repositories</em>, rồi chọn đúng kho <code id="ten-kho-huong-dan">drkien-website</code>.</li>
+        <li><strong>Permissions → Repository permissions:</strong> tìm dòng <em>Contents</em>, đổi thành <strong>Read and write</strong>. Các quyền khác để nguyên.</li>
+        <li>Bấm <strong>Generate token</strong>, sao chép chuỗi bắt đầu bằng <code>github_pat_</code> rồi dán vào ô bên trên.</li>
+      </ol>
+      <p class="qt-phu">GitHub chỉ hiện chuỗi token đúng một lần. Dán xong nếu muốn dùng trên máy khác thì lưu lại vào trình quản lý mật khẩu, đừng gửi qua tin nhắn.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ————— Khung chính ————— -->
+<div id="man-chinh" hidden>
+
+  <header class="qt-dau">
+    <div class="qt-dau-trai">
+      <strong>Quản trị blog</strong>
+      <span class="qt-kho" id="nhan-kho"></span>
+    </div>
+    <div class="qt-dau-phai">
+      <a class="qt-nut qt-nut-nhe" href="/blog" target="_blank" rel="noopener">Xem trang blog</a>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-ra">Đăng xuất</button>
+    </div>
+  </header>
+
+  <!-- ————— Danh sách bài ————— -->
+  <main class="qt-than" id="man-danh-sach">
+    <div class="qt-hang-tieu-de">
+      <div>
+        <h2>Bài đã đăng</h2>
+        <p class="qt-phu" id="tom-tat-danh-sach"></p>
+      </div>
+      <button class="qt-nut qt-nut-chinh" type="button" id="nut-bai-moi">+ Viết bài mới</button>
+    </div>
+    <div id="bang-bai"></div>
+  </main>
+
+  <!-- ————— Soạn bài ————— -->
+  <main class="qt-than" id="man-soan" hidden>
+    <div class="qt-hang-tieu-de">
+      <div>
+        <h2 id="tieu-de-soan">Viết bài mới</h2>
+        <p class="qt-phu" id="duong-dan-soan"></p>
+      </div>
+      <div class="qt-hang-nut">
+        <button class="qt-nut qt-nut-nhe" type="button" id="nut-huy">Quay lại</button>
+        <button class="qt-nut qt-nut-nhe" type="button" id="nut-xem-truoc">Xem trước</button>
+        <button class="qt-nut qt-nut-chinh" type="button" id="nut-dang">Đăng bài</button>
+      </div>
+    </div>
+
+    <form id="form-bai" autocomplete="off">
+
+      <fieldset class="qt-nhom">
+        <legend>Nội dung bài viết</legend>
+
+        <label class="qt-nhan" for="o-h1">Tiêu đề bài viết</label>
+        <p class="qt-goi-y">Tiêu đề lớn hiện đầu trang bài viết. Viết đầy đủ, tự nhiên như khi nói với bệnh nhân.</p>
+        <input class="qt-o" type="text" id="o-h1" required>
+
+        <label class="qt-nhan" for="o-nhan">Chuyên mục</label>
+        <p class="qt-goi-y">Dòng chữ nhỏ phía trên tiêu đề bài viết.</p>
+        <select class="qt-o qt-o-hep" id="o-nhan"></select>
+        <input class="qt-o" type="text" id="o-nhan-moi" maxlength="30" placeholder="Tên chuyên mục mới, ví dụ: Dinh dưỡng thể thao" data-dem="30" hidden>
+
+        <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
+        <p class="qt-goi-y">Đoạn đầu tiên, chữ to hơn phần còn lại. Tóm tắt bài trong 2–3 câu.</p>
+        <textarea class="qt-o qt-o-cao" id="o-lead" rows="3"></textarea>
+
+        <label class="qt-nhan">Thân bài</label>
+        <p class="qt-goi-y">Soạn như Word. Chữ dán từ Word hoặc Google Docs sẽ tự bỏ định dạng thừa, mỗi dòng trống thành một đoạn mới.</p>
+        <div id="khung-soan"></div>
+        <p class="qt-phu" id="dem-chu"></p>
+
+        <label class="qt-nhan">Tài liệu tham khảo</label>
+        <p class="qt-goi-y">Mỗi ô là một mục, hiện ở cuối bài và đánh số theo thứ tự. Để trống nếu bài không cần.</p>
+        <div id="khung-tai-lieu"></div>
+        <button class="qt-nut qt-nut-nhe" type="button" id="nut-them-tai-lieu">+ Thêm một mục</button>
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Ảnh đại diện</legend>
+        <p class="qt-goi-y">Ảnh hiện đầu bài, trên thẻ ở trang blog, và là ảnh xuất hiện khi ai đó chia sẻ bài lên Facebook hoặc Zalo.</p>
+        <div class="qt-anh-chon">
+          <div class="qt-anh-xem" id="xem-anh"><span>Chưa chọn ảnh</span></div>
+          <div class="qt-anh-canh">
+            <button class="qt-nut qt-nut-nhe" type="button" id="nut-chon-anh">Chọn ảnh</button>
+            <p class="qt-phu" id="thong-tin-anh"></p>
+          </div>
+        </div>
+        <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh</label>
+        <p class="qt-goi-y">Tả ảnh cho người khiếm thị và cho Google. Ví dụ: <em>Bác sĩ kéo giãn cơ cho vận động viên tại giải chạy</em>.</p>
+        <input class="qt-o" type="text" id="o-anh-alt">
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Hiện trên trang blog</legend>
+        <p class="qt-goi-y">Phần này quyết định cái thẻ giới thiệu bài ở trang blog và ở khối “Bài viết khác”, có thể viết ngắn hơn tiêu đề thật.</p>
+
+        <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
+        <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="60">
+
+        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
+        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="2" data-dem="160"></textarea>
+
+        <label class="qt-chon">
+          <input type="checkbox" id="o-noi-bat">
+          <span>Đưa vào khối nổi bật ở đầu trang blog</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Đường dẫn, ngày đăng &amp; SEO</legend>
+        <p class="qt-goi-y">Mọi ô ở đây <strong>tự điền theo tiêu đề và đoạn mở đầu</strong> — không cần biết SEO, cứ để nguyên là đăng được. Chỉ sửa khi muốn dòng chữ trên Google khác đi.</p>
+
+        <label class="qt-nhan" for="o-ten-file">Đường dẫn</label>
+        <p class="qt-goi-y">Địa chỉ bài viết: <code id="xem-duong-dan">bacsikien.com/…</code></p>
+        <input class="qt-o" type="text" id="o-ten-file" required pattern="[a-z0-9\-]+">
+        <p class="qt-canh-bao" id="canh-bao-duong-dan" hidden>Bài này đã đăng rồi. Đổi đường dẫn nghĩa là địa chỉ cũ sẽ không còn — ai đã lưu hoặc chia sẻ link cũ sẽ gặp trang lỗi. Chỉ đổi khi thật cần.</p>
+
+        <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
+        <input class="qt-o qt-o-hep" type="date" id="o-ngay" required>
+
+        <label class="qt-nhan" for="o-tieu-de-trang">Tiêu đề trên Google</label>
+        <p class="qt-goi-y">Dòng xanh người ta bấm vào trong kết quả tìm kiếm. Google thường cắt sau khoảng 60 ký tự.</p>
+        <input class="qt-o" type="text" id="o-tieu-de-trang" data-dem="60" required>
+
+        <label class="qt-nhan" for="o-mo-ta-trang">Mô tả trên Google</label>
+        <p class="qt-goi-y">Đoạn chữ xám dưới tiêu đề trong kết quả tìm kiếm — tự lấy từ đoạn mở đầu của bài.</p>
+        <textarea class="qt-o qt-o-cao" id="o-mo-ta-trang" rows="3" data-dem="160" required></textarea>
+      </fieldset>
+    </form>
+  </main>
+</div>
+
+<!-- ————— Bảng chọn ảnh ————— -->
+<div class="qt-lop" id="lop-anh" hidden>
+  <div class="qt-hop-lon" role="dialog" aria-modal="true" aria-label="Chọn ảnh">
+    <div class="qt-hop-dau">
+      <strong>Chọn ảnh</strong>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-dong-anh">Đóng</button>
+    </div>
+
+    <div class="qt-the-hang">
+      <button class="qt-the qt-the-bat" type="button" data-the="co">Ảnh đã có trên site</button>
+      <button class="qt-the" type="button" data-the="moi">Tải ảnh mới lên</button>
+    </div>
+
+    <div class="qt-hop-than" id="the-co">
+      <input class="qt-o" type="search" id="o-tim-anh" placeholder="Gõ để lọc theo tên ảnh…">
+      <div class="qt-luoi-anh" id="luoi-anh"></div>
+    </div>
+
+    <div class="qt-hop-than" id="the-moi" hidden>
+      <p class="qt-goi-y">Ảnh sẽ được thu nhỏ còn tối đa 1600px và nén lại trước khi tải lên, để trang không bị nặng. Ảnh gốc trong máy bạn không bị đụng tới.</p>
+      <input class="qt-o" type="file" id="o-tep-anh" accept="image/*">
+      <div id="ket-qua-nen"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ————— Xem trước ————— -->
+<div class="qt-lop" id="lop-xem" hidden>
+  <div class="qt-hop-lon qt-hop-xem" role="dialog" aria-modal="true" aria-label="Xem trước bài viết">
+    <div class="qt-hop-dau">
+      <strong>Xem trước — đây là hình dáng bài viết khi lên site</strong>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-dong-xem">Đóng</button>
+    </div>
+    <iframe id="khung-xem" title="Xem trước bài viết"></iframe>
+  </div>
+</div>
+
+<!-- ————— Hỏi lại trước khi làm việc không lùi được ————— -->
+<div class="qt-lop" id="lop-hoi" hidden>
+  <div class="qt-hop" role="dialog" aria-modal="true">
+    <h3 id="hoi-tieu-de"></h3>
+    <div id="hoi-noi-dung"></div>
+    <div class="qt-hang-nut qt-hang-nut-phai">
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-hoi-thoi">Thôi</button>
+      <button class="qt-nut qt-nut-nguy" type="button" id="nut-hoi-dong-y">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<!-- ————— Băng thông báo ————— -->
+<div class="qt-bao" id="bao" hidden></div>
+
+<!-- ————— Màn chờ khi đang ghi lên GitHub ————— -->
+<div class="qt-lop qt-lop-cho" id="lop-cho" hidden>
+  <div class="qt-cho">
+    <div class="qt-quay"></div>
+    <p id="chu-cho">Đang lưu…</p>
+  </div>
+</div>
+
+<script src="admin-github.js"></script>
+<script src="admin-bai-viet.js"></script>
+<script src="admin-soan-thao.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

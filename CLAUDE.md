@@ -26,6 +26,31 @@ If a page needs an SVG symbol the component uses, the component should
 inject the missing symbol itself rather than requiring every page to
 carry the sprite.
 
+## Trang quản trị blog (admin.html)
+
+`bacsikien.com/admin` là CMS tự viết: chủ site xem/sửa/ẩn/xóa/đăng bài
+mà không cần mở code. Không có backend — trang ghi file thẳng vào repo
+GitHub bằng token (Git Data API, mỗi lần đăng là MỘT commit gộp đủ
+file bài + blog-cards.js + sitemap.xml). Các file liên quan:
+
+- `admin-github.js` — gọi GitHub API, giữ token trong localStorage.
+- `admin-bai-viet.js` — sinh file bài viết đúng khuôn và đọc ngược
+  file HTML về dữ liệu form. **Đổi bố cục bài viết thì phải sửa cả
+  `sinhHTML()` lẫn `docHTML()` cho khớp.**
+- `admin-soan-thao.js` — khung soạn thảo, lọc sạch HTML dán từ Word.
+- `admin.js` + `admin.css` — giao diện.
+
+Ràng buộc phải giữ khi sửa các file khác:
+
+- Vùng giữa hai mốc `/* DANH_SACH:BAT_DAU */` … `/* DANH_SACH:KET_THUC */`
+  trong `blog-cards.js` phải luôn là JSON hợp lệ (nháy kép, không dấu
+  phẩy thừa) — trang admin đọc/ghi đè đúng vùng này.
+- Bài có `an: true` trong DANH_SACH là bài "gỡ khỏi danh sách": không
+  hiện ở đâu nhưng file vẫn tồn tại để link cũ không chết.
+- Trang admin ghi thẳng lên `origin/main`, nên **trước khi sửa nội dung
+  blog trong repo local, luôn `git pull` trước** kẻo lệch với bài vừa
+  đăng từ admin.
+
 ## Git workflow
 
 - **Do not commit on your own initiative.** Only commit when the user

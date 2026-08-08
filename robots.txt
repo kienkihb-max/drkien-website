@@ -1,5 +1,7 @@
-# Cho phép mọi công cụ tìm kiếm đọc toàn bộ trang.
+# Cho phép mọi công cụ tìm kiếm đọc toàn bộ trang,
+# trừ trang quản trị — trang đó chỉ dành cho chủ site.
 User-agent: *
 Allow: /
+Disallow: /admin
 
 Sitemap: https://bacsikien.com/sitemap.xml

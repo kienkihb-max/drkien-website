@@ -39,7 +39,7 @@
         người bệnh sớm trở lại sinh hoạt, lao động hoặc tập luyện thể thao.
       </p>
       <div class="offer-actions">
-        <a class="btn btn-primary btn-icon" href="https://zalo.me/0345901772" target="_blank" rel="noopener">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
           Tư vấn điều trị <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
         </a>
       </div>
@@ -193,18 +193,16 @@
       <div class="cards-2col">
         <div class="info-card">
           <h3><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Địa chỉ</h3>
-          <p>Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội</p>
-          <div class="footer-map">
-            <iframe src="https://www.google.com/maps?q=Ng%C3%B5%208%2C%20Ng%C3%B4%20Quy%E1%BB%81n%2C%20H%C3%A0%20%C4%90%C3%B4ng%2C%20H%C3%A0%20N%E1%BB%99i&amp;output=embed" title="Bản đồ tới phòng khám" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-          </div>
+          <!-- Địa chỉ và bản đồ do thong-tin.js điền — sửa trong file đó -->
+          <div data-tt="dia-chi-ban-do"></div>
         </div>
         <div class="info-card">
           <h3><svg class="icon icon-sm"><use href="#ic-clock"/></svg> Giờ đón khách</h3>
-          <p>Thứ 2 – Thứ 6: 17h30 – 19h30<br>Thứ 7 – Chủ nhật: 9h00 – 17h00</p>
+          <div data-tt="gio"></div>
         </div>
       </div>
       <p class="cv-link-wrap">
-        <a class="btn btn-primary btn-icon" href="https://zalo.me/0345901772" target="_blank" rel="noopener">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
           Tư vấn điều trị <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
         </a>
       </p>
@@ -217,6 +215,7 @@
 
 <footer class="site-footer"></footer>
 
+<script src="thong-tin.js"></script>
 <script src="site-header.js"></script>
 <script src="site-footer.js"></script>
 <script src="service-cards.js"></script>

@@ -13,7 +13,8 @@
 // script.js / sticky-cta.js, để hai file đó nhìn thấy các thẻ vừa dựng.
 (function () {
   // ——— Nội dung, sửa ở đây ———
-  var ZALO = "https://zalo.me/0345901772";
+  // Số Zalo lấy từ thong-tin.js — nguồn duy nhất cho toàn site.
+  var ZALO = window.THONG_TIN.ZALO;
   var CHU_NUT_XEM = "Xem chi tiết";
 
   // Tiêu đề khối "Xem thêm" ở cuối các trang dịch vụ

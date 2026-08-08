@@ -7,13 +7,9 @@
 (function () {
   // ——— Nội dung footer, sửa ở đây ———
   var TRANG_CHU = "/";
-  var ZALO = "https://zalo.me/0345901772";
-  var FACEBOOK = "https://www.facebook.com/bskienyhcthn/";
-  // Địa chỉ dùng cho cả dòng chữ lẫn bản đồ Google bên dưới — sửa một chỗ
-  // là cả hai cùng đổi theo.
-  var DIA_CHI = "Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội";
-  var BAN_DO =
-    "https://www.google.com/maps?q=" + encodeURIComponent(DIA_CHI) + "&output=embed";
+  // Địa chỉ, giờ làm việc, Zalo, Facebook lấy từ thong-tin.js — nguồn duy
+  // nhất cho toàn site. Sửa mấy thứ đó ở file kia, đừng viết lại ở đây.
+  var TT = window.THONG_TIN;
 
   // Sơ đồ trang — hai cột cuối của hàng footer, ngang hàng với Địa chỉ,
   // Giờ làm việc và Liên hệ. Thêm/bớt cột hoặc mục thì sửa danh sách này;
@@ -49,22 +45,17 @@
     "  </div>",
     '  <div class="footer-col">',
     "    <h4>Địa chỉ phòng khám</h4>",
-    '    <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> ' + DIA_CHI + "</p>",
-    '    <div class="footer-map"><iframe src="' +
-      BAN_DO +
-      '" title="Bản đồ tới phòng khám" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>',
+    '    <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> ' + TT.DIA_CHI + "</p>",
+    "    " + TT.htmlBanDo(),
     "  </div>",
     '  <div class="footer-col">',
     "    <h4>Giờ làm việc</h4>",
-    '    <ul class="footer-hours">',
-    "      <li><span>Thứ 2 – Thứ 6</span><span>17h30 – 19h30</span></li>",
-    "      <li><span>Thứ 7 – Chủ nhật</span><span>9h00 – 17h00</span></li>",
-    "    </ul>",
+    "    " + TT.htmlGio(),
     "  </div>",
     '  <div class="footer-col">',
     "    <h4>Liên hệ</h4>",
-    '    <a class="footer-link" href="' + ZALO + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: 034 590 1772</a>',
-    '    <a class="footer-link" href="' + FACEBOOK + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook</a>',
+    '    <a class="footer-link" href="' + TT.ZALO + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: ' + TT.SO_ZALO + "</a>",
+    '    <a class="footer-link" href="' + TT.FACEBOOK + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook</a>',
     "  </div>",
     SO_DO_TRANG.map(function (cot) {
       return [

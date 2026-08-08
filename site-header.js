@@ -7,7 +7,8 @@
 (function () {
   // ——— Nội dung menu, sửa ở đây ———
   var TRANG_CHU = "/";
-  var ZALO = "https://zalo.me/0345901772";
+  // Số Zalo lấy từ thong-tin.js — nguồn duy nhất cho toàn site.
+  var ZALO = window.THONG_TIN.ZALO;
 
   // Các mục nhảy tới từng phần trên trang chủ.
   var MUC_TRANG_CHU = [

@@ -43,6 +43,39 @@
 
 html { scroll-behavior: smooth; }
 
+/* ---- Hiệu ứng chuyển trang ------------------------------------------
+   Bấm từ trang này sang trang kia thì mờ dần thay vì nhảy giật một cái.
+   Dùng View Transitions của trình duyệt nên không cần thư viện; trình
+   duyệt nào chưa hỗ trợ thì trang vẫn chuyển bình thường như cũ.
+
+   Mỗi loại trang vào một kiểu, đánh dấu bằng data-page trên thẻ <html>:
+   trang chủ mờ dần cho êm, trang dịch vụ phóng nhẹ cho có nhấn, bài viết
+   trôi lên như lật sang trang đọc. */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: chuyen-trang-ra .18s ease both; }
+::view-transition-new(root) { animation: chuyen-trang-vao .28s ease both; }
+
+@keyframes chuyen-trang-ra { to { opacity: 0; } }
+@keyframes chuyen-trang-vao { from { opacity: 0; } }
+
+html[data-page="service"]::view-transition-new(root) {
+  animation: chuyen-trang-phong .3s ease both;
+}
+@keyframes chuyen-trang-phong { from { opacity: 0; transform: scale(.985); } }
+
+html[data-page="article"]::view-transition-new(root) {
+  animation: chuyen-trang-len .3s ease both;
+}
+@keyframes chuyen-trang-len { from { opacity: 0; transform: translateY(14px); } }
+
+/* Người bật giảm chuyển động trong hệ điều hành thì bỏ hết hiệu ứng. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}
+
 body {
   font-family: var(--font-body);
   color: var(--text-muted);

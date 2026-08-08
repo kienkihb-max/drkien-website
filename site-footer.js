@@ -15,6 +15,28 @@
   var BAN_DO =
     "https://www.google.com/maps?q=" + encodeURIComponent(DIA_CHI) + "&output=embed";
 
+  // Sơ đồ trang — dải riêng cuối footer, ngay trên dòng bản quyền.
+  // Thêm/bớt cột hoặc mục thì sửa danh sách này.
+  var SO_DO_TRANG = [
+    {
+      tieuDe: "Dịch vụ",
+      muc: [
+        { trang: "y-te-su-kien.html", chu: "Y tế sự kiện" },
+        { trang: "dien-gia-seminar.html", chu: "Diễn giả seminar" },
+        { trang: "dieu-tri.html", chu: "Thăm khám &amp; điều trị" },
+      ],
+    },
+    {
+      tieuDe: "Đọc thêm",
+      muc: [
+        { trang: "index.html#experience", chu: "Nền tảng chuyên môn" },
+        { trang: "index.html#stories", chu: "Chia sẻ từ bệnh nhân" },
+        { trang: "index.html#credibility", chu: "Uy tín chuyên môn" },
+        { trang: "blog.html", chu: "Blog" },
+      ],
+    },
+  ];
+
   var FOOTER = [
     '<div class="container footer-grid">',
     '  <div class="footer-brand">',
@@ -43,6 +65,22 @@
     '    <a class="footer-link" href="' + ZALO + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: 034 590 1772</a>',
     '    <a class="footer-link" href="' + FACEBOOK + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook</a>',
     "  </div>",
+    "</div>",
+    '<div class="container footer-sitemap">',
+    SO_DO_TRANG.map(function (cot) {
+      return [
+        '  <div class="footer-col">',
+        "    <h4>" + cot.tieuDe + "</h4>",
+        '    <ul class="footer-sitemap-list">',
+        cot.muc
+          .map(function (m) {
+            return '      <li><a href="' + m.trang + '">' + m.chu + "</a></li>";
+          })
+          .join("\n"),
+        "    </ul>",
+        "  </div>",
+      ].join("\n");
+    }).join("\n"),
     "</div>",
     '<div class="container footer-bottom">',
     '  <p>© <span id="year"></span> ThS.BS Lê Trung Kiên — Y học cổ truyền.</p>',

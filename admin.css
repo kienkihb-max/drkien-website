@@ -253,6 +253,57 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 .st-vung sup { color: var(--qt-chinh); font-weight: 600; }
 .st-vung a { color: var(--qt-chinh); }
 
+/* ————— Thẻ xem trước trên trang blog ————— */
+/* Mô phỏng .event-card của style.css, đủ giống để cân nhắc độ dài chữ. */
+.qt-hai-cot { display: flex; gap: 24px; align-items: flex-start; }
+.qt-cot-nhap { flex: 1; min-width: 0; }
+.qt-cot-xem { width: 300px; flex-shrink: 0; position: sticky; top: 130px; }
+@media (max-width: 720px) {
+  .qt-hai-cot { flex-direction: column; }
+  .qt-cot-xem { width: 100%; position: static; }
+}
+.qt-the-xem {
+  background: #fff;
+  border: 1px solid var(--qt-vien);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 0 30px rgba(0, 42, 106, 0.08);
+  position: relative;
+}
+.qt-the-xem .the-badge {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  background: var(--qt-chinh);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+.qt-the-xem .the-anh {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  background: var(--qt-nen);
+}
+.qt-the-xem .the-anh-trong {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  background: var(--qt-nen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qt-chu-mo);
+  font-size: 0.85rem;
+}
+.qt-the-xem h3 { font-size: 1.05rem; margin: 10px 0 6px; line-height: 1.35; }
+.qt-the-xem p { font-size: 0.88rem; color: var(--qt-chu-mo); margin: 0 0 10px; line-height: 1.5; }
+.qt-the-xem .the-doc { color: var(--qt-chinh); font-weight: 600; font-size: 0.88rem; }
+
 /* ————— Tài liệu tham khảo ————— */
 .qt-tai-lieu-hang { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
 .qt-tai-lieu-so { padding-top: 10px; color: var(--qt-chu-mo); min-width: 22px; text-align: right; }

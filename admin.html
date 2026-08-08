@@ -125,19 +125,27 @@
       </fieldset>
 
       <fieldset class="qt-nhom">
-        <legend>Hiện trên trang blog</legend>
-        <p class="qt-goi-y">Phần này quyết định cái thẻ giới thiệu bài ở trang blog và ở khối “Bài viết khác”, có thể viết ngắn hơn tiêu đề thật.</p>
+        <legend>Thẻ bài trên trang blog</legend>
+        <p class="qt-goi-y">Chữ trên thẻ <strong>tự điền theo tiêu đề và đoạn mở đầu</strong> — bên phải là hình dáng thật của thẻ. Chỉ gõ đè khi muốn chữ trên thẻ ngắn gọn hơn.</p>
 
-        <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
-        <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="60">
+        <div class="qt-hai-cot">
+          <div class="qt-cot-nhap">
+            <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
+            <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="60">
 
-        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
-        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="2" data-dem="160"></textarea>
+            <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
+            <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3" data-dem="160"></textarea>
 
-        <label class="qt-chon">
-          <input type="checkbox" id="o-noi-bat">
-          <span>Đưa vào khối nổi bật ở đầu trang blog</span>
-        </label>
+            <label class="qt-chon">
+              <input type="checkbox" id="o-noi-bat">
+              <span>Đưa vào khối nổi bật ở đầu trang blog</span>
+            </label>
+          </div>
+          <div class="qt-cot-xem">
+            <p class="qt-nhan" style="margin-top:18px">Xem trước</p>
+            <div class="qt-the-xem" id="xem-the"></div>
+          </div>
+        </div>
       </fieldset>
 
       <fieldset class="qt-nhom">

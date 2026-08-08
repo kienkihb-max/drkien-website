@@ -318,6 +318,8 @@
     cac_dem.forEach(function (f) {
       f();
     });
+    // Các ô trên thẻ vừa được tự điền lại thì thẻ xem trước cũng vẽ lại.
+    veTheXemTruoc();
   }
 
   // ——— Chuyên mục: chọn từ danh sách, hoặc tạo mới có giới hạn ký tự ———
@@ -409,6 +411,31 @@
     return cau.slice(0, cau.lastIndexOf(" ")) + "…";
   }
 
+  // ——— Tự viết hoa chữ cái đầu ở các ô nhập chữ ———
+  // Gõ trên điện thoại hay quên viết hoa; sửa ngay lúc gõ thì mọi chỗ dùng
+  // lại (thẻ bài, tiêu đề Google…) đều nhận được bản đã viết hoa.
+  // Đăng ký TRƯỚC các bộ tự điền, để chúng đọc được giá trị đã sửa.
+  function tuVietHoa(el) {
+    el.addEventListener("input", function () {
+      var chu = el.value;
+      if (!chu) return;
+      var dau = chu.charAt(0);
+      var hoa = dau.toLocaleUpperCase("vi");
+      if (dau === hoa) return;
+      var chon_dau = el.selectionStart;
+      var chon_cuoi = el.selectionEnd;
+      el.value = hoa + chu.slice(1);
+      try {
+        el.setSelectionRange(chon_dau, chon_cuoi);
+      } catch (e) {}
+    });
+  }
+  ["o-h1", "o-lead", "o-anh-alt", "o-the-tieu-de", "o-the-mo-ta", "o-nhan-moi"].forEach(
+    function (id) {
+      tuVietHoa(o(id));
+    }
+  );
+
   o("o-h1").addEventListener("input", function () {
     var h1 = o("o-h1").value;
     // Đường dẫn chốt theo tiêu đề lúc viết bài mới. Bài đã đăng thì giữ
@@ -426,6 +453,29 @@
     veLaiDem();
   });
 
+  // ——— Thẻ xem trước: hình dáng thật của bài trên trang blog ———
+  // Vẽ lại mỗi khi tiêu đề/mô tả/ảnh/nổi bật đổi, để thấy ngay chữ có bị
+  // dài quá hay không mà cân nhắc gõ ngắn lại.
+  function veTheXemTruoc() {
+    var khung = o("xem-the");
+    if (!khung) return;
+    var anh_img = o("xem-anh").querySelector("img");
+    var tieu_de = o("o-the-tieu-de").value.trim();
+    var mo_ta = o("o-the-mo-ta").value.trim();
+    khung.innerHTML = [
+      o("o-noi-bat").checked ? '<span class="the-badge">Nổi bật</span>' : "",
+      anh_img
+        ? '<img class="the-anh" src="' + anh_img.src.replace(/"/g, "&quot;") + '" alt="">'
+        : '<div class="the-anh-trong">Ảnh đại diện hiện ở đây</div>',
+      "<h3>" + (tieu_de ? Bai.thoat(tieu_de) : "Tiêu đề bài viết…") + "</h3>",
+      "<p>" + (mo_ta ? Bai.thoat(mo_ta) : "Mô tả ngắn của bài sẽ hiện ở đây.") + "</p>",
+      '<span class="the-doc">Đọc bài viết →</span>',
+    ].join("\n");
+  }
+  o("o-the-tieu-de").addEventListener("input", veTheXemTruoc);
+  o("o-the-mo-ta").addEventListener("input", veTheXemTruoc);
+  o("o-noi-bat").addEventListener("change", veTheXemTruoc);
+
   // ——— Tài liệu tham khảo: mỗi mục một ô ———
   function themOTaiLieu(gia_tri) {
     var khung = o("khung-tai-lieu");
@@ -437,6 +487,7 @@
     inp.className = "qt-o";
     inp.type = "text";
     inp.value = gia_tri || "";
+    tuVietHoa(inp);
     var nut = document.createElement("button");
     nut.type = "button";
     nut.className = "qt-nut qt-nut-nhe";
@@ -576,6 +627,7 @@
       o("thong-tin-anh").textContent = "";
     }
     if (alt != null) o("o-anh-alt").value = alt;
+    veTheXemTruoc();
 
     // Chưa biết kích thước (chọn ảnh có sẵn) thì đo từ chính ảnh — thẻ
     // og:image cần con số thật để Facebook/Zalo dựng khung đúng tỉ lệ.

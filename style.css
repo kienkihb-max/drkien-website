@@ -168,6 +168,23 @@ h4 { font-size: var(--fs-base); }
   border-radius: 8px;
 }
 .site-nav a:hover { color: var(--primary); }
+
+/* Mục đang xem. site-header.js gắn .is-active theo tên file của trang. */
+.site-nav > a.is-active,
+.nav-dropdown.is-active > a { color: var(--primary); }
+.site-nav > a.is-active::after,
+.nav-dropdown.is-active > a::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary-2);
+}
+.site-nav > a.is-active { position: relative; }
+.nav-dropdown.is-active > a { position: relative; }
+.nav-dropdown-menu a.is-active { background: var(--primary-soft); color: var(--primary); }
+
 .nav-cta {
   background: var(--primary-2);
   color: #fff !important;
@@ -953,6 +970,9 @@ main img.zoomable:hover {
     min-width: 0;
   }
   .nav-dropdown-menu a { padding: 10px 0; }
+  /* Menu mobile xếp dọc nên gạch chân lệch — chỉ giữ đổi màu */
+  .site-nav > a.is-active::after,
+  .nav-dropdown.is-active > a::after { display: none; }
   .hero { padding-top: 58px; }
   /* Stack: source + arrow share the top row, title gets a full row below.
      DOM order is source, title, arrow — so reorder to pull the arrow up. */

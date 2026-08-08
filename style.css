@@ -1027,7 +1027,9 @@ main img.zoomable:hover {
   .awards-featured { grid-template-columns: 1fr; }
   .award-featured .award-img { height: 220px; }
   .awards-grid { grid-template-columns: repeat(2, 1fr); }
-  .case-study { padding: 20px; }
+  /* Xếp dọc: ảnh trước/sau lên trên, chữ xuống dưới. Để 2 cột trên màn
+     hình hẹp thì ảnh bị bóp còn một nửa, nhìn không ra mặt bệnh nhân. */
+  .case-study { grid-template-columns: 1fr; gap: 20px; padding: 20px; }
 }
 
 /* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */

@@ -1,77 +1,21 @@
+// Nút "lên đầu trang" và cụm nút nổi ở góc phải — chỉ trang chủ có.
 // Năm ở chân trang do site-footer.js lo, nút hamburger do site-header.js lo.
 // Menu giờ nằm ở mọi trang còn script.js chỉ được nạp ở trang chủ, nên gắn
 // lại ở đây sẽ toggle hai lần và nút thành vô hiệu.
+//
+// Lightbox xem ảnh phóng to đã tách sang lightbox.js để mọi trang dùng chung.
 
 const backToTop = document.getElementById("backToTop");
 const floatingActions = document.querySelector(".floating-actions");
 
-window.addEventListener("scroll", () => {
-  floatingActions.classList.toggle("visible", window.scrollY > 400);
-});
-
-backToTop.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-const lightboxCaption = document.getElementById("lightboxCaption");
-let currentShots = [];
-let currentShot = 0;
-
-function showShot(index) {
-  currentShot = (index + currentShots.length) % currentShots.length;
-  const shot = currentShots[currentShot];
-  lightboxImg.src = shot.src;
-  lightboxImg.alt = shot.alt;
-  lightboxCaption.textContent = shot.caption;
-}
-
-function openLightbox(shots, index) {
-  currentShots = shots;
-  showShot(index);
-  lightbox.classList.add("open");
-  lightbox.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-
-function closeLightbox() {
-  lightbox.classList.remove("open");
-  lightbox.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
-document.querySelectorAll("main section").forEach((scope) => {
-  const imgs = Array.from(scope.querySelectorAll("img")).filter(
-    (img) => !img.closest('[aria-hidden="true"]')
-  );
-  if (imgs.length === 0) return;
-  const shots = imgs.map((img) => {
-    const figure = img.closest("figure");
-    const figcaption = figure ? figure.querySelector("figcaption") : null;
-    return {
-      src: img.src,
-      alt: img.alt,
-      caption: figcaption ? figcaption.textContent.trim() : img.alt,
-    };
+if (floatingActions) {
+  window.addEventListener("scroll", () => {
+    floatingActions.classList.toggle("visible", window.scrollY > 400);
   });
-  imgs.forEach((img, index) => {
-    img.classList.add("zoomable");
-    img.addEventListener("click", () => openLightbox(shots, index));
+}
+
+if (backToTop) {
+  backToTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
-});
-
-document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
-document.getElementById("lightboxPrev").addEventListener("click", () => showShot(currentShot - 1));
-document.getElementById("lightboxNext").addEventListener("click", () => showShot(currentShot + 1));
-
-lightbox.addEventListener("click", (e) => {
-  if (e.target === lightbox) closeLightbox();
-});
-
-document.addEventListener("keydown", (e) => {
-  if (!lightbox.classList.contains("open")) return;
-  if (e.key === "Escape") closeLightbox();
-  if (e.key === "ArrowLeft") showShot(currentShot - 1);
-  if (e.key === "ArrowRight") showShot(currentShot + 1);
-});
+}

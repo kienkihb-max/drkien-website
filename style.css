@@ -11,6 +11,10 @@
   --shadow-card: 0 0 30px rgba(0, 42, 106, 0.1);
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  /* Hover phóng ảnh — xem phần "Component: hover phóng ảnh" bên dưới */
+  --img-zoom: 1.1;
+  --img-zoom-speed: .45s;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +31,34 @@ body {
 }
 
 img { max-width: 100%; display: block; }
+
+/* ─── Component: hover phóng ảnh ──────────────────────────────────────
+   Rê chuột vào ảnh thì ảnh phóng to nhẹ. Đây là NƠI DUY NHẤT định nghĩa
+   hiệu ứng này — đừng viết thêm "transform: scale" cho ảnh ở chỗ khác,
+   nếu không mỗi chỗ sẽ trôi đi một kiểu.
+
+   · Đổi mức phóng / tốc độ  → sửa --img-zoom, --img-zoom-speed ở :root.
+   · Thêm một chỗ ảnh mới    → thêm tên class bọc ảnh vào 1 trong 2 danh
+                                sách dưới đây, không copy đoạn code này.
+
+   Ảnh hero và logo cố ý KHÔNG có trong danh sách nên không phóng:
+   .hero-media, .article-hero-img, .brand, .lightbox-content.
+*/
+
+/* Nhóm 1 — ảnh nằm trong khung cắt sẵn: phóng bên trong khung, không tràn ra. */
+:is(.offer-img, .event-img, .award-img, .shot-thumb) {
+  overflow: hidden;
+
+  & img { transition: transform var(--img-zoom-speed) ease; }
+  &:hover img { transform: scale(var(--img-zoom)); }
+}
+
+/* Nhóm 2 — ảnh đứng riêng, tự có bo góc + đổ bóng: phóng cả tấm ảnh. */
+:is(.cv-photo, .article-inline-img, .runner-media-featured,
+    .runner-media-strip, .case-study, .content-media-single) {
+  & img { transition: transform var(--img-zoom-speed) ease; }
+  & img:hover { transform: scale(var(--img-zoom)); }
+}
 
 a { color: inherit; text-decoration: none; transition: color .2s ease; }
 
@@ -287,6 +319,23 @@ h4 { font-size: 1.1rem; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: 1.1rem; }
 .offer-card p { padding: 0 22px; margin-top: 8px; font-size: 0.9rem; flex: 1; }
+/* Thẻ dịch vụ do service-cards.js dựng — dùng chung cho trang chủ và khối
+   "Xem thêm" trong trang dịch vụ, nên hiệu ứng hover cũng chỉ khai báo ở đây.
+   Phần ảnh phóng to do "Component: hover phóng ảnh" ở đầu file lo. */
+.service-card { transition: box-shadow .25s ease; }
+.service-card:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
+
+/* Placeholder rỗng thì ẩn hẳn, đừng để chừa một dải trắng cao 192px giữa
+   trang khi service-cards.js chưa chạy hoặc không nạp được. */
+.service-related:empty { display: none; }
+
+/* Khối "Xem thêm" chỉ còn 2 thẻ nên thu lưới lại và căn giữa cho cân,
+   thẻ vẫn rộng xấp xỉ ngoài trang chủ. */
+.service-cards-related {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 760px;
+  margin: 0 auto;
+}
 .offer-actions {
   display: flex;
   flex-wrap: wrap;
@@ -294,6 +343,9 @@ h4 { font-size: 1.1rem; }
   padding: 0 22px;
   margin-top: 16px;
 }
+/* Trong hero của trang dịch vụ thì không có padding thẻ để bù,
+   nên bỏ padding đi cho nút thẳng hàng với h1 và đoạn mở đầu. */
+.cv-hero .offer-actions { padding-left: 0; padding-right: 0; }
 
 /* Event gallery (sub-pages) */
 .events-grid {
@@ -438,13 +490,10 @@ h4 { font-size: 1.1rem; }
   aspect-ratio: 4 / 3;
   object-position: center 65%;
 }
-main img.zoomable {
-  cursor: zoom-in;
-  transition: opacity .2s ease;
-}
-main img.zoomable:hover {
-  opacity: .92;
-}
+/* Ảnh bấm được để mở lightbox. Chỉ đổi con trỏ chuột — phần hover
+   phóng ảnh do "Component: hover phóng ảnh" ở đầu file lo, đừng thêm
+   transition ở đây nữa vì nó sẽ đè mất transition của component. */
+main img.zoomable { cursor: zoom-in; }
 .runner-media-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -512,9 +561,8 @@ main img.zoomable:hover {
   width: 100%; height: 100%; display: block;
   object-fit: cover;
   object-position: top center;
-  transition: transform .4s ease;
 }
-.shot-card:hover .shot-thumb img { transform: scale(1.07); }
+/* Hover phóng ảnh: xem "Component: hover phóng ảnh" ở đầu file. */
 
 @media (max-width: 640px) {
   .shot-card { flex-basis: 240px; }

@@ -401,8 +401,8 @@ h4 { font-size: var(--fs-base); }
 }
 .offer-img { aspect-ratio: 4 / 3; overflow: hidden; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: 1.1rem; }
-.offer-card p { padding: 0 22px; margin-top: 8px; font-size: 0.9rem; flex: 1; }
+.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: var(--fs-lg); }
+.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-sm); flex: 1; }
 /* Thẻ dịch vụ do service-cards.js dựng — dùng chung cho trang chủ và khối
    "Xem thêm" trong trang dịch vụ, nên hiệu ứng hover cũng chỉ khai báo ở đây.
    Phần ảnh phóng to do "Component: hover phóng ảnh" ở đầu file lo. */

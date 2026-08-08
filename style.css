@@ -12,6 +12,15 @@
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
 
+  /* Khoảng cách dọc của các trang phụ (blog, bài viết, dịch vụ).
+     Sửa 4 số này là đổi nhịp cho toàn bộ trang phụ; số cho mobile nằm
+     trong @media (max-width: 720px) ở cuối file. Trang chủ không dùng
+     bộ này nên giữ nguyên nhịp cũ. */
+  --sub-section-y: 64px;    /* đệm trên và dưới mỗi section */
+  --sub-hero-top: 140px;    /* chừa chỗ cho header cố định phía trên */
+  --sub-hero-bottom: 40px;  /* hở giữa phần mở đầu và nội dung đầu tiên */
+  --sub-title-gap: 44px;    /* hở dưới cụm tiêu đề của section */
+
   /* Hover phóng ảnh — xem phần "Component: hover phóng ảnh" bên dưới */
   --img-zoom: 1.1;
   --img-zoom-speed: .45s;

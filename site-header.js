@@ -10,14 +10,9 @@
   // Số Zalo lấy từ thong-tin.js — nguồn duy nhất cho toàn site.
   var ZALO = window.THONG_TIN.ZALO;
 
-  // Các mục nhảy tới từng phần trên trang chủ.
-  var MUC_TRANG_CHU = [
-    { neo: "#home", chu: "Giới thiệu" },
-    { neo: "#offerings", chu: "Dịch vụ" },
-    { neo: "#experience", chu: "Nền tảng chuyên môn" },
-    { neo: "#stories", chu: "Chia sẻ từ bệnh nhân" },
-    { neo: "#credibility", chu: "Uy tín chuyên môn" },
-  ];
+  // "Trang chủ" nay là một liên kết thẳng, không còn menu con nhảy tới từng
+  // phần trong trang. Muốn dựng lại thì thêm danh sách neo ở đây và bọc lại
+  // trong .nav-dropdown như mục Dịch vụ bên dưới.
 
   // Các trang dịch vụ.
   var MUC_DICH_VU = [
@@ -59,14 +54,7 @@
     "    <span></span><span></span><span></span>",
     "  </button>",
     '  <nav class="site-nav" id="siteNav">',
-    '    <div class="nav-dropdown">',
-    '      <a href="' + (laTrangChu ? "#top" : TRANG_CHU) + '">Trang chủ ' + CHEVRON + "</a>",
-    '      <div class="nav-dropdown-menu">',
-    MUC_TRANG_CHU.map(function (m) {
-      return '        <a href="' + toiTrangChu(m.neo) + '">' + m.chu + "</a>";
-    }).join("\n"),
-    "      </div>",
-    "    </div>",
+    '    <a href="' + (laTrangChu ? "#top" : TRANG_CHU) + '">Trang chủ</a>',
     '    <div class="nav-dropdown">',
     '      <a href="' + toiTrangChu("#offerings") + '">Dịch vụ ' + CHEVRON + "</a>",
     '      <div class="nav-dropdown-menu">',
@@ -75,6 +63,7 @@
     }).join("\n"),
     "      </div>",
     "    </div>",
+    '    <a href="bac-si-le-trung-kien">Giới thiệu</a>',
     '    <a href="blog">Blog</a>',
     '    <a href="' + ZALO + '" target="_blank" rel="noopener" class="nav-cta">Liên hệ</a>',
     "  </nav>",

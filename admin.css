@@ -56,6 +56,17 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   background: #fff;
 }
 .qt-o:focus { outline: 2px solid var(--qt-chinh); outline-offset: 1px; border-color: transparent; }
+.qt-o:disabled { background: #f2f5fa; color: var(--qt-chu-mo); cursor: default; }
+.qt-tu-dong {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--qt-chu-mo);
+  background: #eceff4;
+  border-radius: 99px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
 .qt-o-cao { resize: vertical; }
 .qt-o-hep { max-width: 220px; }
 .qt-dem { font-size: 0.8rem; color: var(--qt-chu-mo); text-align: right; margin: 2px 0 0; }

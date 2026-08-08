@@ -383,18 +383,20 @@
     }
   });
 
-  // ——— Tự điền các ô SEO (chỉ khi người dùng chưa tự sửa ô đó) ———
-  // Chủ site không phải dân SEO, nên nguyên tắc là: viết tiêu đề + nội dung
-  // là đủ, mọi ô SEO đều tự sinh từ đó. Ô nào người dùng đã gõ tay thì thôi,
+  // ——— Các ô SEO: tự sinh hoàn toàn, khóa không cho sửa ———
+  // Chủ site không phải dân SEO nên toàn bộ phần này máy lo: đường dẫn,
+  // tiêu đề Google, mô tả Google đều sinh từ tiêu đề + đoạn mở đầu. Ô hiện
+  // trên form chỉ để xem trước, đã disabled trong HTML.
+  //
+  // Hai ô hiển thị trên thẻ bài (tiêu đề/mô tả trên trang blog) vẫn sửa
+  // được — đó là chữ người đọc thấy, không phải SEO. Gõ tay rồi thì thôi
   // không tự điền đè lên nữa.
   var tay = {};
-  ["o-ten-file", "o-tieu-de-trang", "o-mo-ta-trang", "o-the-tieu-de", "o-the-mo-ta"].forEach(
-    function (id) {
-      o(id).addEventListener("input", function () {
-        tay[id] = true;
-      });
-    }
-  );
+  ["o-the-tieu-de", "o-the-mo-ta"].forEach(function (id) {
+    o(id).addEventListener("input", function () {
+      tay[id] = true;
+    });
+  });
 
   // Cắt đoạn mở đầu thành mô tả cho Google: ưu tiên trọn câu, quá dài thì
   // cắt ở ranh giới từ và thêm dấu ba chấm.
@@ -409,36 +411,20 @@
 
   o("o-h1").addEventListener("input", function () {
     var h1 = o("o-h1").value;
-    if (!dang_sua && !tay["o-ten-file"]) {
-      o("o-ten-file").value = Bai.tenFile(h1);
-      veDuongDan();
-    }
-    if (!tay["o-tieu-de-trang"]) o("o-tieu-de-trang").value = h1 ? h1 + Bai.DUOI_TIEU_DE : "";
+    // Đường dẫn chốt theo tiêu đề lúc viết bài mới. Bài đã đăng thì giữ
+    // nguyên vĩnh viễn — đổi là link cũ đã chia sẻ thành trang lỗi.
+    if (!dang_sua) o("o-ten-file").value = Bai.tenFile(h1);
+    o("o-tieu-de-trang").value = h1 ? h1 + Bai.DUOI_TIEU_DE : "";
     if (!tay["o-the-tieu-de"]) o("o-the-tieu-de").value = h1;
     veLaiDem();
   });
 
   // Đoạn mở đầu → mô tả trên Google → mô tả trên thẻ, dây chuyền tự chảy.
   o("o-lead").addEventListener("input", function () {
-    if (!tay["o-mo-ta-trang"]) {
-      o("o-mo-ta-trang").value = catMoTa(o("o-lead").value, 160);
-      if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = o("o-mo-ta-trang").value;
-      veLaiDem();
-    }
+    o("o-mo-ta-trang").value = catMoTa(o("o-lead").value, 160);
+    if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = o("o-mo-ta-trang").value;
+    veLaiDem();
   });
-
-  o("o-mo-ta-trang").addEventListener("input", function () {
-    if (!tay["o-the-mo-ta"]) {
-      o("o-the-mo-ta").value = o("o-mo-ta-trang").value;
-      veLaiDem();
-    }
-  });
-
-  function veDuongDan() {
-    o("xem-duong-dan").textContent = "bacsikien.com/" + (o("o-ten-file").value || "…");
-    o("canh-bao-duong-dan").hidden = !(dang_sua && o("o-ten-file").value !== dang_sua.ten_file);
-  }
-  o("o-ten-file").addEventListener("input", veDuongDan);
 
   // ——— Tài liệu tham khảo: mỗi mục một ô ———
   function themOTaiLieu(gia_tri) {
@@ -495,7 +481,6 @@
     veChuyenMuc(null);
     o("tieu-de-soan").textContent = "Viết bài mới";
     o("duong-dan-soan").textContent = "Bài sẽ lên sóng khoảng một phút sau khi bấm Đăng bài.";
-    veDuongDan();
     veLaiDem();
     da_doi = false;
     doiManSoan(true);
@@ -517,14 +502,9 @@
         var d = Bai.docHTML(kq.noi_dung, muc.href);
         dang_sua = d;
         anh_cho_tai = [];
-        // Bài đã đăng: các ô SEO giữ đúng nội dung cũ, không tự điền đè.
-        tay = {
-          "o-ten-file": true,
-          "o-tieu-de-trang": true,
-          "o-mo-ta-trang": true,
-          "o-the-tieu-de": true,
-          "o-the-mo-ta": true,
-        };
+        // Chữ trên thẻ bài của bài cũ giữ nguyên như đã đặt, trừ khi người
+        // dùng gõ lại. (Các ô SEO thì luôn tự sinh, không cần cờ.)
+        tay = { "o-the-tieu-de": true, "o-the-mo-ta": true };
 
         o("form-bai").reset();
         o("o-h1").value = d.h1;
@@ -544,7 +524,6 @@
 
         o("tieu-de-soan").textContent = "Sửa bài";
         o("duong-dan-soan").textContent = "Đang sửa: " + Bai.GOC_SITE + "/" + d.ten_file;
-        veDuongDan();
         veLaiDem();
         o("dem-chu").textContent = "Khoảng " + bo_soan.demChu() + " chữ.";
         da_doi = false;
@@ -746,22 +725,19 @@
 
   // ——— Gom dữ liệu từ form ———
   function kiemTraForm() {
+    // Chỉ nhắc những ô người dùng sửa được. Các ô SEO tự sinh nên không bao
+    // giờ nằm trong danh sách thiếu — thiếu là do nguồn của nó (tiêu đề,
+    // đoạn mở đầu) chưa có.
     var thieu = [];
     if (!o("o-h1").value.trim()) thieu.push("tiêu đề bài viết");
     if (!layNhan()) thieu.push("tên chuyên mục mới");
-    if (!o("o-ten-file").value.trim()) thieu.push("đường dẫn");
     if (!o("o-ngay").value) thieu.push("ngày đăng");
-    if (!o("o-tieu-de-trang").value.trim()) thieu.push("tiêu đề trên Google");
-    if (!o("o-mo-ta-trang").value.trim()) thieu.push("mô tả trên Google");
+    if (!o("o-lead").value.trim()) thieu.push("đoạn mở đầu");
     if (!anh_hien_tai.anh) thieu.push("ảnh đại diện");
     if (!o("o-anh-alt").value.trim()) thieu.push("mô tả ảnh");
-    if (!bo_soan.layHTML().trim() && !o("o-lead").value.trim()) thieu.push("thân bài");
+    if (!bo_soan.layHTML().trim()) thieu.push("thân bài");
     if (thieu.length) {
       bao("Còn thiếu: <strong>" + thieu.join(", ") + "</strong>.", "loi", 7000);
-      return false;
-    }
-    if (!/^[a-z0-9-]+$/.test(o("o-ten-file").value.trim())) {
-      bao("Đường dẫn chỉ được gồm chữ thường không dấu, số và dấu gạch ngang.", "loi", 7000);
       return false;
     }
     return true;
@@ -819,17 +795,20 @@
     if (!kiemTraForm()) return;
     var d = gomDuLieu();
 
-    // Bài mới trùng đường dẫn với bài đã có là sắp ghi đè nhầm — chặn lại.
-    var trung = danh_sach.some(function (m) {
-      return m.href === d.ten_file;
-    });
-    if (!dang_sua && trung) {
-      bao(
-        "Đã có bài dùng đường dẫn <strong>" + Bai.thoat(d.ten_file) + "</strong>. Đổi đường dẫn khác.",
-        "loi",
-        8000
-      );
-      return;
+    // Bài mới trùng đường dẫn với bài đã có (hai bài trùng tiêu đề) thì tự
+    // thêm hậu tố -2, -3… — đường dẫn do máy sinh nên máy tự tránh luôn,
+    // không bắt người dùng xử lý.
+    if (!dang_sua) {
+      var goc_ten = d.ten_file;
+      var so = 2;
+      while (
+        danh_sach.some(function (m) {
+          return m.href === d.ten_file;
+        })
+      ) {
+        d.ten_file = goc_ten + "-" + so++;
+      }
+      o("o-ten-file").value = d.ten_file;
     }
 
     var doi_duong_dan = dang_sua && dang_sua.ten_file !== d.ten_file;

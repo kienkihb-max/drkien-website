@@ -141,24 +141,21 @@
       </fieldset>
 
       <fieldset class="qt-nhom">
-        <legend>Đường dẫn, ngày đăng &amp; SEO</legend>
-        <p class="qt-goi-y">Mọi ô ở đây <strong>tự điền theo tiêu đề và đoạn mở đầu</strong> — không cần biết SEO, cứ để nguyên là đăng được. Chỉ sửa khi muốn dòng chữ trên Google khác đi.</p>
-
-        <label class="qt-nhan" for="o-ten-file">Đường dẫn</label>
-        <p class="qt-goi-y">Địa chỉ bài viết: <code id="xem-duong-dan">bacsikien.com/…</code></p>
-        <input class="qt-o" type="text" id="o-ten-file" required pattern="[a-z0-9\-]+">
-        <p class="qt-canh-bao" id="canh-bao-duong-dan" hidden>Bài này đã đăng rồi. Đổi đường dẫn nghĩa là địa chỉ cũ sẽ không còn — ai đã lưu hoặc chia sẻ link cũ sẽ gặp trang lỗi. Chỉ đổi khi thật cần.</p>
+        <legend>Ngày đăng &amp; SEO</legend>
 
         <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
         <input class="qt-o qt-o-hep" type="date" id="o-ngay" required>
 
-        <label class="qt-nhan" for="o-tieu-de-trang">Tiêu đề trên Google</label>
-        <p class="qt-goi-y">Dòng xanh người ta bấm vào trong kết quả tìm kiếm. Google thường cắt sau khoảng 60 ký tự.</p>
-        <input class="qt-o" type="text" id="o-tieu-de-trang" data-dem="60" required>
+        <p class="qt-goi-y" style="margin-top:16px">Phần dưới đây là những gì Google và Facebook/Zalo sẽ hiển thị — <strong>tự sinh từ tiêu đề và đoạn mở đầu</strong>, không sửa được và không cần sửa.</p>
 
-        <label class="qt-nhan" for="o-mo-ta-trang">Mô tả trên Google</label>
-        <p class="qt-goi-y">Đoạn chữ xám dưới tiêu đề trong kết quả tìm kiếm — tự lấy từ đoạn mở đầu của bài.</p>
-        <textarea class="qt-o qt-o-cao" id="o-mo-ta-trang" rows="3" data-dem="160" required></textarea>
+        <label class="qt-nhan" for="o-ten-file">Đường dẫn <span class="qt-tu-dong">tự sinh</span></label>
+        <input class="qt-o" type="text" id="o-ten-file" disabled>
+
+        <label class="qt-nhan" for="o-tieu-de-trang">Tiêu đề trên Google <span class="qt-tu-dong">tự sinh</span></label>
+        <input class="qt-o" type="text" id="o-tieu-de-trang" disabled>
+
+        <label class="qt-nhan" for="o-mo-ta-trang">Mô tả trên Google <span class="qt-tu-dong">tự sinh</span></label>
+        <textarea class="qt-o qt-o-cao" id="o-mo-ta-trang" rows="3" disabled></textarea>
       </fieldset>
     </form>
   </main>

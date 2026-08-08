@@ -12,31 +12,14 @@
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
 
-  /* ---- Thang cỡ chữ ----------------------------------------------------
-     Mọi cỡ chữ trong file này phải lấy từ 9 bậc dưới đây — không viết
-     thẳng số rem vào từng rule nữa. Trước đây site có 26 cỡ chữ khác
-     nhau, trong đó 5 cỡ chen nhau trong khoảng 13.6–15.2px mà mắt không
-     phân biệt được; gom về một thang giúp các trang nhất quán và sửa một
-     chỗ là đổi toàn site.
-
-     Quy tắc dựng thang: mọi bậc đều chia hết cho 4, riêng 14px là ngoại
-     lệ vì cần một bậc nằm giữa 12 và 16.
-
-     Sàn là 12px (--fs-xs) và CHỈ dùng cho chú thích — chú thích ảnh,
-     nguồn trích dẫn, số chú thích trong bài, dòng bản quyền. Chữ để đọc
-     không bao giờ nhỏ hơn 14px, vì người xem site này phần nhiều là bệnh
-     nhân lớn tuổi dùng điện thoại.
-
-     Gốc 1rem = 16px, nên px ghi ở mỗi dòng là cỡ thật khi hiển thị. */
-  --fs-xs: 0.75rem;     /* 12px — CHỈ chú thích, không dùng cho chữ đọc */
-  --fs-sm: 0.875rem;    /* 14px — chữ nền mobile, nhãn, menu, nút, chân trang */
-  --fs-base: 1rem;      /* 16px — chữ nền desktop, chữ trong bài viết */
-  --fs-lg: 1.25rem;     /* 20px — h3, tiêu đề thẻ, đoạn dẫn */
-  --fs-xl: 1.5rem;      /* 24px — tiêu đề thẻ nổi bật */
-  --fs-2xl: 1.75rem;    /* 28px — h1 mobile, h2 tablet/mobile */
-  --fs-3xl: 2rem;       /* 32px — h1 tablet */
-  --fs-4xl: 2.25rem;    /* 36px — h2 desktop */
-  --fs-5xl: 2.5rem;     /* 40px — h1 desktop */
+  /* Khoảng cách dọc của các trang phụ (blog, bài viết, dịch vụ).
+     Sửa 4 số này là đổi nhịp cho toàn bộ trang phụ; số cho mobile nằm
+     trong @media (max-width: 720px) ở cuối file. Trang chủ không dùng
+     bộ này nên giữ nguyên nhịp cũ. */
+  --sub-section-y: 64px;    /* đệm trên và dưới mỗi section */
+  --sub-hero-top: 140px;    /* chừa chỗ cho header cố định phía trên */
+  --sub-hero-bottom: 40px;  /* hở giữa phần mở đầu và nội dung đầu tiên */
+  --sub-title-gap: 44px;    /* hở dưới cụm tiêu đề của section */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -384,6 +367,24 @@ h4 { font-size: var(--fs-base); }
   padding-bottom: 20px;
   position: relative;
 }
+/* Card dạng link — bấm được cả card, hover thì phóng ảnh.
+   Dùng chung cho card bài viết ở blog và card "Bài viết khác". */
+.event-card-link {
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .25s ease;
+}
+.event-card-link p { flex: 1; }
+.event-card-link:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
+.event-card-link:hover .event-img img { transform: scale(1.1); }
+.event-card-link:hover .related-more { color: var(--primary-2); }
+.event-card-link:focus-visible {
+  outline: 2px solid var(--primary-2);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-card-link:hover .event-img img { transform: none; }
+}
 .event-card-featured {
   border: 2px solid var(--primary-2);
   box-shadow: 0 12px 34px rgba(0, 42, 106, 0.2);
@@ -402,7 +403,13 @@ h4 { font-size: var(--fs-base); }
   box-shadow: 0 4px 12px rgba(0, 42, 106, 0.25);
 }
 .event-img { aspect-ratio: 4 / 3; overflow: hidden; }
-.event-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.event-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform .4s ease;
+}
 .event-img-pending {
   display: flex;
   align-items: center;
@@ -686,11 +693,24 @@ main img.zoomable:hover {
   margin-right: auto;
 }
 
+/* ---- Nhịp dọc của trang phụ ----
+   Áp cho mọi trang có <body class="subpage">: blog, 3 bài viết và các
+   trang dịch vụ. Trang chủ dài và nhiều ảnh lớn nên vẫn dùng nhịp cũ
+   của .section; trang phụ ngắn, dày chữ hơn nên khoảng cách gọn lại. */
+.subpage .section { padding: var(--sub-section-y) 0; }
+.subpage .section-title { margin-bottom: var(--sub-title-gap); }
+/* Phần mở đầu (nhãn + H1 + lead) thuộc về nội dung ngay dưới nó, nên
+   hở xuống section kế tiếp hẹp hơn khoảng cách giữa 2 section thường.
+   .cv-hero luôn đi cùng body.subpage — bỏ một trong hai thì phần đầu
+   trang sẽ chui xuống dưới header cố định. */
+.subpage .cv-hero {
+  padding-top: var(--sub-hero-top);
+  padding-bottom: var(--sub-hero-bottom);
+}
+/* Trang bài viết: ảnh mở đầu đi liền ngay dưới H1, không cần đệm trên */
+.subpage .section-article { padding-top: 0; }
+
 /* Full CV sub-page */
-/* Dùng .section.cv-hero để thắng các rule .section { padding: ... }
-   khai báo ở dưới trong media query — nếu không, phần đệm trên bị ghi đè
-   và dòng chữ xanh trên tiêu đề chui xuống dưới header cố định. */
-.section.cv-hero { padding-top: 140px; }
 .cv-awards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -698,7 +718,6 @@ main img.zoomable:hover {
   margin-top: 32px;
 }
 @media (max-width: 720px) {
-  .section.cv-hero { padding-top: 88px; }
   .cv-awards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .award-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card); overflow: hidden; }
@@ -765,15 +784,11 @@ main img.zoomable:hover {
 .related-scroller::-webkit-scrollbar { height: 6px; }
 .related-scroller::-webkit-scrollbar-thumb { background: #cdd8e6; border-radius: 3px; }
 .related-scroller::-webkit-scrollbar-track { background: transparent; }
+/* Chỉ lo phần bố cục trong scroller — kiểu hover nằm ở .event-card-link */
 .related-card {
   flex: 0 0 320px;
   scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow .25s ease;
 }
-.related-card:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
-.related-card p { flex: 1; }
 .related-more {
   display: flex;
   align-items: center;
@@ -784,7 +799,6 @@ main img.zoomable:hover {
   font-size: var(--fs-sm);
   color: var(--primary);
 }
-.related-card:hover .related-more { color: var(--primary-2); }
 
 /* Press */
 .press-list { display: flex; flex-direction: column; gap: 16px; }
@@ -1034,6 +1048,14 @@ main img.zoomable:hover {
 
 /* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */
 @media (max-width: 720px) {
+  /* Nhịp dọc trang phụ trên mobile — xem chú thích ở :root đầu file */
+  :root {
+    --sub-section-y: 32px;
+    --sub-hero-top: 88px;
+    --sub-hero-bottom: 20px;
+    --sub-title-gap: 28px;
+  }
+
   /* Lề 2 bên: mọi thứ cách mép màn hình đúng 16px */
   .container { padding: 0 16px; }
   .site-nav { padding: 12px 16px 24px; }

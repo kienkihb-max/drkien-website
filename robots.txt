@@ -1,0 +1,5 @@
+# Cho phép mọi công cụ tìm kiếm đọc toàn bộ trang.
+User-agent: *
+Allow: /
+
+Sitemap: https://bacsikien.com/sitemap.xml

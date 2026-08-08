@@ -1,19 +1,6 @@
-document.getElementById("year").textContent = new Date().getFullYear();
-
-const navToggle = document.getElementById("navToggle");
-const siteNav = document.getElementById("siteNav");
-
-navToggle.addEventListener("click", () => {
-  const isOpen = siteNav.classList.toggle("open");
-  navToggle.setAttribute("aria-expanded", isOpen);
-});
-
-siteNav.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    siteNav.classList.remove("open");
-    navToggle.setAttribute("aria-expanded", "false");
-  });
-});
+// Năm ở chân trang do site-footer.js lo, nút hamburger do site-header.js lo.
+// Menu giờ nằm ở mọi trang còn script.js chỉ được nạp ở trang chủ, nên gắn
+// lại ở đây sẽ toggle hai lần và nút thành vô hiệu.
 
 const backToTop = document.getElementById("backToTop");
 const floatingActions = document.querySelector(".floating-actions");

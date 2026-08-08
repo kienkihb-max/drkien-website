@@ -26,11 +26,44 @@
 
 html { scroll-behavior: smooth; }
 
+/* ---- Hiệu ứng chuyển trang ------------------------------------------
+   Bấm từ trang này sang trang kia thì mờ dần thay vì nhảy giật một cái.
+   Dùng View Transitions của trình duyệt nên không cần thư viện; trình
+   duyệt nào chưa hỗ trợ thì trang vẫn chuyển bình thường như cũ.
+
+   Mỗi loại trang vào một kiểu, đánh dấu bằng data-page trên thẻ <html>:
+   trang chủ mờ dần cho êm, trang dịch vụ phóng nhẹ cho có nhấn, bài viết
+   trôi lên như lật sang trang đọc. */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: chuyen-trang-ra .18s ease both; }
+::view-transition-new(root) { animation: chuyen-trang-vao .28s ease both; }
+
+@keyframes chuyen-trang-ra { to { opacity: 0; } }
+@keyframes chuyen-trang-vao { from { opacity: 0; } }
+
+html[data-page="service"]::view-transition-new(root) {
+  animation: chuyen-trang-phong .3s ease both;
+}
+@keyframes chuyen-trang-phong { from { opacity: 0; transform: scale(.985); } }
+
+html[data-page="article"]::view-transition-new(root) {
+  animation: chuyen-trang-len .3s ease both;
+}
+@keyframes chuyen-trang-len { from { opacity: 0; transform: translateY(14px); } }
+
+/* Người bật giảm chuyển động trong hệ điều hành thì bỏ hết hiệu ứng. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}
+
 body {
   font-family: var(--font-body);
   color: var(--text-muted);
   background: var(--white);
-  font-size: 16px;
+  font-size: var(--fs-base);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -48,10 +81,10 @@ h1, h2, h3, h4 {
   line-height: 1.25;
 }
 
-h1 { font-size: 2.6rem; letter-spacing: -0.5px; }
-h2 { font-size: 2.25rem; }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.1rem; }
+h1 { font-size: var(--fs-5xl); letter-spacing: -0.5px; }
+h2 { font-size: var(--fs-4xl); }
+h3 { font-size: var(--fs-lg); }
+h4 { font-size: var(--fs-base); }
 
 .container {
   max-width: 1160px;
@@ -59,19 +92,19 @@ h4 { font-size: 1.1rem; }
   padding: 0 24px;
 }
 
-.section { padding: 96px 0; }
+.section { padding: 40px 0; }
 .section-alt { background: var(--gray-bg); }
 
 .section-label {
   color: var(--primary);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 10px;
 }
 
-.section-title { margin-bottom: 56px; }
+.section-title { margin-bottom: 40px; }
 .text-center { text-align: center; }
 
 .divider {
@@ -83,7 +116,7 @@ h4 { font-size: 1.1rem; }
 }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-.lead { font-size: 1.05rem; margin: 16px 0; }
+.lead { font-size: var(--fs-lg); margin: 16px 0; }
 .lead-light { color: rgba(255,255,255,0.85); }
 
 .icon { width: 1.4em; height: 1.4em; }
@@ -96,7 +129,7 @@ h4 { font-size: 1.1rem; }
   gap: 10px;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   padding: 14px 30px;
   border-radius: 50px;
   border: 2px solid transparent;
@@ -109,7 +142,7 @@ h4 { font-size: 1.1rem; }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 .btn-main { background: var(--primary); color: #fff; }
 .btn-main:hover { background: var(--primary-2); color: #fff; }
-.btn-sm { padding: 10px 20px; font-size: 0.82rem; }
+.btn-sm { padding: 10px 20px; font-size: var(--fs-sm); }
 .btn-icon .icon { transition: transform .2s ease; }
 .btn-icon:hover .icon { transform: translateX(3px); }
 
@@ -139,18 +172,35 @@ h4 { font-size: 1.1rem; }
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text-heading);
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
 }
 .site-nav { display: flex; align-items: center; gap: 8px; }
 .site-nav a {
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
   color: var(--text-heading);
   padding: 10px 14px;
   border-radius: 8px;
 }
 .site-nav a:hover { color: var(--primary); }
+
+/* Mục đang xem. site-header.js gắn .is-active theo tên file của trang. */
+.site-nav > a.is-active,
+.nav-dropdown.is-active > a { color: var(--primary); }
+.site-nav > a.is-active::after,
+.nav-dropdown.is-active > a::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary-2);
+}
+.site-nav > a.is-active { position: relative; }
+.nav-dropdown.is-active > a { position: relative; }
+.nav-dropdown-menu a.is-active { background: var(--primary-soft); color: var(--primary); }
+
 .nav-cta {
   background: var(--primary-2);
   color: #fff !important;
@@ -223,11 +273,11 @@ h4 { font-size: 1.1rem; }
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--primary);
 }
-.hero-lead { font-size: 1.08rem; margin: 20px 0 28px; max-width: 46ch; }
+.hero-lead { font-size: var(--fs-lg); margin: 20px 0 28px; max-width: 46ch; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .hero-media { position: relative; display: flex; justify-content: center; }
@@ -274,10 +324,9 @@ h4 { font-size: 1.1rem; }
   box-shadow: var(--shadow-card);
 }
 .service-item h4 { margin-bottom: 10px; }
-.service-item p { font-size: 0.92rem; }
+.service-item p { font-size: var(--fs-sm); }
 
 /* Offerings (3 services, right under hero) */
-.offerings-section { padding-top: 72px; }
 .offer-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -294,8 +343,8 @@ h4 { font-size: 1.1rem; }
 }
 .offer-img { aspect-ratio: 4 / 3; overflow: hidden; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: 1.1rem; }
-.offer-card p { padding: 0 22px; margin-top: 8px; font-size: 0.9rem; flex: 1; }
+.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: var(--fs-lg); }
+.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-sm); flex: 1; }
 .offer-actions {
   display: flex;
   flex-wrap: wrap;
@@ -347,7 +396,7 @@ h4 { font-size: 1.1rem; }
   z-index: 2;
   background: var(--primary-2);
   color: #fff;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   padding: 5px 12px;
   border-radius: 999px;
@@ -367,11 +416,11 @@ h4 { font-size: 1.1rem; }
   justify-content: center;
   background: var(--gray-bg);
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-xs);
   border-bottom: 1px dashed #cdd8e6;
 }
-.event-card h4 { padding: 16px 18px 0; font-size: 1rem; }
-.event-card p { padding: 8px 18px 0; font-size: 0.88rem; }
+.event-card h4 { padding: 16px 18px 0; font-size: var(--fs-base); }
+.event-card p { padding: 8px 18px 0; font-size: var(--fs-sm); }
 .content-media-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -397,9 +446,9 @@ h4 { font-size: 1.1rem; }
   margin-bottom: 24px;
 }
 .events-featured-grid .event-img { aspect-ratio: 16 / 10; }
-.events-featured-grid .event-badge { font-size: 0.8rem; padding: 6px 16px; }
-.events-featured-grid h4 { font-size: 1.35rem; padding: 22px 24px 0; }
-.events-featured-grid p { font-size: 1rem; padding: 10px 24px 4px; }
+.events-featured-grid .event-badge { font-size: var(--fs-xs); padding: 6px 16px; }
+.events-featured-grid h4 { font-size: var(--fs-xl); padding: 22px 24px 0; }
+.events-featured-grid p { font-size: var(--fs-base); padding: 10px 24px 4px; }
 @media (max-width: 960px) {
   .events-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -434,12 +483,11 @@ h4 { font-size: 1.1rem; }
 .info-card h3 .icon { vertical-align: -0.15em; margin-right: 6px; }
 .cv-photo { max-width: 640px; margin: 0 auto 40px; text-align: center; }
 .cv-photo img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-card); }
-.cv-photo figcaption { margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); }
 .list-check { display: flex; flex-direction: column; gap: 12px; }
 .list-check li {
   position: relative;
   padding-left: 26px;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--text-heading);
 }
 .list-check li::before {
@@ -500,6 +548,10 @@ main img.zoomable:hover {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
 }
+/* Ở #stories marquee đứng cuối container, margin cộng vào padding section
+   làm khoảng hở rộng hơn các section khác. Ở dieu-tri.html còn nội dung
+   phía sau nên vẫn cần 36px — chỉ bỏ khi nó là phần tử cuối. */
+.shots-marquee:last-child { margin-bottom: 0; }
 .shots-track {
   display: flex;
   width: max-content;
@@ -581,7 +633,7 @@ main img.zoomable:hover {
 .lightbox-content figcaption {
   color: rgba(255,255,255,0.9);
   margin-top: 18px;
-  font-size: 0.95rem;
+  font-size: var(--fs-xs);
   text-align: center;
   max-width: 600px;
 }
@@ -630,7 +682,7 @@ main img.zoomable:hover {
 }
 .award-featured { border: none; }
 .award-featured .award-img { height: 340px; }
-.award-featured figcaption { font-size: 1rem; font-weight: 700; color: var(--primary); }
+.award-featured figcaption { font-size: var(--fs-base); font-weight: 700; color: var(--primary); }
 
 .awards-grid {
   display: grid;
@@ -680,7 +732,7 @@ main img.zoomable:hover {
 .cv-awards-grid .award-img img { object-fit: contain; }
 .award-card figcaption {
   padding: 14px 16px;
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   color: var(--text-heading);
   font-weight: 500;
   line-height: 1.5;
@@ -696,10 +748,10 @@ main img.zoomable:hover {
   box-shadow: var(--shadow-card);
 }
 .article-body { max-width: 720px; margin: 0 auto; }
-.article-body p { font-size: 1.02rem; line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
-.article-body p.lead { font-size: 1.15rem; color: var(--text-heading); }
-.article-body h3 { margin: 40px 0 16px; font-size: 1.3rem; }
-.article-body sup { font-size: 0.7em; color: var(--primary-2); }
+.article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
+.article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
+.article-body h3 { margin: 40px 0 16px; font-size: var(--fs-lg); }
+.article-body sup { font-size: var(--fs-xs); color: var(--primary-2); }
 .article-inline-img { margin: 36px 0; }
 .article-inline-img img {
   width: 100%;
@@ -710,14 +762,14 @@ main img.zoomable:hover {
 }
 .article-inline-img figcaption {
   margin-top: 10px;
-  font-size: 0.85rem;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   text-align: center;
 }
 .article-refs { max-width: 720px; margin: 44px auto 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
-.article-refs h4 { font-size: 0.92rem; color: var(--text-heading); margin-bottom: 12px; }
+.article-refs h4 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
-.article-refs li { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+.article-refs li { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 
 /* Related posts — horizontal scroller at the foot of an article.
    Vertical padding leaves room for the cards' shadow, which would
@@ -744,7 +796,7 @@ main img.zoomable:hover {
   padding: 14px 18px 0;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--primary);
 }
 
@@ -760,7 +812,7 @@ main img.zoomable:hover {
   gap: 8px;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
   color: var(--primary);
 }
 .cv-link:hover { color: var(--primary-2); }
@@ -780,7 +832,7 @@ main img.zoomable:hover {
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--primary);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   flex-shrink: 0;
   width: 170px;
 }
@@ -798,7 +850,7 @@ main img.zoomable:hover {
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-inner p { font-size: 0.88rem; }
+.footer-inner p { font-size: var(--fs-sm); }
 .footer-meta { color: var(--text-muted); }
 .footer-grid {
   display: grid;
@@ -807,14 +859,14 @@ main img.zoomable:hover {
   padding-bottom: 40px;
 }
 .footer-brand .brand { margin-bottom: 14px; }
-.footer-brand p { font-size: 0.88rem; margin-bottom: 20px; }
+.footer-brand p { font-size: var(--fs-sm); margin-bottom: 20px; }
 .footer-col h4 {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   color: var(--text-heading);
   margin-bottom: 16px;
 }
 .footer-col p {
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   display: flex;
   gap: 8px;
 }
@@ -824,14 +876,14 @@ main img.zoomable:hover {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
 }
 .footer-hours li span:first-child { color: var(--text-heading); }
 .footer-link {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   margin-bottom: 12px;
 }
@@ -842,7 +894,7 @@ main img.zoomable:hover {
   padding: 20px 0;
   text-align: center;
 }
-.footer-bottom p { font-size: 0.85rem; }
+.footer-bottom p { font-size: var(--fs-xs); }
 @media (max-width: 720px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-brand { grid-column: 1 / -1; }
@@ -891,8 +943,11 @@ main img.zoomable:hover {
 
 /* Responsive */
 @media (max-width: 960px) {
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.8rem; }
+  h1 { font-size: var(--fs-3xl); }
+  h2 { font-size: var(--fs-2xl); }
+  /* Desktop đã xuống 40px, chỉ còn cách mobile 8px nên không cần bậc
+     trung gian cho .section nữa — chỉ hạ khoảng cách dưới tiêu đề */
+  .section-title { margin-bottom: 32px; }
   .hero { padding-top: 84px; }
   .hero-inner, .runner-grid { grid-template-columns: 1fr; }
   /* Hero collapses to a single stacking cell: image below, text on top */
@@ -928,12 +983,16 @@ main img.zoomable:hover {
 }
 
 @media (max-width: 720px) {
-  h1 { font-size: 1.75rem; }
+  /* Chữ nền trên điện thoại nhỏ hơn desktop một bậc: 16px -> 14px.
+     Chỉ đổi ở đây là mọi chữ không tự khai font-size đều theo. Chữ trong
+     bài viết (.article-body p) vẫn giữ 16px vì đó là chữ để đọc dài. */
+  body { font-size: var(--fs-sm); }
+  h1 { font-size: var(--fs-2xl); }
   .header-inner { height: 58px; gap: 12px; }
   .brand { gap: 9px; min-width: 0; }
   .brand-mark { width: 34px; height: 34px; }
-  .brand-text { font-size: 0.95rem; white-space: nowrap; }
-  .header-inner .btn-sm { padding: 8px 14px; font-size: 0.76rem; white-space: nowrap; }
+  .brand-text { font-size: var(--fs-sm); white-space: nowrap; }
+  .header-inner .btn-sm { padding: 8px 14px; font-size: var(--fs-sm); white-space: nowrap; }
   .nav-toggle { display: flex; }
   .site-nav {
     position: absolute;
@@ -958,6 +1017,9 @@ main img.zoomable:hover {
     min-width: 0;
   }
   .nav-dropdown-menu a { padding: 10px 0; }
+  /* Menu mobile xếp dọc nên gạch chân lệch — chỉ giữ đổi màu */
+  .site-nav > a.is-active::after,
+  .nav-dropdown.is-active > a::after { display: none; }
   .hero { padding-top: 58px; }
   /* Stack: source + arrow share the top row, title gets a full row below.
      DOM order is source, title, arrow — so reorder to pull the arrow up. */
@@ -979,7 +1041,9 @@ main img.zoomable:hover {
   .awards-featured { grid-template-columns: 1fr; }
   .award-featured .award-img { height: 220px; }
   .awards-grid { grid-template-columns: repeat(2, 1fr); }
-  .case-study { padding: 20px; }
+  /* Xếp dọc: ảnh trước/sau lên trên, chữ xuống dưới. Để 2 cột trên màn
+     hình hẹp thì ảnh bị bóp còn một nửa, nhìn không ra mặt bệnh nhân. */
+  .case-study { grid-template-columns: 1fr; gap: 20px; padding: 20px; }
 }
 
 /* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */

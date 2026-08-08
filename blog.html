@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-page="article">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,20 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="subpage">
 
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <symbol id="ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
 </svg>
 
-<header class="site-header">
-  <div class="container header-inner">
-    <a href="index.html" class="brand">
-      <img class="brand-mark" src="assets/img/logo-chay-bo-cung-bs-kien.jpg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
-      <span class="brand-text">ThS.BS Lê Trung Kiên</span>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 
 <main>
   <section class="section cv-hero">
@@ -46,30 +39,24 @@
         <div class="divider mx-auto"></div>
       </div>
       <div class="events-grid">
-        <div class="event-card">
+        <a class="event-card event-card-link" href="van-dong-phuc-hoi-cot-song.html">
           <div class="event-img"><img src="assets/img/offer-treatment.jpg" alt="Điều trị phục hồi chức năng tại khoa Y học cổ truyền" loading="lazy"></div>
           <h4>Vai trò của vận động trong phục hồi bệnh nhân đau cột sống mạn tính</h4>
           <p>Câu chuyện một bệnh nhân lớn tuổi vượt qua nỗi sợ vận động để phục hồi chức năng sau xẹp đốt sống.</p>
-          <div class="offer-actions">
-            <a class="btn btn-outline btn-sm" href="van-dong-phuc-hoi-cot-song.html">Đọc bài viết</a>
-          </div>
-        </div>
-        <div class="event-card">
+          <span class="related-more">Đọc bài viết <svg class="icon icon-sm"><use href="#ic-arrow"/></svg></span>
+        </a>
+        <a class="event-card event-card-link" href="xu-huong-phat-trien-yhct.html">
           <div class="event-img"><img src="assets/img/community-health-checkup.jpg" alt="Khám sức khỏe cộng đồng tại y tế cơ sở" loading="lazy"></div>
           <h4>Xu hướng phát triển Y học cổ truyền trong giai đoạn mới</h4>
           <p>Ghi chép từ các chuyến công tác tại tuyến y tế cơ sở, và góc nhìn về định hướng kết hợp Y học cổ truyền với y học hiện đại.</p>
-          <div class="offer-actions">
-            <a class="btn btn-outline btn-sm" href="xu-huong-phat-trien-yhct.html">Đọc bài viết</a>
-          </div>
-        </div>
-        <div class="event-card">
+          <span class="related-more">Đọc bài viết <svg class="icon icon-sm"><use href="#ic-arrow"/></svg></span>
+        </a>
+        <a class="event-card event-card-link" href="da-mo-thuc-y-hoc-the-thao.html">
           <div class="event-img"><img src="assets/img/treatment-giachoi-cupping.jpg" alt="Giác hơi điều trị đau cơ vùng cẳng chân cho vận động viên" loading="lazy"></div>
           <h4>Điều trị đa mô thức trong Y học thể thao</h4>
           <p>Tổng quan bằng chứng khoa học về vị trí của châm cứu và Y học cổ truyền trong mô hình phục hồi chấn thương thể thao hiện đại.</p>
-          <div class="offer-actions">
-            <a class="btn btn-outline btn-sm" href="da-mo-thuc-y-hoc-the-thao.html">Đọc bài viết</a>
-          </div>
-        </div>
+          <span class="related-more">Đọc bài viết <svg class="icon icon-sm"><use href="#ic-arrow"/></svg></span>
+        </a>
       </div>
     </div>
   </section>
@@ -109,6 +96,7 @@
 
 <footer class="site-footer"></footer>
 
+<script src="site-header.js"></script>
 <script src="site-footer.js"></script>
 </body>
 </html>

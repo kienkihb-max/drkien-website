@@ -11,6 +11,15 @@
   --shadow-card: 0 0 30px rgba(0, 42, 106, 0.1);
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  /* Khoảng cách dọc của các trang phụ (blog, bài viết, dịch vụ).
+     Sửa 4 số này là đổi nhịp cho toàn bộ trang phụ; số cho mobile nằm
+     trong @media (max-width: 720px) ở cuối file. Trang chủ không dùng
+     bộ này nên giữ nguyên nhịp cũ. */
+  --sub-section-y: 64px;    /* đệm trên và dưới mỗi section */
+  --sub-hero-top: 140px;    /* chừa chỗ cho header cố định phía trên */
+  --sub-hero-bottom: 40px;  /* hở giữa phần mở đầu và nội dung đầu tiên */
+  --sub-title-gap: 44px;    /* hở dưới cụm tiêu đề của section */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -309,6 +318,24 @@ h4 { font-size: 1.1rem; }
   padding-bottom: 20px;
   position: relative;
 }
+/* Card dạng link — bấm được cả card, hover thì phóng ảnh.
+   Dùng chung cho card bài viết ở blog và card "Bài viết khác". */
+.event-card-link {
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .25s ease;
+}
+.event-card-link p { flex: 1; }
+.event-card-link:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
+.event-card-link:hover .event-img img { transform: scale(1.1); }
+.event-card-link:hover .related-more { color: var(--primary-2); }
+.event-card-link:focus-visible {
+  outline: 2px solid var(--primary-2);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-card-link:hover .event-img img { transform: none; }
+}
 .event-card-featured {
   border: 2px solid var(--primary-2);
   box-shadow: 0 12px 34px rgba(0, 42, 106, 0.2);
@@ -327,7 +354,13 @@ h4 { font-size: 1.1rem; }
   box-shadow: 0 4px 12px rgba(0, 42, 106, 0.25);
 }
 .event-img { aspect-ratio: 4 / 3; overflow: hidden; }
-.event-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.event-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform .4s ease;
+}
 .event-img-pending {
   display: flex;
   align-items: center;
@@ -608,8 +641,24 @@ main img.zoomable:hover {
   margin-right: auto;
 }
 
+/* ---- Nhịp dọc của trang phụ ----
+   Áp cho mọi trang có <body class="subpage">: blog, 3 bài viết và các
+   trang dịch vụ. Trang chủ dài và nhiều ảnh lớn nên vẫn dùng nhịp cũ
+   của .section; trang phụ ngắn, dày chữ hơn nên khoảng cách gọn lại. */
+.subpage .section { padding: var(--sub-section-y) 0; }
+.subpage .section-title { margin-bottom: var(--sub-title-gap); }
+/* Phần mở đầu (nhãn + H1 + lead) thuộc về nội dung ngay dưới nó, nên
+   hở xuống section kế tiếp hẹp hơn khoảng cách giữa 2 section thường.
+   .cv-hero luôn đi cùng body.subpage — bỏ một trong hai thì phần đầu
+   trang sẽ chui xuống dưới header cố định. */
+.subpage .cv-hero {
+  padding-top: var(--sub-hero-top);
+  padding-bottom: var(--sub-hero-bottom);
+}
+/* Trang bài viết: ảnh mở đầu đi liền ngay dưới H1, không cần đệm trên */
+.subpage .section-article { padding-top: 0; }
+
 /* Full CV sub-page */
-.cv-hero { padding-top: 140px; }
 .cv-awards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -617,7 +666,6 @@ main img.zoomable:hover {
   margin-top: 32px;
 }
 @media (max-width: 720px) {
-  .cv-hero { padding-top: 88px; }
   .cv-awards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .award-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card); overflow: hidden; }
@@ -684,15 +732,11 @@ main img.zoomable:hover {
 .related-scroller::-webkit-scrollbar { height: 6px; }
 .related-scroller::-webkit-scrollbar-thumb { background: #cdd8e6; border-radius: 3px; }
 .related-scroller::-webkit-scrollbar-track { background: transparent; }
+/* Chỉ lo phần bố cục trong scroller — kiểu hover nằm ở .event-card-link */
 .related-card {
   flex: 0 0 320px;
   scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow .25s ease;
 }
-.related-card:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
-.related-card p { flex: 1; }
 .related-more {
   display: flex;
   align-items: center;
@@ -703,7 +747,6 @@ main img.zoomable:hover {
   font-size: 0.85rem;
   color: var(--primary);
 }
-.related-card:hover .related-more { color: var(--primary-2); }
 
 /* Press */
 .press-list { display: flex; flex-direction: column; gap: 16px; }
@@ -941,6 +984,14 @@ main img.zoomable:hover {
 
 /* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */
 @media (max-width: 720px) {
+  /* Nhịp dọc trang phụ trên mobile — xem chú thích ở :root đầu file */
+  :root {
+    --sub-section-y: 32px;
+    --sub-hero-top: 88px;
+    --sub-hero-bottom: 20px;
+    --sub-title-gap: 28px;
+  }
+
   /* Lề 2 bên: mọi thứ cách mép màn hình đúng 16px */
   .container { padding: 0 16px; }
   .site-nav { padding: 12px 16px 24px; }

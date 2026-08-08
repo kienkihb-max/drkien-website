@@ -89,6 +89,14 @@ html[data-page="article"]::view-transition-new(root) {
   ::view-transition-new(root) { animation: none; }
 }
 
+/* Cỡ chữ nền của cả site khai báo DUY NHẤT ở đây: 16px trên desktop,
+   14px trên mobile (override trong @media (max-width: 720px) cuối file).
+
+   Mọi đoạn chữ xám thường — mô tả trong thẻ, đoạn dẫn .lead, mô tả sự
+   kiện — KHÔNG tự khai báo font-size mà để kế thừa từ body, nhờ vậy chỉ
+   sửa một chỗ là đổi đồng thời mọi trang và không chỗ nào lệch nhau.
+   Chỉ khai báo font-size khi cỡ chữ thật sự phải khác chữ nền: tiêu đề,
+   nhãn, nút, menu, chân trang, chú thích ảnh. */
 body {
   font-family: var(--font-body);
   color: var(--text-muted);
@@ -174,10 +182,8 @@ h4 { font-size: var(--fs-base); }
 }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-/* Đoạn dẫn xám mở đầu section. Để bằng cỡ chữ nền (16px desktop, 14px
-   mobile — xem @media cuối file) chứ không phóng to như --fs-lg: khối
-   này thường dài 3–4 dòng, đọc ở cỡ chữ nền dễ chịu hơn. */
-.lead { font-size: var(--fs-base); margin: 16px 0; }
+/* Đoạn dẫn xám mở đầu section — theo cỡ chữ nền, xem chú thích ở body. */
+.lead { margin: 16px 0; }
 .lead-light { color: rgba(255,255,255,0.85); }
 
 .icon { width: 1.4em; height: 1.4em; }
@@ -338,7 +344,7 @@ h4 { font-size: var(--fs-base); }
   font-weight: 600;
   color: var(--primary);
 }
-.hero-lead { font-size: var(--fs-lg); margin: 20px 0 28px; max-width: 46ch; }
+.hero-lead { margin: 20px 0 28px; max-width: 46ch; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .hero-media { position: relative; display: flex; justify-content: center; }
@@ -385,7 +391,6 @@ h4 { font-size: var(--fs-base); }
   box-shadow: var(--shadow-card);
 }
 .service-item h4 { margin-bottom: 10px; }
-.service-item p { font-size: var(--fs-sm); }
 
 /* Offerings (3 services, right under hero) */
 .offer-grid {
@@ -405,9 +410,7 @@ h4 { font-size: var(--fs-base); }
 .offer-img { aspect-ratio: 4 / 3; overflow: hidden; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: var(--fs-lg); }
-/* Mô tả trong thẻ dịch vụ: cỡ chữ nền 16px trên desktop, xuống 14px ở
-   mobile (override trong @media cuối file) cho khớp bề rộng thẻ hẹp hơn. */
-.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-base); flex: 1; }
+.offer-card p { padding: 0 22px; margin-top: 8px; flex: 1; }
 /* Thẻ dịch vụ do service-cards.js dựng — dùng chung cho trang chủ và khối
    "Xem thêm" trong trang dịch vụ, nên hiệu ứng hover cũng chỉ khai báo ở đây.
    Phần ảnh phóng to do "Component: hover phóng ảnh" ở đầu file lo. */
@@ -503,7 +506,7 @@ h4 { font-size: var(--fs-base); }
   border-bottom: 1px dashed #cdd8e6;
 }
 .event-card h4 { padding: 16px 18px 0; font-size: var(--fs-base); }
-.event-card p { padding: 8px 18px 0; font-size: var(--fs-sm); }
+.event-card p { padding: 8px 18px 0; }
 .content-media-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -531,7 +534,7 @@ h4 { font-size: var(--fs-base); }
 .events-featured-grid .event-img { aspect-ratio: 16 / 10; }
 .events-featured-grid .event-badge { font-size: var(--fs-xs); padding: 6px 16px; }
 .events-featured-grid h4 { font-size: var(--fs-xl); padding: 22px 24px 0; }
-.events-featured-grid p { font-size: var(--fs-base); padding: 10px 24px 4px; }
+.events-featured-grid p { padding: 10px 24px 4px; }
 @media (max-width: 960px) {
   .events-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1151,7 +1154,7 @@ main img.zoomable { cursor: zoom-in; }
   .hero h1 { margin: 0 -16px; padding: 0 16px 28px; }
   .hero-inner { gap: 0; padding-bottom: 0; }
   .hero-lead { margin: 16px 0 22px; }
-  .lead { font-size: var(--fs-sm); margin: 12px 0; }
+  .lead { margin: 12px 0; }
 
   .cv-photo { margin-bottom: 24px; }
 
@@ -1185,7 +1188,6 @@ main img.zoomable { cursor: zoom-in; }
   .offer-card h3,
   .offer-card p,
   .offer-actions { padding-left: 18px; padding-right: 18px; }
-  .offer-card p { font-size: var(--fs-sm); }
 
 
   /* Footer */

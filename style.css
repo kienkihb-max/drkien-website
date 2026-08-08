@@ -405,7 +405,9 @@ h4 { font-size: var(--fs-base); }
 .offer-img { aspect-ratio: 4 / 3; overflow: hidden; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: var(--fs-lg); }
-.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-sm); flex: 1; }
+/* Mô tả trong thẻ dịch vụ: cỡ chữ nền 16px trên desktop, xuống 14px ở
+   mobile (override trong @media cuối file) cho khớp bề rộng thẻ hẹp hơn. */
+.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-base); flex: 1; }
 /* Thẻ dịch vụ do service-cards.js dựng — dùng chung cho trang chủ và khối
    "Xem thêm" trong trang dịch vụ, nên hiệu ứng hover cũng chỉ khai báo ở đây.
    Phần ảnh phóng to do "Component: hover phóng ảnh" ở đầu file lo. */
@@ -1183,6 +1185,7 @@ main img.zoomable { cursor: zoom-in; }
   .offer-card h3,
   .offer-card p,
   .offer-actions { padding-left: 18px; padding-right: 18px; }
+  .offer-card p { font-size: var(--fs-sm); }
 
 
   /* Footer */

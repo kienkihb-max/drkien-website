@@ -117,8 +117,9 @@ img { max-width: 100%; display: block; }
    · Thêm một chỗ ảnh mới    → thêm tên class bọc ảnh vào 1 trong 2 danh
                                 sách dưới đây, không copy đoạn code này.
 
-   Ảnh hero và logo cố ý KHÔNG có trong danh sách nên không phóng:
-   .hero-media, .article-hero-img, .brand, .lightbox-content.
+   Ảnh hero, logo và ảnh trong bài viết cố ý KHÔNG có trong danh sách nên
+   không phóng: .hero-media, .article-hero-img, .article-inline-img, .brand,
+   .lightbox-content.
 */
 
 /* Nhóm 1 — ảnh nằm trong khung cắt sẵn: phóng bên trong khung, không tràn ra. */
@@ -130,7 +131,7 @@ img { max-width: 100%; display: block; }
 }
 
 /* Nhóm 2 — ảnh đứng riêng, tự có bo góc + đổ bóng: phóng cả tấm ảnh. */
-:is(.cv-photo, .article-inline-img, .runner-media-featured,
+:is(.cv-photo, .runner-media-featured,
     .runner-media-strip, .case-study, .content-media-single) {
   & img { transition: transform var(--img-zoom-speed) ease; }
   & img:hover { transform: scale(var(--img-zoom)); }

@@ -945,9 +945,12 @@ main img.zoomable { cursor: zoom-in; }
 }
 .footer-inner p { font-size: var(--fs-sm); }
 .footer-meta { color: var(--text-muted); }
+/* 6 cột: Thương hiệu · Địa chỉ · Giờ làm việc · Liên hệ · Dịch vụ · Đọc thêm.
+   Hai cột cuối dựng từ SO_DO_TRANG trong site-footer.js — thêm cột ở đó thì
+   sửa số cột tại đây. Cột thương hiệu và địa chỉ rộng hơn vì có logo và bản đồ. */
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1.1fr 1fr 1fr;
+  grid-template-columns: 1.4fr 1.2fr 1fr 1fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 40px;
 }
@@ -974,17 +977,7 @@ main img.zoomable { cursor: zoom-in; }
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
 }
-/* Sơ đồ trang — dải riêng cuối footer, ngay trên dòng bản quyền.
-   Nội dung 2 cột (Dịch vụ / Đọc thêm) dựng từ SO_DO_TRANG trong
-   site-footer.js. */
-.footer-sitemap {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40px;
-  border-top: 1px solid #d9e4ef;
-  padding-top: 28px;
-  padding-bottom: 32px;
-}
+/* Danh sách liên kết trong hai cột Dịch vụ / Đọc thêm của .footer-grid */
 .footer-sitemap-list { display: flex; flex-direction: column; gap: 8px; }
 .footer-sitemap-list a { font-size: var(--fs-sm); }
 .footer-sitemap-list a:hover { color: var(--primary); }
@@ -1013,6 +1006,10 @@ main img.zoomable { cursor: zoom-in; }
   text-align: center;
 }
 .footer-bottom p { font-size: var(--fs-xs); }
+/* 6 cột chỉ vừa trên màn rộng; hẹp dần thì giảm số cột để chữ không bị bó. */
+@media (max-width: 1180px) {
+  .footer-grid { grid-template-columns: repeat(3, 1fr); gap: 36px; }
+}
 @media (max-width: 720px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-brand { grid-column: 1 / -1; }

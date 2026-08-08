@@ -15,8 +15,9 @@
   var BAN_DO =
     "https://www.google.com/maps?q=" + encodeURIComponent(DIA_CHI) + "&output=embed";
 
-  // Sơ đồ trang — dải riêng cuối footer, ngay trên dòng bản quyền.
-  // Thêm/bớt cột hoặc mục thì sửa danh sách này.
+  // Sơ đồ trang — hai cột cuối của hàng footer, ngang hàng với Địa chỉ,
+  // Giờ làm việc và Liên hệ. Thêm/bớt cột hoặc mục thì sửa danh sách này;
+  // nhớ sửa số cột của .footer-grid trong style.css nếu thêm cột mới.
   var SO_DO_TRANG = [
     {
       tieuDe: "Dịch vụ",
@@ -65,8 +66,6 @@
     '    <a class="footer-link" href="' + ZALO + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: 034 590 1772</a>',
     '    <a class="footer-link" href="' + FACEBOOK + '" target="_blank" rel="noopener"><svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook</a>',
     "  </div>",
-    "</div>",
-    '<div class="container footer-sitemap">',
     SO_DO_TRANG.map(function (cot) {
       return [
         '  <div class="footer-col">',

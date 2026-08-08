@@ -235,11 +235,11 @@
 
   // Bài blog: là trang bài viết nhưng không phải trang danh sách hay hồ sơ.
   var la_bai_viet =
-    loai_trang === "article" && ten_tap !== "blog" && ten_tap !== "ho-so";
+    loai_trang === "article" && ten_tap !== "blog" && ten_tap !== "bac-si-le-trung-kien";
 
   var kieu_trang = la_trang_chu
     ? "WebPage"
-    : ten_tap === "ho-so"
+    : ten_tap === "bac-si-le-trung-kien"
       ? "ProfilePage"
       : ten_tap === "blog"
         ? "CollectionPage"
@@ -257,7 +257,7 @@
     isPartOf: { "@id": id("website") },
     about: { "@id": id("bacsi") },
   };
-  if (la_trang_chu || ten_tap === "ho-so") TRANG.mainEntity = { "@id": id("bacsi") };
+  if (la_trang_chu || ten_tap === "bac-si-le-trung-kien") TRANG.mainEntity = { "@id": id("bacsi") };
   if (anh_bai) TRANG.primaryImageOfPage = tuyetDoi(anh_bai.getAttribute("src"));
 
   var DO_THI = [NGUOI, PHONG_KHAM, TRANG_WEB, TRANG];

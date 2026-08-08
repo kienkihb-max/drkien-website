@@ -444,6 +444,13 @@ h4 { font-size: var(--fs-base); }
    nên bỏ padding đi cho nút thẳng hàng với h1 và đoạn mở đầu. */
 .cv-hero .offer-actions { padding-left: 0; padding-right: 0; }
 
+/* Đoạn tiểu sử mở đầu trang hồ sơ. Giới hạn bề rộng dòng cho dễ đọc —
+   chữ chạy hết chiều ngang container thì mắt khó bắt được đầu dòng sau. */
+.cv-bio { max-width: 760px; margin-top: 20px; }
+.cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 16px; }
+.cv-bio p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
+.cv-bio p:last-child { margin-bottom: 0; }
+
 /* Event gallery (sub-pages) */
 .events-grid {
   display: grid;
@@ -837,6 +844,36 @@ main img.zoomable { cursor: zoom-in; }
   object-fit: cover;
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
+}
+/* Dòng tác giả đầu bài viết — blog-byline.js dựng ra từ data-ngay-dang trên
+   thẻ <html>. Bài về y tế thì người đọc cần biết ai viết và họ có chuyên môn
+   gì, nên khối này nằm ngay dưới tiêu đề chứ không giấu ở cuối bài. */
+.article-byline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+.article-byline p { margin: 0; }
+.article-byline-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.article-byline-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--fs-base);
+  color: var(--text-heading);
+}
+.article-byline-name a { color: inherit; }
+.article-byline-name a:hover { color: var(--primary); }
+.article-byline-meta {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
 }
 .article-body { max-width: 720px; margin: 0 auto; }
 .article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }

@@ -135,6 +135,28 @@ bản: `src` trỏ bản `-thumb.jpg` rộng 640px, `data-full` trỏ bản gố
 Chỉ tạo thumbnail khi tiết kiệm được đáng kể — dưới khoảng 30% thì thêm một
 file với một lượt tải không bõ.
 
+### Tiêu đề của một section
+
+Nhãn, tiêu đề và gạch xanh luôn đi cùng nhau trong một lớp bọc
+`.section-title` — chính lớp bọc này tạo khoảng cách xuống nội dung bên dưới
+(40px, riêng trang phụ 44px):
+
+```html
+<div class="section-title text-center">   <!-- bỏ text-center nếu căn trái -->
+  <p class="section-label">Nhãn nhỏ</p>
+  <h2>Tiêu đề</h2>
+  <div class="divider mx-auto"></div>     <!-- bỏ mx-auto nếu căn trái -->
+</div>
+```
+
+`.divider` chỉ có lề trên, **không có lề dưới**. Đặt nó thẳng vào
+`.container` mà quên lớp bọc thì gạch xanh dính sát vào ô ngay bên dưới — đã
+xảy ra ở trang hồ sơ bác sĩ, khoảng cách đo được đúng 0px.
+
+Đừng chữa bằng cách thêm lề dưới cho `.divider`: nó nằm trong
+`.section-title` ở hơn 10 chỗ khác, hai khoảng cách sẽ cộng dồn và đẩy giãn
+mọi trang chỉ để sửa một trang.
+
 ### Liên kết
 
 Liên kết nội bộ **không có đuôi `.html`**: `href="blog"`, `href="/"`,

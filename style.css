@@ -174,7 +174,10 @@ h4 { font-size: var(--fs-base); }
 }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-.lead { font-size: var(--fs-lg); margin: 16px 0; }
+/* Đoạn dẫn xám mở đầu section. Để bằng cỡ chữ nền (16px desktop, 14px
+   mobile — xem @media cuối file) chứ không phóng to như --fs-lg: khối
+   này thường dài 3–4 dòng, đọc ở cỡ chữ nền dễ chịu hơn. */
+.lead { font-size: var(--fs-base); margin: 16px 0; }
 .lead-light { color: rgba(255,255,255,0.85); }
 
 .icon { width: 1.4em; height: 1.4em; }
@@ -1146,7 +1149,7 @@ main img.zoomable { cursor: zoom-in; }
   .hero h1 { margin: 0 -16px; padding: 0 16px 28px; }
   .hero-inner { gap: 0; padding-bottom: 0; }
   .hero-lead { margin: 16px 0 22px; }
-  .lead { margin: 12px 0; }
+  .lead { font-size: var(--fs-sm); margin: 12px 0; }
 
   .cv-photo { margin-bottom: 24px; }
 
@@ -1180,6 +1183,7 @@ main img.zoomable { cursor: zoom-in; }
   .offer-card h3,
   .offer-card p,
   .offer-actions { padding-left: 18px; padding-right: 18px; }
+
 
   /* Footer */
   .site-footer { padding-top: 44px; }

@@ -50,7 +50,7 @@ h4 { font-size: 1.1rem; }
   padding: 0 24px;
 }
 
-.section { padding: 72px 0; }
+.section { padding: 40px 0; }
 .section-alt { background: var(--gray-bg); }
 
 .section-label {
@@ -268,7 +268,6 @@ h4 { font-size: 1.1rem; }
 .service-item p { font-size: 0.92rem; }
 
 /* Offerings (3 services, right under hero) */
-.offerings-section { padding-top: 48px; }
 .offer-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -466,6 +465,9 @@ main img.zoomable:hover {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
 }
+/* Marquee đứng cuối container thì margin cộng vào padding của section,
+   làm khoảng hở rộng hơn các section khác — bỏ đi trong trường hợp đó. */
+.shots-marquee:last-child { margin-bottom: 0; }
 .shots-track {
   display: flex;
   width: max-content;
@@ -849,8 +851,8 @@ main img.zoomable:hover {
 @media (max-width: 960px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.8rem; }
-  /* Bậc trung gian giữa 72px của desktop và 32px của mobile */
-  .section { padding: 56px 0; }
+  /* Desktop đã xuống 40px, chỉ còn cách mobile 8px nên không cần bậc
+     trung gian cho .section nữa — chỉ hạ khoảng cách dưới tiêu đề */
   .section-title { margin-bottom: 32px; }
   .hero { padding-top: 84px; }
   .hero-inner, .runner-grid { grid-template-columns: 1fr; }

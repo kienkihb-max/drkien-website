@@ -401,7 +401,6 @@ h4 { font-size: 1.1rem; }
 .info-card h3 .icon { vertical-align: -0.15em; margin-right: 6px; }
 .cv-photo { max-width: 640px; margin: 0 auto 40px; text-align: center; }
 .cv-photo img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-card); }
-.cv-photo figcaption { margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); }
 .list-check { display: flex; flex-direction: column; gap: 12px; }
 .list-check li {
   position: relative;

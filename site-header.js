@@ -18,19 +18,11 @@
     { neo: "#credibility", chu: "Uy tín chuyên môn" },
   ];
 
-  // Các trang dịch vụ. Đang xem trang nào thì mục đó sáng lên.
+  // Các trang dịch vụ.
   var MUC_DICH_VU = [
     { trang: "y-te-su-kien.html", chu: "Y tế sự kiện" },
     { trang: "dien-gia-seminar.html", chu: "Diễn giả" },
     { trang: "dieu-tri.html", chu: "Điều trị" },
-  ];
-
-  // Trang blog và các bài viết đều tính là đang ở mục Blog.
-  var TRANG_BLOG = [
-    "blog.html",
-    "van-dong-phuc-hoi-cot-song.html",
-    "xu-huong-phat-trien-yhct.html",
-    "da-mo-thuc-y-hoc-the-thao.html",
   ];
 
   // ——— Từ đây trở xuống là phần dựng menu ———
@@ -43,15 +35,6 @@
   // Trên trang chủ neo thẳng tới section; ở trang con phải quay về index trước.
   function toiTrangChu(neo) {
     return laTrangChu ? neo : TRANG_CHU + neo;
-  }
-
-  var dangODichVu = MUC_DICH_VU.some(function (m) {
-    return m.trang === trang;
-  });
-  var dangOBlog = TRANG_BLOG.indexOf(trang) !== -1;
-
-  function danhDau(dieuKien) {
-    return dieuKien ? " is-active" : "";
   }
 
   var CHEVRON =
@@ -67,7 +50,7 @@
     "    <span></span><span></span><span></span>",
     "  </button>",
     '  <nav class="site-nav" id="siteNav">',
-    '    <div class="nav-dropdown' + danhDau(laTrangChu) + '">',
+    '    <div class="nav-dropdown">',
     '      <a href="' + (laTrangChu ? "#top" : TRANG_CHU) + '">Trang chủ ' + CHEVRON + "</a>",
     '      <div class="nav-dropdown-menu">',
     MUC_TRANG_CHU.map(function (m) {
@@ -75,23 +58,15 @@
     }).join("\n"),
     "      </div>",
     "    </div>",
-    '    <div class="nav-dropdown' + danhDau(dangODichVu) + '">',
+    '    <div class="nav-dropdown">',
     '      <a href="' + toiTrangChu("#offerings") + '">Dịch vụ ' + CHEVRON + "</a>",
     '      <div class="nav-dropdown-menu">',
     MUC_DICH_VU.map(function (m) {
-      return (
-        '        <a class="' +
-        (m.trang === trang ? "is-active" : "") +
-        '" href="' +
-        m.trang +
-        '">' +
-        m.chu +
-        "</a>"
-      );
+      return '        <a href="' + m.trang + '">' + m.chu + "</a>";
     }).join("\n"),
     "      </div>",
     "    </div>",
-    '    <a class="' + (dangOBlog ? "is-active" : "") + '" href="blog.html">Blog</a>',
+    '    <a href="blog.html">Blog</a>',
     '    <a href="' + ZALO + '" target="_blank" rel="noopener" class="nav-cta">Liên hệ</a>',
     "  </nav>",
     "</div>",

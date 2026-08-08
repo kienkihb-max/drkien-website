@@ -857,24 +857,18 @@ main img.zoomable { cursor: zoom-in; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 .article-refs li { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 
-/* Related posts — horizontal scroller at the foot of an article.
-   Vertical padding leaves room for the cards' shadow, which would
-   otherwise be clipped: overflow-x:auto forces overflow-y to auto too. */
+/* "Bài viết khác" cuối mỗi bài. Desktop dàn lưới 3 cột cho thấy hết;
+   mobile (@media 720px cuối file) chuyển thành dải lướt ngang.
+   Kiểu hover của thẻ nằm ở .event-card-link. */
 .related-scroller {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
   padding: 8px 0 14px;
 }
-.related-scroller::-webkit-scrollbar { height: 6px; }
-.related-scroller::-webkit-scrollbar-thumb { background: #cdd8e6; border-radius: 3px; }
-.related-scroller::-webkit-scrollbar-track { background: transparent; }
-/* Chỉ lo phần bố cục trong scroller — kiểu hover nằm ở .event-card-link */
-.related-card {
-  flex: 0 0 320px;
-  scroll-snap-align: start;
-}
+/* Hiện tối đa 6 bài — từ bài thứ 7 trở đi ẩn, khỏi phải nhớ đếm khi
+   thêm thẻ mới vào danh sách. */
+.related-scroller > :nth-child(n + 7) { display: none; }
 .related-more {
   display: flex;
   align-items: center;
@@ -1064,6 +1058,7 @@ main img.zoomable { cursor: zoom-in; }
   .hero-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
   .hero .btn-outline { border-color: rgba(255,255,255,0.6); color: #fff; }
   .services-grid, .offer-grid { grid-template-columns: repeat(2, 1fr); }
+  .related-scroller { grid-template-columns: repeat(2, 1fr); }
   .cards-2col, .quotes-grid { grid-template-columns: 1fr; }
   .runner-media-strip { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 }
@@ -1115,11 +1110,23 @@ main img.zoomable { cursor: zoom-in; }
   .press-source { flex: 1; width: auto; order: 1; }
   .press-arrow { order: 2; }
   .press-title { flex: 0 0 100%; order: 3; min-width: 0; }
-  /* Bleed to the screen edges so the next card peeks in, hinting the swipe.
+  /* "Bài viết khác" trên mobile: dải lướt ngang thay cho lưới desktop.
+     Bleed to the screen edges so the next card peeks in, hinting the swipe.
      scroll-padding keeps the snap point inside the padding, so the resting
      card lines up with the heading instead of hugging the screen edge. */
-  .related-scroller { gap: 14px; margin: 0 -24px; padding: 8px 24px 14px; scroll-padding-left: 24px; }
-  .related-card { flex-basis: 78%; }
+  .related-scroller {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 14px;
+    margin: 0 -24px;
+    padding: 8px 24px 14px;
+    scroll-padding-left: 24px;
+  }
+  .related-scroller::-webkit-scrollbar { height: 6px; }
+  .related-scroller::-webkit-scrollbar-thumb { background: #cdd8e6; border-radius: 3px; }
+  .related-scroller::-webkit-scrollbar-track { background: transparent; }
+  .related-card { flex: 0 0 78%; scroll-snap-align: start; }
   .services-grid, .offer-grid { grid-template-columns: 1fr; }
   .awards-featured { grid-template-columns: 1fr; }
   .award-featured .award-img { height: 220px; }

@@ -11,6 +11,32 @@
   --shadow-card: 0 0 30px rgba(0, 42, 106, 0.1);
   --font-heading: "Be Vietnam Pro", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  /* ---- Thang cỡ chữ ----------------------------------------------------
+     Mọi cỡ chữ trong file này phải lấy từ 9 bậc dưới đây — không viết
+     thẳng số rem vào từng rule nữa. Trước đây site có 26 cỡ chữ khác
+     nhau, trong đó 5 cỡ chen nhau trong khoảng 13.6–15.2px mà mắt không
+     phân biệt được; gom về một thang giúp các trang nhất quán và sửa một
+     chỗ là đổi toàn site.
+
+     Quy tắc dựng thang: mọi bậc đều chia hết cho 4, riêng 14px là ngoại
+     lệ vì cần một bậc nằm giữa 12 và 16.
+
+     Sàn là 12px (--fs-xs) và CHỈ dùng cho chú thích — chú thích ảnh,
+     nguồn trích dẫn, số chú thích trong bài, dòng bản quyền. Chữ để đọc
+     không bao giờ nhỏ hơn 14px, vì người xem site này phần nhiều là bệnh
+     nhân lớn tuổi dùng điện thoại.
+
+     Gốc 1rem = 16px, nên px ghi ở mỗi dòng là cỡ thật khi hiển thị. */
+  --fs-xs: 0.75rem;     /* 12px — CHỈ chú thích, không dùng cho chữ đọc */
+  --fs-sm: 0.875rem;    /* 14px — chữ nền mobile, nhãn, menu, nút, chân trang */
+  --fs-base: 1rem;      /* 16px — chữ nền desktop, chữ trong bài viết */
+  --fs-lg: 1.25rem;     /* 20px — h3, tiêu đề thẻ, đoạn dẫn */
+  --fs-xl: 1.5rem;      /* 24px — tiêu đề thẻ nổi bật */
+  --fs-2xl: 1.75rem;    /* 28px — h1 mobile, h2 tablet/mobile */
+  --fs-3xl: 2rem;       /* 32px — h1 tablet */
+  --fs-4xl: 2.25rem;    /* 36px — h2 desktop */
+  --fs-5xl: 2.5rem;     /* 40px — h1 desktop */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,7 +47,7 @@ body {
   font-family: var(--font-body);
   color: var(--text-muted);
   background: var(--white);
-  font-size: 16px;
+  font-size: var(--fs-base);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -39,10 +65,10 @@ h1, h2, h3, h4 {
   line-height: 1.25;
 }
 
-h1 { font-size: 2.6rem; letter-spacing: -0.5px; }
-h2 { font-size: 2.25rem; }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.1rem; }
+h1 { font-size: var(--fs-5xl); letter-spacing: -0.5px; }
+h2 { font-size: var(--fs-4xl); }
+h3 { font-size: var(--fs-lg); }
+h4 { font-size: var(--fs-base); }
 
 .container {
   max-width: 1160px;
@@ -56,7 +82,7 @@ h4 { font-size: 1.1rem; }
 .section-label {
   color: var(--primary);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -74,7 +100,7 @@ h4 { font-size: 1.1rem; }
 }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-.lead { font-size: 1.05rem; margin: 16px 0; }
+.lead { font-size: var(--fs-lg); margin: 16px 0; }
 .lead-light { color: rgba(255,255,255,0.85); }
 
 .icon { width: 1.4em; height: 1.4em; }
@@ -87,7 +113,7 @@ h4 { font-size: 1.1rem; }
   gap: 10px;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   padding: 14px 30px;
   border-radius: 50px;
   border: 2px solid transparent;
@@ -100,7 +126,7 @@ h4 { font-size: 1.1rem; }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 .btn-main { background: var(--primary); color: #fff; }
 .btn-main:hover { background: var(--primary-2); color: #fff; }
-.btn-sm { padding: 10px 20px; font-size: 0.82rem; }
+.btn-sm { padding: 10px 20px; font-size: var(--fs-sm); }
 .btn-icon .icon { transition: transform .2s ease; }
 .btn-icon:hover .icon { transform: translateX(3px); }
 
@@ -130,13 +156,13 @@ h4 { font-size: 1.1rem; }
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text-heading);
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
 }
 .site-nav { display: flex; align-items: center; gap: 8px; }
 .site-nav a {
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
   color: var(--text-heading);
   padding: 10px 14px;
   border-radius: 8px;
@@ -214,11 +240,11 @@ h4 { font-size: 1.1rem; }
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--primary);
 }
-.hero-lead { font-size: 1.08rem; margin: 20px 0 28px; max-width: 46ch; }
+.hero-lead { font-size: var(--fs-lg); margin: 20px 0 28px; max-width: 46ch; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .hero-media { position: relative; display: flex; justify-content: center; }
@@ -265,7 +291,7 @@ h4 { font-size: 1.1rem; }
   box-shadow: var(--shadow-card);
 }
 .service-item h4 { margin-bottom: 10px; }
-.service-item p { font-size: 0.92rem; }
+.service-item p { font-size: var(--fs-sm); }
 
 /* Offerings (3 services, right under hero) */
 .offer-grid {
@@ -284,8 +310,8 @@ h4 { font-size: 1.1rem; }
 }
 .offer-img { aspect-ratio: 4 / 3; overflow: hidden; }
 .offer-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: 1.1rem; }
-.offer-card p { padding: 0 22px; margin-top: 8px; font-size: 0.9rem; flex: 1; }
+.offer-card h3 { padding: 0 22px; margin-top: 18px; font-size: var(--fs-lg); }
+.offer-card p { padding: 0 22px; margin-top: 8px; font-size: var(--fs-sm); flex: 1; }
 .offer-actions {
   display: flex;
   flex-wrap: wrap;
@@ -319,7 +345,7 @@ h4 { font-size: 1.1rem; }
   z-index: 2;
   background: var(--primary-2);
   color: #fff;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   padding: 5px 12px;
   border-radius: 999px;
@@ -333,11 +359,11 @@ h4 { font-size: 1.1rem; }
   justify-content: center;
   background: var(--gray-bg);
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-xs);
   border-bottom: 1px dashed #cdd8e6;
 }
-.event-card h4 { padding: 16px 18px 0; font-size: 1rem; }
-.event-card p { padding: 8px 18px 0; font-size: 0.88rem; }
+.event-card h4 { padding: 16px 18px 0; font-size: var(--fs-base); }
+.event-card p { padding: 8px 18px 0; font-size: var(--fs-sm); }
 .content-media-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -363,9 +389,9 @@ h4 { font-size: 1.1rem; }
   margin-bottom: 24px;
 }
 .events-featured-grid .event-img { aspect-ratio: 16 / 10; }
-.events-featured-grid .event-badge { font-size: 0.8rem; padding: 6px 16px; }
-.events-featured-grid h4 { font-size: 1.35rem; padding: 22px 24px 0; }
-.events-featured-grid p { font-size: 1rem; padding: 10px 24px 4px; }
+.events-featured-grid .event-badge { font-size: var(--fs-xs); padding: 6px 16px; }
+.events-featured-grid h4 { font-size: var(--fs-xl); padding: 22px 24px 0; }
+.events-featured-grid p { font-size: var(--fs-base); padding: 10px 24px 4px; }
 @media (max-width: 960px) {
   .events-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -404,7 +430,7 @@ h4 { font-size: 1.1rem; }
 .list-check li {
   position: relative;
   padding-left: 26px;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--text-heading);
 }
 .list-check li::before {
@@ -465,8 +491,9 @@ main img.zoomable:hover {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
 }
-/* Marquee đứng cuối container thì margin cộng vào padding của section,
-   làm khoảng hở rộng hơn các section khác — bỏ đi trong trường hợp đó. */
+/* Ở #stories marquee đứng cuối container, margin cộng vào padding section
+   làm khoảng hở rộng hơn các section khác. Ở dieu-tri.html còn nội dung
+   phía sau nên vẫn cần 36px — chỉ bỏ khi nó là phần tử cuối. */
 .shots-marquee:last-child { margin-bottom: 0; }
 .shots-track {
   display: flex;
@@ -549,7 +576,7 @@ main img.zoomable:hover {
 .lightbox-content figcaption {
   color: rgba(255,255,255,0.9);
   margin-top: 18px;
-  font-size: 0.95rem;
+  font-size: var(--fs-xs);
   text-align: center;
   max-width: 600px;
 }
@@ -598,7 +625,7 @@ main img.zoomable:hover {
 }
 .award-featured { border: none; }
 .award-featured .award-img { height: 340px; }
-.award-featured figcaption { font-size: 1rem; font-weight: 700; color: var(--primary); }
+.award-featured figcaption { font-size: var(--fs-base); font-weight: 700; color: var(--primary); }
 
 .awards-grid {
   display: grid;
@@ -610,7 +637,10 @@ main img.zoomable:hover {
 }
 
 /* Full CV sub-page */
-.cv-hero { padding-top: 140px; }
+/* Dùng .section.cv-hero để thắng các rule .section { padding: ... }
+   khai báo ở dưới trong media query — nếu không, phần đệm trên bị ghi đè
+   và dòng chữ xanh trên tiêu đề chui xuống dưới header cố định. */
+.section.cv-hero { padding-top: 140px; }
 .cv-awards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -618,7 +648,7 @@ main img.zoomable:hover {
   margin-top: 32px;
 }
 @media (max-width: 720px) {
-  .cv-hero { padding-top: 88px; }
+  .section.cv-hero { padding-top: 88px; }
   .cv-awards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .award-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-card); overflow: hidden; }
@@ -633,7 +663,7 @@ main img.zoomable:hover {
 .cv-awards-grid .award-img img { object-fit: contain; }
 .award-card figcaption {
   padding: 14px 16px;
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   color: var(--text-heading);
   font-weight: 500;
   line-height: 1.5;
@@ -649,10 +679,10 @@ main img.zoomable:hover {
   box-shadow: var(--shadow-card);
 }
 .article-body { max-width: 720px; margin: 0 auto; }
-.article-body p { font-size: 1.02rem; line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
-.article-body p.lead { font-size: 1.15rem; color: var(--text-heading); }
-.article-body h3 { margin: 40px 0 16px; font-size: 1.3rem; }
-.article-body sup { font-size: 0.7em; color: var(--primary-2); }
+.article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
+.article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
+.article-body h3 { margin: 40px 0 16px; font-size: var(--fs-lg); }
+.article-body sup { font-size: var(--fs-xs); color: var(--primary-2); }
 .article-inline-img { margin: 36px 0; }
 .article-inline-img img {
   width: 100%;
@@ -663,14 +693,14 @@ main img.zoomable:hover {
 }
 .article-inline-img figcaption {
   margin-top: 10px;
-  font-size: 0.85rem;
+  font-size: var(--fs-xs);
   color: var(--text-muted);
   text-align: center;
 }
 .article-refs { max-width: 720px; margin: 44px auto 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
-.article-refs h4 { font-size: 0.92rem; color: var(--text-heading); margin-bottom: 12px; }
+.article-refs h4 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
-.article-refs li { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+.article-refs li { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 
 /* Related posts — horizontal scroller at the foot of an article.
    Vertical padding leaves room for the cards' shadow, which would
@@ -701,7 +731,7 @@ main img.zoomable:hover {
   padding: 14px 18px 0;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--primary);
 }
 .related-card:hover .related-more { color: var(--primary-2); }
@@ -718,7 +748,7 @@ main img.zoomable:hover {
   gap: 8px;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
   color: var(--primary);
 }
 .cv-link:hover { color: var(--primary-2); }
@@ -738,7 +768,7 @@ main img.zoomable:hover {
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--primary);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   flex-shrink: 0;
   width: 170px;
 }
@@ -756,7 +786,7 @@ main img.zoomable:hover {
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-inner p { font-size: 0.88rem; }
+.footer-inner p { font-size: var(--fs-sm); }
 .footer-meta { color: var(--text-muted); }
 .footer-grid {
   display: grid;
@@ -765,14 +795,14 @@ main img.zoomable:hover {
   padding-bottom: 40px;
 }
 .footer-brand .brand { margin-bottom: 14px; }
-.footer-brand p { font-size: 0.88rem; margin-bottom: 20px; }
+.footer-brand p { font-size: var(--fs-sm); margin-bottom: 20px; }
 .footer-col h4 {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   color: var(--text-heading);
   margin-bottom: 16px;
 }
 .footer-col p {
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   display: flex;
   gap: 8px;
 }
@@ -782,14 +812,14 @@ main img.zoomable:hover {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
 }
 .footer-hours li span:first-child { color: var(--text-heading); }
 .footer-link {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   margin-bottom: 12px;
 }
@@ -800,7 +830,7 @@ main img.zoomable:hover {
   padding: 20px 0;
   text-align: center;
 }
-.footer-bottom p { font-size: 0.85rem; }
+.footer-bottom p { font-size: var(--fs-xs); }
 @media (max-width: 720px) {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-brand { grid-column: 1 / -1; }
@@ -849,8 +879,8 @@ main img.zoomable:hover {
 
 /* Responsive */
 @media (max-width: 960px) {
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.8rem; }
+  h1 { font-size: var(--fs-3xl); }
+  h2 { font-size: var(--fs-2xl); }
   /* Desktop đã xuống 40px, chỉ còn cách mobile 8px nên không cần bậc
      trung gian cho .section nữa — chỉ hạ khoảng cách dưới tiêu đề */
   .section-title { margin-bottom: 32px; }
@@ -889,12 +919,16 @@ main img.zoomable:hover {
 }
 
 @media (max-width: 720px) {
-  h1 { font-size: 1.75rem; }
+  /* Chữ nền trên điện thoại nhỏ hơn desktop một bậc: 16px -> 14px.
+     Chỉ đổi ở đây là mọi chữ không tự khai font-size đều theo. Chữ trong
+     bài viết (.article-body p) vẫn giữ 16px vì đó là chữ để đọc dài. */
+  body { font-size: var(--fs-sm); }
+  h1 { font-size: var(--fs-2xl); }
   .header-inner { height: 58px; gap: 12px; }
   .brand { gap: 9px; min-width: 0; }
   .brand-mark { width: 34px; height: 34px; }
-  .brand-text { font-size: 0.95rem; white-space: nowrap; }
-  .header-inner .btn-sm { padding: 8px 14px; font-size: 0.76rem; white-space: nowrap; }
+  .brand-text { font-size: var(--fs-sm); white-space: nowrap; }
+  .header-inner .btn-sm { padding: 8px 14px; font-size: var(--fs-sm); white-space: nowrap; }
   .nav-toggle { display: flex; }
   .site-nav {
     position: absolute;

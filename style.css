@@ -50,7 +50,7 @@ h4 { font-size: 1.1rem; }
   padding: 0 24px;
 }
 
-.section { padding: 96px 0; }
+.section { padding: 72px 0; }
 .section-alt { background: var(--gray-bg); }
 
 .section-label {
@@ -62,7 +62,7 @@ h4 { font-size: 1.1rem; }
   margin-bottom: 10px;
 }
 
-.section-title { margin-bottom: 56px; }
+.section-title { margin-bottom: 40px; }
 .text-center { text-align: center; }
 
 .divider {
@@ -268,7 +268,7 @@ h4 { font-size: 1.1rem; }
 .service-item p { font-size: 0.92rem; }
 
 /* Offerings (3 services, right under hero) */
-.offerings-section { padding-top: 72px; }
+.offerings-section { padding-top: 48px; }
 .offer-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -849,6 +849,9 @@ main img.zoomable:hover {
 @media (max-width: 960px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.8rem; }
+  /* Bậc trung gian giữa 72px của desktop và 32px của mobile */
+  .section { padding: 56px 0; }
+  .section-title { margin-bottom: 32px; }
   .hero { padding-top: 84px; }
   .hero-inner, .runner-grid { grid-template-columns: 1fr; }
   /* Hero collapses to a single stacking cell: image below, text on top */

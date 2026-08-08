@@ -452,6 +452,39 @@ h4 { font-size: var(--fs-base); }
 .cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 22px; text-align: justify; text-wrap: pretty; }
 .cv-bio p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
 .cv-bio p:last-child { margin-bottom: 0; }
+/* Khối thu gọn kèm nút "Đọc thêm" — do doc-them.js dựng.
+   Chỉ che bằng max-height, chữ vẫn nằm đủ trong HTML nên Google đọc được hết. */
+.doc-them {
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.3s ease;
+}
+/* Vệt mờ ở đáy để người đọc biết bên dưới còn chữ. Khi mở thì tắt đi. */
+.doc-them:not(.doc-them-mo)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, var(--bg, #fff));
+  pointer-events: none;
+}
+.doc-them-nut {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+.doc-them-nut:hover { text-decoration: underline; }
+
 /* Khổ hẹp thì bỏ căn đều: chỉ còn hơn 300px mỗi dòng nên chữ bị giãn thành
    những khoảng trắng rộng bất thường, đọc mệt hơn là lề phải so le. */
 @media (max-width: 620px) {

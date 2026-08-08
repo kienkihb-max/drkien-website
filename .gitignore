@@ -1,4 +1,7 @@
 _template/
 *.zip
+# Bản sao repo do Claude Code tạo khi chạy nhiều phiên song song —
+# không phải nội dung site, lỡ commit vào là nhân đôi cả kho.
+.claude/worktrees/
 .DS_Store
 Thumbs.db

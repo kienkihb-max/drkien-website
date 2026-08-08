@@ -446,10 +446,12 @@ h4 { font-size: var(--fs-base); }
 
 /* Đoạn tiểu sử mở đầu trang hồ sơ. Giới hạn bề rộng dòng cho dễ đọc —
    chữ chạy hết chiều ngang container thì mắt khó bắt được đầu dòng sau. */
-.cv-bio { max-width: 760px; margin-top: 20px; }
-.cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 16px; }
+.cv-bio { max-width: 760px; margin-top: 36px; }
+.cv-bio p { color: var(--text-muted); line-height: 1.85; margin-bottom: 22px; }
 .cv-bio p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
 .cv-bio p:last-child { margin-bottom: 0; }
+/* Tiêu đề mục nằm giữa đoạn tiểu sử và lưới thẻ trên trang hồ sơ. */
+.cv-section-title { margin-top: 44px; }
 
 /* Event gallery (sub-pages) */
 .events-grid {
@@ -517,7 +519,7 @@ h4 { font-size: var(--fs-base); }
   font-size: var(--fs-xs);
   border-bottom: 1px dashed #cdd8e6;
 }
-.event-card h4 { padding: 16px 18px 0; font-size: var(--fs-base); }
+.event-card h3 { padding: 16px 18px 0; font-size: var(--fs-base); }
 .event-card p { padding: 8px 18px 0; }
 .content-media-grid {
   display: grid;
@@ -545,7 +547,7 @@ h4 { font-size: var(--fs-base); }
 }
 .events-featured-grid .event-img { aspect-ratio: 16 / 10; }
 .events-featured-grid .event-badge { font-size: var(--fs-xs); padding: 6px 16px; }
-.events-featured-grid h4 { font-size: var(--fs-xl); padding: 22px 24px 0; }
+.events-featured-grid h3 { font-size: var(--fs-xl); padding: 22px 24px 0; }
 .events-featured-grid p { padding: 10px 24px 4px; }
 @media (max-width: 960px) {
   .events-grid { grid-template-columns: repeat(2, 1fr); }
@@ -878,7 +880,10 @@ main img.zoomable { cursor: zoom-in; }
 .article-body { max-width: 720px; margin: 0 auto; }
 .article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
 .article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
-.article-body h3 { margin: 40px 0 16px; font-size: var(--fs-lg); }
+/* Mục trong bài là h2 (dưới h1 tiêu đề bài), mục con là h3. Cỡ chữ giữ
+   nguyên như trước khi đổi thẻ — đây là sửa thứ bậc, không đổi giao diện. */
+.article-body h2 { margin: 40px 0 16px; font-size: var(--fs-lg); }
+.article-body h3 { font-size: var(--fs-base); }
 /* Danh sách trong bài viết cần khoảng cách dưới bằng đoạn văn, nếu không
    đoạn văn kế tiếp sẽ dính sát vào mục cuối cùng của danh sách. */
 .article-body ul, .article-body ol { margin-bottom: 22px; }
@@ -898,7 +903,7 @@ main img.zoomable { cursor: zoom-in; }
   text-align: center;
 }
 .article-refs { max-width: 720px; margin: 44px auto 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
-.article-refs h4 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
+.article-refs h2 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 .article-refs li { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 

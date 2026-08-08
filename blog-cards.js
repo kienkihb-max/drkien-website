@@ -77,7 +77,7 @@
       '<a class="event-card event-card-link' + (themClass ? " " + themClass : "") + '" href="' + thoat(bai.href) + '">',
       themClass === "event-card-featured" ? '  <span class="event-badge">Nổi bật</span>' : null,
       '  <div class="event-img"><img src="' + thoat(bai.anh) + '" alt="' + thoat(bai.alt) + '" loading="lazy"></div>',
-      "  <h4>" + thoat(bai.tieu_de) + "</h4>",
+      "  <h3>" + thoat(bai.tieu_de) + "</h3>",
       "  <p>" + thoat(bai.mo_ta) + "</p>",
       '  <span class="related-more">' + thoat(CHU_NUT) + " " + MUI_TEN + "</span>",
       "</a>",

@@ -7,7 +7,17 @@
 <meta name="description" content="Hồ sơ đầy đủ của bác sĩ Lê Trung Kiên: quá trình công tác tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội, bằng cấp, chứng chỉ chuyên môn và các giải thưởng đã nhận.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Tải font không chặn hiển thị: trình duyệt vẽ chữ bằng font hệ thống trước,
+     đổi sang font riêng khi tải xong. Chữ hiện sớm hơn trên mạng chậm. -->
+<link rel="preload" as="style" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+">
+<link rel="stylesheet" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+"></noscript>
 <link rel="canonical" href="https://bacsikien.com/bac-si-le-trung-kien">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -33,27 +43,8 @@
     <div class="container">
       <p class="section-label">Hồ sơ</p>
       <h1>Bác sĩ Lê Trung Kiên — Thạc sĩ Y học cổ truyền</h1>
-      <div class="cv-bio">
-        <p class="lead">
-          Bác sĩ Lê Trung Kiên là Thạc sĩ Y học cổ truyền, tốt nghiệp Học viện Y Dược học cổ
-          truyền Việt Nam năm 2018 và hoàn thành chương trình Thạc sĩ tại Đại học Y Hà Nội
-          năm 2025. Từ năm 2020, bác sĩ công tác tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội;
-          từ tháng 6/2026 giữ vai trò Thư ký Ban chủ nhiệm Chuyên khoa đầu ngành Y học cổ
-          truyền — Sở Y tế Hà Nội.
-        </p>
-        <p>
-          Trong thực hành lâm sàng, bác sĩ Lê Trung Kiên tập trung vào điều trị đau cơ xương
-          khớp và chấn thương thể thao, kết hợp châm cứu, vật lý trị liệu và vận động trị liệu,
-          cùng chứng chỉ Siêu âm cơ xương khớp của Đại học Y Hải Phòng. Bác sĩ là thành viên
-          Hội Đông y Hà Nội, Hội Châm cứu Hà Nội, Hội Châm cứu Việt Nam và Hội Vật lý trị liệu
-          Việt Nam.
-        </p>
-        <p>
-          Ngoài phòng khám, bác sĩ đồng hành y tế tại các giải chạy và giải đấu thể thao phong
-          trào, đồng thời chia sẻ kiến thức chăm sóc sức khỏe và sơ cấp cứu tại các seminar cho
-          doanh nghiệp, trường học và cộng đồng.
-        </p>
-      </div>
+      <h2 class="cv-section-title">Quá trình công tác &amp; học vấn</h2>
+      <div class="divider"></div>
       <div class="cards-2col">
         <div class="info-card">
           <h3>Quá trình công tác</h3>
@@ -78,6 +69,27 @@
             <li>Chứng chỉ Siêu âm cơ xương khớp &amp; Siêu âm tổng quát — Đại học Y Hải Phòng (2025)</li>
           </ul>
         </div>
+      </div>
+      <div class="cv-bio">
+        <p class="lead">
+          Bác sĩ Lê Trung Kiên là Thạc sĩ Y học cổ truyền, tốt nghiệp Học viện Y Dược học cổ
+          truyền Việt Nam năm 2018 và hoàn thành chương trình Thạc sĩ tại Đại học Y Hà Nội
+          năm 2025. Từ năm 2020, bác sĩ công tác tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội;
+          từ tháng 6/2026 giữ vai trò Thư ký Ban chủ nhiệm Chuyên khoa đầu ngành Y học cổ
+          truyền — Sở Y tế Hà Nội.
+        </p>
+        <p>
+          Trong thực hành lâm sàng, bác sĩ Lê Trung Kiên tập trung vào điều trị đau cơ xương
+          khớp và chấn thương thể thao, kết hợp châm cứu, vật lý trị liệu và vận động trị liệu,
+          cùng chứng chỉ Siêu âm cơ xương khớp của Đại học Y Hải Phòng. Bác sĩ là thành viên
+          Hội Đông y Hà Nội, Hội Châm cứu Hà Nội, Hội Châm cứu Việt Nam và Hội Vật lý trị liệu
+          Việt Nam.
+        </p>
+        <p>
+          Ngoài phòng khám, bác sĩ đồng hành y tế tại các giải chạy và giải đấu thể thao phong
+          trào, đồng thời chia sẻ kiến thức chăm sóc sức khỏe và sơ cấp cứu tại các seminar cho
+          doanh nghiệp, trường học và cộng đồng.
+        </p>
       </div>
     </div>
   </section>

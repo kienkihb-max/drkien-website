@@ -7,7 +7,17 @@
 <meta name="description" content="Bác sĩ Lê Trung Kiên (ThS.BS) — bác sĩ Y học cổ truyền tại Hà Nội, làm y tế sự kiện thể thao và diễn giả sức khỏe. Châm cứu, vật lý trị liệu, phục hồi chấn thương thể thao.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Tải font không chặn hiển thị: trình duyệt vẽ chữ bằng font hệ thống trước,
+     đổi sang font riêng khi tải xong. Chữ hiện sớm hơn trên mạng chậm. -->
+<link rel="preload" as="style" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+">
+<link rel="stylesheet" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="
+https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap
+"></noscript>
 <link rel="canonical" href="https://bacsikien.com/">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -208,6 +218,26 @@
 
 </main>
 
+<!-- Menu, thẻ dịch vụ và chân trang đều do JavaScript dựng, nên trình thu thập
+     nào không chạy JavaScript sẽ không thấy một liên kết nội bộ nào. Khối này
+     chỉ hiện với các trình đó. Đặt ở trang chủ là đủ — từ đây tới được mọi
+     trang; thêm trang mới thì thêm một dòng vào đây. -->
+<noscript>
+  <nav class="fallback-nav" aria-label="Sơ đồ trang">
+    <ul>
+      <li><a href="bac-si-le-trung-kien">Hồ sơ bác sĩ Lê Trung Kiên</a></li>
+      <li><a href="dieu-tri">Thăm khám &amp; điều trị</a></li>
+      <li><a href="y-te-su-kien">Y tế sự kiện thể thao</a></li>
+      <li><a href="dien-gia-seminar">Diễn giả seminar sức khỏe</a></li>
+      <li><a href="blog">Blog</a></li>
+      <li><a href="chuot-rut-khi-chay-bo">Chuột rút khi chạy bộ</a></li>
+      <li><a href="chuot-rut-khi-van-dong">Chạy lại sau tái tạo dây chằng chéo trước</a></li>
+      <li><a href="shin-splints-dau-xuong-chay">Đau xương chày (Shin Splints)</a></li>
+      <li><a href="van-dong-phuc-hoi-cot-song">Thoát vị đĩa đệm: 6 sự thật</a></li>
+      <li><a href="xu-huong-phat-trien-yhct">Đi làm cả ngày đã đủ vận động chưa?</a></li>
+    </ul>
+  </nav>
+</noscript>
 <footer class="site-footer"></footer>
 
 <div class="floating-actions">

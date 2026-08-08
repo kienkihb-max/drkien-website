@@ -6,7 +6,7 @@
 // <script src="site-footer.js"></script> trước các script khác.
 (function () {
   // ——— Nội dung footer, sửa ở đây ———
-  var TRANG_CHU = "index.html";
+  var TRANG_CHU = "/";
   var ZALO = "https://zalo.me/0345901772";
   var FACEBOOK = "https://www.facebook.com/bskienyhcthn/";
   // Địa chỉ dùng cho cả dòng chữ lẫn bản đồ Google bên dưới — sửa một chỗ
@@ -22,18 +22,18 @@
     {
       tieuDe: "Dịch vụ",
       muc: [
-        { trang: "y-te-su-kien.html", chu: "Y tế sự kiện" },
-        { trang: "dien-gia-seminar.html", chu: "Diễn giả seminar" },
-        { trang: "dieu-tri.html", chu: "Thăm khám &amp; điều trị" },
+        { trang: "y-te-su-kien", chu: "Y tế sự kiện" },
+        { trang: "dien-gia-seminar", chu: "Diễn giả seminar" },
+        { trang: "dieu-tri", chu: "Thăm khám &amp; điều trị" },
       ],
     },
     {
       tieuDe: "Đọc thêm",
       muc: [
-        { trang: "index.html#experience", chu: "Nền tảng chuyên môn" },
-        { trang: "index.html#stories", chu: "Chia sẻ từ bệnh nhân" },
-        { trang: "index.html#credibility", chu: "Uy tín chuyên môn" },
-        { trang: "blog.html", chu: "Blog" },
+        { trang: "/#experience", chu: "Nền tảng chuyên môn" },
+        { trang: "/#stories", chu: "Chia sẻ từ bệnh nhân" },
+        { trang: "/#credibility", chu: "Uy tín chuyên môn" },
+        { trang: "blog", chu: "Blog" },
       ],
     },
   ];

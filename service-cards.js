@@ -22,7 +22,7 @@
 
   var DICH_VU = [
     {
-      href: "y-te-su-kien.html",
+      href: "y-te-su-kien",
       ten: "Y tế sự kiện thể thao",
       mo_ta:
         "Hỗ trợ y tế, sơ cứu chấn thương cho các giải chạy, giải đấu thể thao phong trào.",
@@ -31,7 +31,7 @@
       chu_nut_lien_he: "Liên hệ hợp tác",
     },
     {
-      href: "dien-gia-seminar.html",
+      href: "dien-gia-seminar",
       ten: "Diễn giả tại seminar",
       mo_ta:
         "Chia sẻ chuyên môn tại workshop, seminar chăm sóc sức khỏe cho doanh nghiệp, trường học.",
@@ -40,7 +40,7 @@
       chu_nut_lien_he: "Liên hệ hợp tác",
     },
     {
-      href: "dieu-tri.html",
+      href: "dieu-tri",
       ten: "Thăm khám & điều trị",
       mo_ta:
         "Châm cứu, vật lý trị liệu cho đau cơ xương khớp và chấn thương thể thao.",

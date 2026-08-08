@@ -6,7 +6,7 @@
 // <script src="site-header.js"></script> trước các script khác.
 (function () {
   // ——— Nội dung menu, sửa ở đây ———
-  var TRANG_CHU = "index.html";
+  var TRANG_CHU = "/";
   var ZALO = "https://zalo.me/0345901772";
 
   // Các mục nhảy tới từng phần trên trang chủ.
@@ -20,20 +20,25 @@
 
   // Các trang dịch vụ.
   var MUC_DICH_VU = [
-    { trang: "y-te-su-kien.html", chu: "Y tế sự kiện" },
-    { trang: "dien-gia-seminar.html", chu: "Diễn giả" },
-    { trang: "dieu-tri.html", chu: "Điều trị" },
+    { trang: "y-te-su-kien", chu: "Y tế sự kiện" },
+    { trang: "dien-gia-seminar", chu: "Diễn giả" },
+    { trang: "dieu-tri", chu: "Điều trị" },
   ];
 
   // ——— Từ đây trở xuống là phần dựng menu ———
   var header = document.querySelector("header.site-header");
   if (!header) return;
 
-  var trang = location.pathname.split("/").pop() || TRANG_CHU;
-  // Một số host (và npx serve khi dev) bỏ đuôi .html khỏi URL — thêm lại để
-  // mọi phép so sánh tên trang trong file này luôn dùng dạng "ten-trang.html".
-  if (trang.indexOf(".") === -1) trang += ".html";
-  var laTrangChu = trang === TRANG_CHU;
+  // Liên kết trong site không còn đuôi .html, nên URL có thể là "/", "/blog"
+  // hoặc "/blog.html" (link cũ đã chia sẻ ra ngoài vẫn chạy). Chuẩn hoá về
+  // dạng "ten-trang.html" để mọi phép so sánh bên dưới chỉ cần viết một kiểu.
+  var tenTrang = location.pathname.split("/").pop();
+  var laTrangChu = tenTrang === "" || tenTrang === "index" || tenTrang === "index.html";
+  var trang = laTrangChu
+    ? "index.html"
+    : tenTrang.indexOf(".") === -1
+      ? tenTrang + ".html"
+      : tenTrang;
 
   // Trên trang chủ neo thẳng tới section; ở trang con phải quay về index trước.
   function toiTrangChu(neo) {
@@ -69,7 +74,7 @@
     }).join("\n"),
     "      </div>",
     "    </div>",
-    '    <a href="blog.html">Blog</a>',
+    '    <a href="blog">Blog</a>',
     '    <a href="' + ZALO + '" target="_blank" rel="noopener" class="nav-cta">Liên hệ</a>',
     "  </nav>",
     "</div>",
@@ -129,7 +134,7 @@
     manh.forEach(function (chu, i) {
       crumbs.push('<span class="breadcrumb-sep" aria-hidden="true">›</span>');
       if (chu === "Blog" && trang !== "blog.html") {
-        crumbs.push('<a href="blog.html">' + bocChu(chu) + "</a>");
+        crumbs.push('<a href="blog">' + bocChu(chu) + "</a>");
       } else if (i === manh.length - 1) {
         crumbs.push('<span aria-current="page">' + bocChu(chu) + "</span>");
       } else {

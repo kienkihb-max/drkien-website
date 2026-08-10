@@ -833,6 +833,22 @@ main img.zoomable { cursor: zoom-in; }
   margin-right: auto;
 }
 
+/* Thư cảm ơn là văn bản khổ dọc. Khung 110px của .award-img cắt cover sẽ chỉ
+   còn một vệt mỏng, nên khối này dùng khung cao theo tỉ lệ 3/4 và neo ảnh lên
+   đỉnh để phần tiêu đề "THƯ CẢM ƠN" cùng tên đơn vị luôn nhìn thấy. Bấm vào
+   ảnh mở lightbox để đọc bản đầy đủ. */
+.letters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.letters-grid .award-img { height: auto; aspect-ratio: 3 / 4; }
+.letters-grid .award-img img { object-position: top; }
+@media (max-width: 620px) {
+  .letters-grid { grid-template-columns: 1fr; }
+}
+
 /* ---- Nhịp dọc của trang phụ ----
    Áp cho mọi trang có <body class="subpage">: blog, 3 bài viết và các
    trang dịch vụ. Trang chủ dài và nhiều ảnh lớn nên vẫn dùng nhịp cũ

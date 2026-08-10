@@ -15,7 +15,7 @@
   // ——— Nội dung, sửa ở đây ———
   // Số Zalo lấy từ thong-tin.js — nguồn duy nhất cho toàn site.
   var ZALO = window.THONG_TIN.ZALO;
-  var CHU_NUT_XEM = "Xem chi tiết";
+  var CHU_NUT_XEM = "Tìm hiểu thêm";
 
   // Tiêu đề khối "Xem thêm" ở cuối các trang dịch vụ
   var XEM_THEM_NHAN = "Xem thêm";

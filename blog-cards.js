@@ -45,7 +45,7 @@
     },
     {
       "href": "van-dong-phuc-hoi-cot-song",
-      "tieu_de": "Thoát vị đĩa đệm: 6 sự thật",
+      "tieu_de": "6 Sự thật về Thoát vị đĩa đệm",
       "mo_ta": "Đĩa đệm không hề \"trượt\", MRI bất thường gặp cả ở người không đau, và khối thoát vị có thể tự tiêu biến.",
       "anh": "assets/img/offer-treatment.jpg",
       "alt": "Điện châm vùng thắt lưng kết hợp đèn hồng ngoại tại khoa Y học cổ truyền",

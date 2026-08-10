@@ -70,13 +70,6 @@
   </url>
 
   <url>
-    <loc>https://bacsikien.com/van-dong-phuc-hoi-cot-song</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <url>
     <loc>https://bacsikien.com/xu-huong-phat-trien-yhct</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>yearly</changefreq>
@@ -85,6 +78,13 @@
 
   <url>
     <loc>https://bacsikien.com/vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai</loc>
+    <lastmod>2026-08-10</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://bacsikien.com/van-dong-phuc-hoi-cot-song</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>

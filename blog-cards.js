@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",
+      "tieu_de": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
+      "mo_ta": "Trong số các chấn thương do quá tải ở bàn chân, tổn thương stress xương ghe (navicular bone stress injury – BSI) là một trong những tình trạng cần được phát…",
+      "anh": "assets/img/images-1-2026-08-10.jpg",
+      "alt": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
+      "ngay": "2026-08-10"
+    },
+    {
       "href": "chuot-rut-khi-chay-bo",
       "tieu_de": "Chuột rút khi chạy bộ: Chuối hay tập tạ?",
       "mo_ta": "Nghiên cứu trên 98 vận động viên marathon cho thấy điều khác biệt không nằm ở nước hay điện giải.",

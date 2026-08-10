@@ -29,8 +29,8 @@
     {
       "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",
       "tieu_de": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
-      "mo_ta": "Trong số các chấn thương do quá tải ở bàn chân, tổn thương stress xương ghe (navicular bone stress injury – BSI) là một trong những tình trạng cần được phát…",
-      "anh": "assets/img/images-1-2026-08-10.jpg",
+      "mo_ta": "Các nghiên cứu cho thấy tổn thương stress xương ghe chiếm khoảng 14–35% tổng số tổn thương stress vùng bàn chân và cổ chân, thường gặp ở vận động viên điền kinh, nhảy xa, bóng rổ và đặc biệt là người chạy bộ.",
+      "anh": "assets/img/benh-gay-xuong-ban-chan-4-800x450-2026-08-10.jpg",
       "alt": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
       "ngay": "2026-08-10"
     },

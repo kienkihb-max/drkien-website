@@ -5,6 +5,11 @@
   --text-dark: #222222;
   --text-heading: #444444;
   --text-muted: #6f8ba4;
+  /* Màu chữ cho phần đọc dài (thân bài blog, tiểu sử). --text-muted chỉ đạt
+     tương phản 3.56:1 trên nền trắng, dưới mức tối thiểu 4.5:1 nên đọc cả
+     bài thấy mờ và mỏi mắt. Màu này đạt 8.8:1 mà vẫn giữ sắc xanh xám của
+     site, dùng cho chữ dài chứ không thay --text-muted ở nhãn hay chú thích. */
+  --text-body: #3d4c5c;
   --gray-bg: #f4f9fc;
   --white: #ffffff;
   --radius: 12px;
@@ -833,22 +838,6 @@ main img.zoomable { cursor: zoom-in; }
   margin-right: auto;
 }
 
-/* Thư cảm ơn là văn bản khổ dọc. Khung 110px của .award-img cắt cover sẽ chỉ
-   còn một vệt mỏng, nên khối này dùng khung cao theo tỉ lệ 3/4 và neo ảnh lên
-   đỉnh để phần tiêu đề "THƯ CẢM ƠN" cùng tên đơn vị luôn nhìn thấy. Bấm vào
-   ảnh mở lightbox để đọc bản đầy đủ. */
-.letters-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 24px;
-}
-.letters-grid .award-img { height: auto; aspect-ratio: 3 / 4; }
-.letters-grid .award-img img { object-position: top; }
-@media (max-width: 620px) {
-  .letters-grid { grid-template-columns: 1fr; }
-}
-
 /* ---- Nhịp dọc của trang phụ ----
    Áp cho mọi trang có <body class="subpage">: blog, 3 bài viết và các
    trang dịch vụ. Trang chủ dài và nhiều ảnh lớn nên vẫn dùng nhịp cũ
@@ -934,12 +923,22 @@ main img.zoomable { cursor: zoom-in; }
   line-height: 1.6;
 }
 .article-body { max-width: 720px; margin: 0 auto; }
-.article-body p { font-size: var(--fs-base); line-height: 1.85; color: var(--text-muted); margin-bottom: 22px; }
+/* Chữ thân bài 17px thay vì 16px và dùng --text-body đậm hơn: đây là phần
+   người đọc nhìn liên tục vài phút, nên ưu tiên dễ đọc hơn là nhẹ nhàng.
+   Đổi ở đây áp cho mọi bài blog, không phải sửa từng trang. */
+.article-body p { font-size: 1.0625rem; line-height: 1.8; color: var(--text-body); margin-bottom: 22px; }
 .article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
-/* Mục trong bài là h2 (dưới h1 tiêu đề bài), mục con là h3. Cỡ chữ giữ
-   nguyên như trước khi đổi thẻ — đây là sửa thứ bậc, không đổi giao diện. */
-.article-body h2 { margin: 40px 0 16px; font-size: var(--fs-lg); }
-.article-body h3 { font-size: var(--fs-base); }
+.article-body ul, .article-body ol { font-size: 1.0625rem; line-height: 1.8; color: var(--text-body); }
+.article-body strong { color: var(--text-heading); font-weight: 600; }
+/* Mục trong bài là h2 (dưới h1 tiêu đề bài), mục con là h3. Cỡ to hơn và
+   màu đậm hơn để phân mục nổi rõ khi đọc lướt tìm phần cần xem. */
+.article-body h2 {
+  margin: 44px 0 16px;
+  font-size: 1.375rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+.article-body h3 { margin: 32px 0 12px; font-size: 1.0625rem; color: var(--text-dark); }
 /* Danh sách trong bài viết cần khoảng cách dưới bằng đoạn văn, nếu không
    đoạn văn kế tiếp sẽ dính sát vào mục cuối cùng của danh sách. */
 .article-body ul, .article-body ol { margin-bottom: 22px; }

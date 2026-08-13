@@ -30,7 +30,7 @@
       "href": "y-hoc-co-truyen-tai-tuyen-co-so",
       "tieu_de": "Y học cổ truyền tại tuyến cơ sở",
       "mo_ta": "Những chuyến công tác, giúp mình thấy rõ: khi cán bộ được đào tạo tốt và người bệnh được điều trị hiệu quả, Y học cổ truyền sẽ tự tìm được chỗ đứng trong cộng đồng",
-      "anh": "assets/img/1786592505991-5195923468930356018-5195923468930356018-f5f342-2026-08-13.jpg",
+      "anh": "assets/img/1786593349738-1484629347920039603-g325776301459161516-e7d3e2-2026-08-13.jpg",
       "alt": "Kiểm tra tay nghề học viện tại Trạm Y tế",
       "ngay": "2026-08-13"
     },

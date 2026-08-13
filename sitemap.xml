@@ -43,7 +43,7 @@
 
   <url>
     <loc>https://bacsikien.com/blog</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -86,6 +86,13 @@
   <url>
     <loc>https://bacsikien.com/van-dong-phuc-hoi-cot-song</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://bacsikien.com/y-hoc-co-truyen-tai-tuyen-co-so</loc>
+    <lastmod>2026-08-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>

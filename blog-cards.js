@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "y-hoc-co-truyen-tai-tuyen-co-so",
+      "tieu_de": "Y học cổ truyền tại tuyến cơ sở",
+      "mo_ta": "Những chuyến công tác, giúp mình thấy rõ: khi cán bộ được đào tạo tốt và người bệnh được điều trị hiệu quả, Y học cổ truyền sẽ tự tìm được chỗ đứng trong cộng đồng",
+      "anh": "assets/img/1786592505991-5195923468930356018-5195923468930356018-f5f342-2026-08-13.jpg",
+      "alt": "Kiểm tra tay nghề học viện tại Trạm Y tế",
+      "ngay": "2026-08-13"
+    },
+    {
       "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",
       "tieu_de": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
       "mo_ta": "Các nghiên cứu cho thấy tổn thương stress xương ghe chiếm khoảng 14–35% tổng số tổn thương stress vùng bàn chân và cổ chân, thường gặp ở vận động viên điền kinh, nhảy xa, bóng rổ và đặc biệt là người chạy bộ.",

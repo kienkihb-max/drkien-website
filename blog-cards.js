@@ -27,6 +27,15 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "y-hoc-co-truyen-dang-thay-doi-nhu-the-nao",
+      "tieu_de": "Y học cổ truyền đang thay đổi như thế nào?",
+      "mo_ta": "Có một câu hỏi mình được hỏi khá nhiều trong quá trình làm nghề: \"Y học cổ truyền có còn phù hợp trong thời đại y học hiện đại phát triển mạnh như hiện nay không?\"",
+      "anh": "assets/img/576121781-25472445602373788-2662229192422447158-n-2026-08-14.jpg",
+      "alt": "Buổi bảo vệ luận văn Thạc sĩ Y học cổ truyền của mình với đề tài Đánh giá tác dụng điều trị rối loạn hậu phẫu của phương pháp điện châm kết hợp Bột ngâm trĩ trên bệnh nhân sau mổ trĩ bằng phương pháp khâu treo và triệt mạch trĩ tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội",
+      "ngay": "2026-08-14",
+      "noi_bat": true
+    },
+    {
       "href": "y-hoc-co-truyen-tai-tuyen-co-so",
       "tieu_de": "Y học cổ truyền tại tuyến cơ sở",
       "mo_ta": "Những chuyến công tác, giúp mình thấy rõ: khi cán bộ được đào tạo tốt và người bệnh được điều trị hiệu quả, Y học cổ truyền sẽ tự tìm được chỗ đứng trong cộng đồng",

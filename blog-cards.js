@@ -66,8 +66,7 @@
       "mo_ta": "Đĩa đệm không hề \"trượt\", MRI bất thường gặp cả ở người không đau, và khối thoát vị có thể tự tiêu biến.",
       "anh": "assets/img/offer-treatment.jpg",
       "alt": "Điện châm vùng thắt lưng kết hợp đèn hồng ngoại tại khoa Y học cổ truyền",
-      "ngay": "2026-08-07",
-      "noi_bat": true
+      "ngay": "2026-08-07"
     },
     {
       "href": "chuot-rut-khi-van-dong",

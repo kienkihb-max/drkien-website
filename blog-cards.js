@@ -27,8 +27,25 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "dau-cot-song-dan-van-phong-talkshow-tigren",
+      "tieu_de": "Đau lưng dân văn phòng: đừng chờ đau mới khám",
+      "mo_ta": "Ghi chép từ buổi talkshow về cột sống cho dân văn phòng: những câu hỏi hay gặp nhất, và vì sao vài phút đứng dậy mỗi giờ lại có giá trị hơn ta tưởng.",
+      "anh": "assets/img/blog-tigren-seminar-cot-song-hoidap.jpg",
+      "alt": "Bác sĩ Lê Trung Kiên trả lời câu hỏi của nhân viên văn phòng tại buổi talkshow về cột sống ở Tigren",
+      "ngay": "2026-06-28",
+      "noi_bat": true
+    },
+    {
+      "href": "so-cuu-tre-em-tap-huan-mai-dich",
+      "tieu_de": "Những bài học mùa hè có thể theo các em nhiều năm sau",
+      "mo_ta": "Buổi tập huấn sơ cứu cho hơn 150 thiếu nhi phường Mai Dịch: vì sao trẻ em cũng cần biết sơ cứu, và những thói quen nhỏ tạo nền tảng sức khỏe lâu dài.",
+      "anh": "assets/img/blog-maidich-thieunhi-dat-cau-hoi.jpg",
+      "alt": "Một em thiếu nhi cầm micro đặt câu hỏi tại buổi tập huấn sơ cứu ở phường Mai Dịch",
+      "ngay": "2026-06-20"
+    },
+    {
       "href": "cau-chuyen-hi-huu-y-te-su-kien",
-      "tieu_de": "Những câu chuyện hi hữu ở phòng y tế sự kiện",
+      "tieu_de": "Chuyện lạ trong phòng y tế sự kiện",
       "mo_ta": "Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.",
       "anh": "assets/img/blog-bac-si-y-te-seagames31-thumb.jpg",
       "alt": "Bác sĩ Lê Trung Kiên làm công tác y tế bên xe cứu thương tại SEA Games 31",
@@ -49,8 +66,7 @@
       "mo_ta": "Nghiên cứu trên 98 vận động viên marathon cho thấy điều khác biệt không nằm ở nước hay điện giải.",
       "anh": "assets/img/sports-marathon-expert.jpg",
       "alt": "ThS.BS Lê Trung Kiên cùng chuyên gia Karl Gunter Lange tại Viettel Marathon Hà Nội 2024",
-      "ngay": "2026-08-08",
-      "noi_bat": true
+      "ngay": "2026-08-08"
     },
     {
       "href": "van-dong-phuc-hoi-cot-song",

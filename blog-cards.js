@@ -33,8 +33,7 @@
       "anh": "assets/img/576121781-25472445602373788-2662229192422447158-n-2026-08-14.jpg",
       "alt": "Buổi bảo vệ luận văn Thạc sĩ Y học cổ truyền của mình với đề tài Đánh giá tác dụng điều trị rối loạn hậu phẫu của phương pháp điện châm kết hợp Bột ngâm trĩ trên bệnh nhân sau mổ trĩ bằng phương pháp khâu treo và triệt mạch trĩ tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội",
       "ngay": "2026-08-14",
-      "noi_bat": true,
-      "an": true
+      "noi_bat": true
     },
     {
       "href": "y-hoc-co-truyen-tai-tuyen-co-so",
@@ -83,7 +82,8 @@
       "mo_ta": "Nhận diện hội chứng quá tải thường gặp ở người chạy bộ, và vì sao điều chỉnh tải vận động quan trọng hơn nghỉ ngơi đơn thuần.",
       "anh": "assets/img/blog-run-with-me-cong-dong-khoe.jpg",
       "alt": "Nhóm vận động viên phong trào tại giải chạy Run With Me — Cộng đồng khỏe, Hà Nội",
-      "ngay": "2026-08-08"
+      "ngay": "2026-08-08",
+      "noi_bat": true
     },
     {
       "href": "xu-huong-phat-trien-yhct",

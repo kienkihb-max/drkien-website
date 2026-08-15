@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "cau-chuyen-hi-huu-y-te-su-kien",
+      "tieu_de": "Những câu chuyện hi hữu ở phòng y tế sự kiện",
+      "mo_ta": "Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.",
+      "anh": "assets/img/blog-bac-si-y-te-seagames31.jpg",
+      "alt": "Bác sĩ Lê Trung Kiên làm công tác y tế bên xe cứu thương tại SEA Games 31",
+      "ngay": "2026-08-15"
+    },
+    {
       "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",
       "tieu_de": "Vì sao tổn thương stress xương ghe đáng lo ngại?",
       "mo_ta": "Các nghiên cứu cho thấy tổn thương stress xương ghe chiếm khoảng 14–35% tổng số tổn thương stress vùng bàn chân và cổ chân, thường gặp ở vận động viên điền kinh, nhảy xa, bóng rổ và đặc biệt là người chạy bộ.",

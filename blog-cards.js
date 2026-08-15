@@ -33,7 +33,8 @@
       "anh": "assets/img/576121781-25472445602373788-2662229192422447158-n-2026-08-14.jpg",
       "alt": "Buổi bảo vệ luận văn Thạc sĩ Y học cổ truyền của mình với đề tài Đánh giá tác dụng điều trị rối loạn hậu phẫu của phương pháp điện châm kết hợp Bột ngâm trĩ trên bệnh nhân sau mổ trĩ bằng phương pháp khâu treo và triệt mạch trĩ tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội",
       "ngay": "2026-08-14",
-      "noi_bat": true
+      "noi_bat": true,
+      "an": true
     },
     {
       "href": "y-hoc-co-truyen-tai-tuyen-co-so",

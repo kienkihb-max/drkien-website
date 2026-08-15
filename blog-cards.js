@@ -30,9 +30,10 @@
       "href": "cau-chuyen-hi-huu-y-te-su-kien",
       "tieu_de": "Những câu chuyện hi hữu ở phòng y tế sự kiện",
       "mo_ta": "Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.",
-      "anh": "assets/img/blog-bac-si-y-te-seagames31.jpg",
+      "anh": "assets/img/blog-bac-si-y-te-seagames31-thumb.jpg",
       "alt": "Bác sĩ Lê Trung Kiên làm công tác y tế bên xe cứu thương tại SEA Games 31",
-      "ngay": "2026-08-15"
+      "ngay": "2026-08-15",
+      "noi_bat": true
     },
     {
       "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",
@@ -73,8 +74,7 @@
       "mo_ta": "Nhận diện hội chứng quá tải thường gặp ở người chạy bộ, và vì sao điều chỉnh tải vận động quan trọng hơn nghỉ ngơi đơn thuần.",
       "anh": "assets/img/blog-run-with-me-cong-dong-khoe.jpg",
       "alt": "Nhóm vận động viên phong trào tại giải chạy Run With Me — Cộng đồng khỏe, Hà Nội",
-      "ngay": "2026-08-08",
-      "noi_bat": true
+      "ngay": "2026-08-08"
     },
     {
       "href": "xu-huong-phat-trien-yhct",

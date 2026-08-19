@@ -55,10 +55,9 @@
       "href": "cau-chuyen-hi-huu-y-te-su-kien",
       "tieu_de": "Chuyện lạ trong phòng y tế sự kiện",
       "mo_ta": "Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.",
-      "anh": "assets/img/blog-bac-si-y-te-seagames31-thumb.jpg",
+      "anh": "assets/img/blog-bac-si-y-te-seagames31.jpg",
       "alt": "Bác sĩ Lê Trung Kiên làm công tác y tế bên xe cứu thương tại SEA Games 31",
-      "ngay": "2026-08-15",
-      "noi_bat": true
+      "ngay": "2026-08-15"
     },
     {
       "href": "vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai",

@@ -49,13 +49,6 @@
   </url>
 
   <url>
-    <loc>https://bacsikien.com/cau-chuyen-hi-huu-y-te-su-kien</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <url>
     <loc>https://bacsikien.com/chuot-rut-khi-chay-bo</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>yearly</changefreq>
@@ -99,6 +92,13 @@
 
   <url>
     <loc>https://bacsikien.com/sea-games-31-va-mot-nhiem-vu-dac-biet</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://bacsikien.com/cau-chuyen-hi-huu-y-te-su-kien</loc>
     <lastmod>2026-08-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>

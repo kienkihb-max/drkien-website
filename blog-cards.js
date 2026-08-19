@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "sea-games-31-va-mot-nhiem-vu-dac-biet",
+      "tieu_de": "SEA Games 31 và một nhiệm vụ đặc biệt",
+      "mo_ta": "Kỷ niệm làm công tác y tế tại SEA Games 31: từ áp lực phòng chống COVID-19, theo dõi đoàn Singapore tại Landmark72 đến những cuộc gặp với các VĐV hàng đầu.",
+      "anh": "assets/img/event-seagames31-doi-y-te.jpg",
+      "alt": "Tổ Y tế Bệnh viện đa khoa Y học cổ truyền Hà Nội",
+      "ngay": "2026-08-19"
+    },
+    {
       "href": "dau-cot-song-dan-van-phong-talkshow-tigren",
       "tieu_de": "Đau lưng dân văn phòng: đừng chờ đau mới khám",
       "mo_ta": "Ghi chép từ buổi talkshow về cột sống cho dân văn phòng: những câu hỏi hay gặp nhất, và vì sao vài phút đứng dậy mỗi giờ lại có giá trị hơn ta tưởng.",

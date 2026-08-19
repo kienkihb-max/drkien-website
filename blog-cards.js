@@ -32,7 +32,8 @@
       "mo_ta": "Kỷ niệm làm công tác y tế tại SEA Games 31: từ áp lực phòng chống COVID-19, theo dõi đoàn Singapore tại Landmark72 đến những cuộc gặp với các VĐV hàng đầu.",
       "anh": "assets/img/event-seagames31-doi-y-te.jpg",
       "alt": "Tổ Y tế Bệnh viện đa khoa Y học cổ truyền Hà Nội",
-      "ngay": "2026-08-19"
+      "ngay": "2026-08-19",
+      "noi_bat": true
     },
     {
       "href": "dau-cot-song-dan-van-phong-talkshow-tigren",

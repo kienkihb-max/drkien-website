@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "dau-lan-xuong-chan-do-re-than-kinh-that-lung",
+      "tieu_de": "Đau lan xuống chân do rễ thần kinh thắt lưng",
+      "mo_ta": "Nhiều người quen gọi là \"đau thần kinh tọa\" — là một trong những lý do phổ biến nhất khiến người bệnh tìm đến phòng khám của mình",
+      "anh": "assets/img/images-6-2026-08-20.jpg",
+      "alt": "Nhiều người quen gọi là \"đau thần kinh tọa\" — là một trong những lý do phổ biến nhất khiến người bệnh tìm đến phòng khám của mình",
+      "ngay": "2026-08-20"
+    },
+    {
       "href": "cong-nghe-ai-phan-tich-dang-chay-khi-khoa-hoc-phong-lab-buoc",
       "tieu_de": "Công nghệ AI phân tích dáng chạy: Khi khoa học phòng lab bước ra đường chạy",
       "mo_ta": "Vì sao điều này đáng quan tâm, kể cả khi bạn không phải vận động viên chuyên nghiệp",

@@ -45,8 +45,8 @@
       ten: "Thăm khám & điều trị",
       mo_ta:
         "Châm cứu, vật lý trị liệu cho đau cơ xương khớp và chấn thương thể thao.",
-      anh: "assets/img/offer-treatment.jpg",
-      alt: "Điện châm điều trị tại khoa Y học cổ truyền",
+      anh: "assets/img/offer-dien-cham-phong-dieu-tri.jpg",
+      alt: "Bác sĩ Lê Trung Kiên điều chỉnh máy điện châm cho người bệnh tại phòng điều trị, kết hợp đèn hồng ngoại",
       chu_nut_lien_he: "Tư vấn điều trị",
     },
   ];

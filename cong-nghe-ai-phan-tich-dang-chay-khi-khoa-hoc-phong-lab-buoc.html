@@ -49,13 +49,11 @@
       </div>
       <div class="article-body">
         <p class="lead">Nếu bạn từng đau đầu gối, đau gân gót hay đau cẳng chân mỗi khi chạy bộ mà không rõ nguyên nhân, có lẽ bạn đã nghe ai đó khuyên "nên đi phân tích dáng chạy". Nhưng phân tích dáng chạy truyền thống — dù là bằng mắt thường của huấn luyện viên hay quay video chậm — vẫn có một giới hạn rất lớn: mắt thường không thể nhìn thấy lực.</p>
-        <p># Công nghệ AI phân tích dáng chạy: Khi khoa học phòng lab bước ra đường chạy</p>
         <p>Bạn có thể thấy một người chạy "đẹp" hay "xấu", nhưng bạn không thể thấy được mỗi bước chân đang dội lên khớp gối bao nhiêu lực, cơ thể đang hấp thu sốc tốt hay kém, hay bên chân nào đang âm thầm bù trừ cho bên còn lại. Đó chính là khoảng trống mà một xu hướng công nghệ mới — phân tích dáng chạy bằng cảm biến AI — đang cố gắng lấp đầy.</p>
         <p>Gần đây mình có dịp tìm hiểu về RunEASI, một trong những công ty đi đầu trong lĩnh vực này, qua chia sẻ của TS. Kurt Schütte (Tiến sĩ Sinh cơ học, đồng sáng lập công ty) trên podcast Physiotutors. Xin chia sẻ lại những điều mình thấy thú vị và hữu ích, viết theo cách dễ hiểu nhất có thể cho những ai không chuyên về sinh cơ học.</p>
 
         <figure class="article-inline-img">
           <img src="assets/img/runeasi-header-640x384-2026-08-20.jpg" alt="" loading="lazy">
-          <figcaption><br></figcaption>
         </figure>
         <p><strong>Vấn đề: Khoảng cách giữa phòng lab và phòng khám</strong></p>
         <p>Trong các phòng thí nghiệm sinh cơ học ở trường đại học, người ta có thể đo lực chân đạp xuống đất bằng những tấm cảm biến chuyên dụng (force plate) và ghi lại chuyển động 3D bằng hệ thống camera hồng ngoại (motion capture) — độ chính xác gần như tuyệt đối. Nhưng những hệ thống này rất đắt, cồng kềnh, đòi hỏi gắn nhiều điểm đánh dấu lên cơ thể, và gần như không một phòng khám tư nhân nào có đủ điều kiện trang bị.</p>
@@ -65,9 +63,7 @@
 
         <figure class="article-inline-img">
           <img src="assets/img/images-5-2026-08-20.jpg" alt="" loading="lazy">
-          <figcaption>Nhập chú thích cho ảnh…</figcaption>
         </figure>
-        <p><br></p>
         <p>Cách tiếp cận của RunEASI khá đơn giản về mặt ý tưởng: gắn một cảm biến chuyển động (gọi là IMU — thiết bị đo quán tính, có thể hình dung như "hộp đen" trong máy bay, chuyên ghi lại gia tốc và độ rung) vào vùng xương cùng, ngay sát thắt lưng — vị trí gần với trọng tâm cơ thể nhất.</p>
         <p>Từ dữ liệu rung động rất nhỏ ghi được ở vị trí này, thuật toán sẽ "giải mã" ngược lại thành các thông số về lực tác động, độ ổn định và độ đối xứng của từng bước chạy. Nhóm phát triển ví thiết bị này như "một tấm đo lực và một hệ thống motion capture được gộp lại, thu nhỏ vào một chiếc đai thể thao gọn nhẹ".</p>
         <p>Điều quan trọng là độ tin cậy của nó không phải lời quảng cáo suông. Để kiểm chứng, nhóm nghiên cứu đã cho người chạy đeo đồng thời cả cảm biến này và hệ thống phòng lab chuẩn (Vicon motion capture + force plate), sau đó đối chiếu từng số liệu một. Sau nhiều vòng hiệu chỉnh — đặc biệt là học được cách cố định cảm biến sao cho không bị nhiễu do quần áo xê dịch — sai số hiện chỉ còn khoảng 1–3% so với tiêu chuẩn vàng. Với mục đích đưa ra quyết định điều trị trong lâm sàng, đây là mức sai số được xem là chấp nhận được.</p>
@@ -89,7 +85,7 @@
       <div class="article-refs">
         <h2>Tài liệu tham khảo</h2>
         <ol>
-          <li>RunEASI in Practice: AI Gait & Jump Analysis for Clinicians" (Physiotutors, khách mời TS. Kurt Schütte)</li>
+          <li>RunEASI in Practice: AI Gait &amp; Jump Analysis for Clinicians" (Physiotutors, khách mời TS. Kurt Schütte)</li>
         </ol>
       </div>
     </div>

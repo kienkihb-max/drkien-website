@@ -27,6 +27,14 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "cong-nghe-ai-phan-tich-dang-chay-khi-khoa-hoc-phong-lab-buoc",
+      "tieu_de": "Công nghệ AI phân tích dáng chạy: Khi khoa học phòng lab bước ra đường chạy",
+      "mo_ta": "Vì sao điều này đáng quan tâm, kể cả khi bạn không phải vận động viên chuyên nghiệp",
+      "anh": "assets/img/images-3-2026-08-20.jpg",
+      "alt": "Vì sao điều này đáng quan tâm, kể cả khi bạn không phải vận động viên chuyên nghiệp",
+      "ngay": "2026-08-20"
+    },
+    {
       "href": "sea-games-31-va-mot-nhiem-vu-dac-biet",
       "tieu_de": "SEA Games 31 và một nhiệm vụ đặc biệt",
       "mo_ta": "Kỷ niệm làm công tác y tế tại SEA Games 31: từ áp lực phòng chống COVID-19, theo dõi đoàn Singapore tại Landmark72 đến những cuộc gặp với các VĐV hàng đầu.",

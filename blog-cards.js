@@ -27,11 +27,19 @@
   /* DANH_SACH:BAT_DAU */
   var DANH_SACH = [
     {
+      "href": "cau-chuyen-ve-cuu-ngai",
+      "tieu_de": "Câu chuyện về cứu ngải",
+      "mo_ta": "Bà đau lưng vì bế cháu cả ngày, và câu nói \"mẹ hợp cứu ngải hơn\" khiến mình nghĩ lại về một kỹ thuật đã sống hàng nghìn năm giữa thời của đủ loại máy tạo nhiệt.",
+      "anh": "assets/img/blog-cuu-ngai-dien-cham-hop-cuu.jpg",
+      "alt": "Hộp cứu ngải treo trên giá, đặt phía trên vùng thắt lưng đang được điện châm",
+      "ngay": "2026-08-20"
+    },
+    {
       "href": "dau-lan-xuong-chan-do-re-than-kinh-that-lung",
-      "tieu_de": "Đau lan xuống chân do rễ thần kinh thắt lưng",
-      "mo_ta": "Nhiều người quen gọi là \"đau thần kinh tọa\" — là một trong những lý do phổ biến nhất khiến người bệnh tìm đến phòng khám của mình",
+      "tieu_de": "Đau thần kinh tọa: khi nào cần lo, khi nào chỉ cần kiên nhẫn",
+      "mo_ta": "Dấu hiệu nào cần đi cấp cứu ngay, dấu hiệu nào chỉ cần theo dõi — và vì sao khoảng 50% người bệnh cải thiện rõ sau 12 tuần dù điều trị bằng cách nào.",
       "anh": "assets/img/images-6-2026-08-20.jpg",
-      "alt": "Nhiều người quen gọi là \"đau thần kinh tọa\" — là một trong những lý do phổ biến nhất khiến người bệnh tìm đến phòng khám của mình",
+      "alt": "Hình minh hoạ đường đi của dây thần kinh tọa từ vùng thắt lưng xuống chân",
       "ngay": "2026-08-20"
     },
     {
@@ -72,7 +80,7 @@
       "href": "cau-chuyen-hi-huu-y-te-su-kien",
       "tieu_de": "Chuyện lạ trong phòng y tế sự kiện",
       "mo_ta": "Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.",
-      "anh": "assets/img/blog-bac-si-y-te-seagames31.jpg",
+      "anh": "assets/img/blog-bac-si-y-te-seagames31-4x3.jpg",
       "alt": "Bác sĩ Lê Trung Kiên làm công tác y tế bên xe cứu thương tại SEA Games 31",
       "ngay": "2026-08-15"
     },

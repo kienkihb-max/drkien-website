@@ -38,7 +38,8 @@
     '<div class="container footer-grid">',
     '  <div class="footer-brand">',
     '    <a href="' + TRANG_CHU + '" class="brand">',
-    '      <img class="brand-mark" src="assets/img/logo-chay-bo-cung-bs-kien.jpg" alt="Logo Chạy bộ cùng bác sĩ Kiên">',
+    // Bản rút gọn, lý do xem chú thích cùng chỗ trong site-header.js
+    '      <img class="brand-mark" src="assets/img/logo-bs-kien-mark.svg" alt="Logo Chạy bộ cùng bác sĩ Kiên">',
     '      <span class="brand-text">ThS.BS Lê Trung Kiên</span>',
     "    </a>",
     "    <p>Y học cổ truyền · Y tế thể thao · Diễn giả sức khỏe</p>",

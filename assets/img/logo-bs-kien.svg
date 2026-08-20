@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="logoTitle">
+<title id="logoTitle">Chạy bộ cùng bác sĩ Kiên</title>
+<!--
+  Logo vẽ lại thành vector từ bản JPG cũ (logo-chay-bo-cung-bs-kien.jpg).
+  Giữ nguyên bố cục: vòng ngoài, chữ chạy vòng cung, người chạy ở giữa.
+
+  Sửa so với bản cũ:
+    - Bỏ hậu cảnh ảnh chụp; nền trong suốt trừ đĩa tròn màu #f3f6ff.
+    - Bỏ màu xanh lá, chuyển hết sang bộ xanh dương đang dùng trên web:
+        #1e3a6e  navy   vòng ngoài, chữ, thân người
+        #3364db         nét phụ
+        #3874ff         nét nhấn, vệt chuyển động
+
+  Đổi màu thì tìm và thay ba mã màu trên, không cần phần mềm đồ hoạ.
+  Đổi chữ thì sửa hai dòng CHẠY BỘ / CÙNG BÁC SĨ KIÊN ở cuối file.
+-->
+
+<!-- Đĩa nền và vòng ngoài -->
+<circle cx="256" cy="256" r="244" fill="#f3f6ff"/>
+<circle cx="256" cy="256" r="244" fill="none" stroke="#1e3a6e" stroke-width="7"/>
+
+<!-- Vòng trong hở ở đỉnh và đáy để nhường chỗ cho chữ -->
+<path d="M 224.7 78.7 A 180 180 0 0 0 224.7 433.3" fill="none" stroke="#3874ff" stroke-width="9" stroke-linecap="round"/>
+<path d="M 287.3 78.7 A 180 180 0 0 1 287.3 433.3" fill="none" stroke="#3364db" stroke-width="9" stroke-linecap="round"/>
+
+<!-- Người chạy. Mỗi bộ phận là một nét bo tròn đầu, sửa toạ độ là đổi dáng. -->
+<g transform="translate(26,17)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ba vệt chuyển động phía sau -->
+  <path d="M116 176 Q158 168 198 172" stroke="#3874ff" stroke-width="12"/>
+  <path d="M106 208 Q152 200 192 204" stroke="#3874ff" stroke-width="10"/>
+  <path d="M124 240 Q162 234 190 237" stroke="#3874ff" stroke-width="8.5"/>
+  <!-- chân sau duỗi thẳng ra sau, đang đạp đất -->
+  <path d="M240 258 L192 300 L150 340" stroke="#3364db" stroke-width="25"/>
+  <!-- tay sau đánh ra sau và xuống -->
+  <path d="M278 194 L226 212" stroke="#3874ff" stroke-width="21"/>
+  <!-- thân người, nối liền xuống chân trước nâng gối -->
+  <path d="M292 180 L240 258 L302 246 L272 306" stroke="#1e3a6e" stroke-width="26"/>
+  <!-- tay trước gập khuỷu, bàn tay vung lên trước -->
+  <path d="M292 184 L334 204 L342 170" stroke="#3874ff" stroke-width="21"/>
+  <!-- đầu -->
+  <circle cx="312" cy="148" r="26" fill="#1e3a6e" stroke="none"/>
+</g>
+
+<!-- Hai chấm ngăn giữa dòng chữ trên và dòng chữ dưới -->
+<circle cx="42" cy="256" r="7" fill="#1e3a6e"/>
+<circle cx="470" cy="256" r="7" fill="#1e3a6e"/>
+
+<!-- Chữ vòng cung. Hai đường dẫn chỉ để chữ bám theo, không vẽ ra. -->
+<defs>
+  <path id="cungTren" d="M 58 256 A 198 198 0 0 1 454 256"/>
+  <path id="cungDuoi" d="M 30 256 A 226 226 0 0 0 482 256"/>
+</defs>
+<g fill="#1e3a6e" font-family="'Be Vietnam Pro', 'Segoe UI', ui-sans-serif, system-ui, sans-serif" font-weight="700">
+  <text font-size="52" letter-spacing="9">
+    <textPath href="#cungTren" startOffset="50%" text-anchor="middle">CHẠY BỘ</textPath>
+  </text>
+  <text font-size="39" letter-spacing="5">
+    <textPath href="#cungDuoi" startOffset="50%" text-anchor="middle">CÙNG BÁC SĨ KIÊN</textPath>
+  </text>
+</g>
+</svg>

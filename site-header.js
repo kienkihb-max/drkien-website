@@ -47,7 +47,10 @@
   var HEADER = [
     '<div class="container header-inner">',
     '  <a href="' + (laTrangChu ? "#top" : TRANG_CHU) + '" class="brand">',
-    '    <img class="brand-mark" src="assets/img/logo-chay-bo-cung-bs-kien.jpg" alt="Logo Chạy bộ cùng bác sĩ Kiên">',
+    // Dùng bản rút gọn (không có vòng chữ) vì ô logo chỉ 44px, ở cỡ đó
+    // chữ "CHẠY BỘ CÙNG BÁC SĨ KIÊN" thành vệt mờ. Bản đầy đủ có vòng chữ
+    // là assets/img/logo-bs-kien.svg, để dành cho chỗ hiển thị to.
+    '    <img class="brand-mark" src="assets/img/logo-bs-kien-mark.svg" alt="Logo Chạy bộ cùng bác sĩ Kiên">',
     '    <span class="brand-text">ThS.BS Lê Trung Kiên</span>',
     "  </a>",
     '  <button class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">',

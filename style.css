@@ -951,6 +951,16 @@ main img.zoomable { cursor: zoom-in; }
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
 }
+/* Ảnh chụp dọc: khung 16/10 ở trên sẽ cắt mất đầu và chân người, chỉ còn
+   một dải ngang giữa ảnh. Thêm class này cạnh .article-inline-img để ảnh
+   giữ nguyên tỉ lệ gốc và thu hẹp bề ngang cho khỏi cao quá màn hình.
+   <figure class="article-inline-img article-inline-img-doc"> */
+.article-inline-img-doc img {
+  aspect-ratio: auto;
+  max-width: 420px;
+  margin-inline: auto;
+  display: block;
+}
 .article-inline-img figcaption {
   margin-top: 10px;
   font-size: var(--fs-xs);

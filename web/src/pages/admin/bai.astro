@@ -6,6 +6,7 @@
 // Đây mới là VỎ: đủ để bài nằm được trong database và đăng lên. Trình soạn
 // thảo dùng lại admin-soan-thao.js của trang cũ nguyên xi — phần nâng cấp
 // soạn thảo làm ở bước sau.
+import VetLoi from "../../components/VetLoi.astro";
 ---
 
 <!DOCTYPE html>
@@ -19,6 +20,8 @@
   <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
+
+<VetLoi />
 
 <div id="man-chinh" hidden>
   <header class="qt-dau">
@@ -113,6 +116,10 @@
   const id_bai = new URLSearchParams(location.search).get("id");
   let bo_soan: any = null;
 
+  // Mốc theo dõi, chỉ có tác dụng khi chạy dev (xem components/VetLoi.astro).
+  const vet = (chu: string, ct?: unknown) =>
+    (window as any).vet?.(chu, ct === undefined ? "" : JSON.stringify(ct));
+
   function bao(chu: string, loi = false) {
     const b = el("bao");
     b.textContent = chu;
@@ -181,22 +188,36 @@
   }
 
   async function nap() {
+    vet("nap() bắt đầu", { id_bai });
     const { data: phien_data } = await supabase.auth.getSession();
     const phien = phien_data.session;
     if (!phien) {
+      vet("không có phiên → về /admin");
       location.href = "/admin";
       return;
     }
+    vet("có phiên", { tai_khoan: phien.user.user_metadata?.user_name });
     el("nhan-tai-khoan").textContent = String(
       phien.user.user_metadata?.user_name ?? phien.user.email ?? ""
     );
 
+    if (!(window as any).SoanThao) {
+      vet("THIẾU window.SoanThao — admin-soan-thao.js không nạp được");
+      bao("Không dựng được khung soạn thảo. Tải lại trang thử xem.", true);
+    }
     bo_soan = (window as any).SoanThao.tao({
       khung: el("khung-soan"),
       khiChonAnh: () => alert("Kho ảnh sẽ làm ở bước sau."),
     });
+    vet("đã dựng trình soạn thảo");
+    // Ghi rõ "từ" và "ký tự" thành hai số riêng. Nhãn cũ ghi "Khoảng N chữ"
+    // mà đếm theo TỪ — gõ liền sáu ký tự không dấu cách thì nó đứng ở 1, ai
+    // nhìn cũng tưởng ô soạn thảo hỏng.
     bo_soan.khiDoi(() => {
-      el("dem-chu").textContent = "Khoảng " + bo_soan.demChu() + " chữ.";
+      const vung = el("khung-soan").querySelector(".st-vung") as HTMLElement;
+      const ky_tu = (vung?.textContent || "").trim().length;
+      el("dem-chu").textContent =
+        "Khoảng " + bo_soan.demChu() + " từ · " + ky_tu + " ký tự.";
     });
 
     if (id_bai) {
@@ -232,6 +253,7 @@
 
     el("man-cho").hidden = true;
     el("man-chinh").hidden = false;
+    vet("nap() xong, form đã hiện");
   }
 
   el("nut-quay-lai").addEventListener("click", () => { location.href = "/admin"; });

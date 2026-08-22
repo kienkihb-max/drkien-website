@@ -41,6 +41,12 @@ create table if not exists bai_viet (
   -- Nhãn trên đầu bài, dạng "Blog · Y học cổ truyền".
   nhan       text,
 
+  -- Danh mục "Tài liệu tham khảo" ở cuối bài, mỗi phần tử là một mục.
+  -- Tách riêng khỏi than_bai vì nó được dàn trang bằng khối .article-refs
+  -- có kiểu hiển thị riêng, và vì với nội dung y tế thì đây là phần Google
+  -- dùng để chấm độ tin cậy chuyên môn — trộn vào thân bài là mất khối đó.
+  tai_lieu   jsonb not null default '[]'::jsonb,
+
   -- Ảnh bìa: hiện ở đầu bài, trên thẻ blog, và khi chia sẻ Facebook/Zalo.
   anh        text,
   anh_alt    text,
@@ -54,6 +60,12 @@ create table if not exists bai_viet (
   seo_mo_ta   text,
 
   ngay_dang  date not null default current_date,
+  -- Ngày sửa nội dung gần nhất. Để trống nghĩa là chưa sửa lần nào.
+  -- Dùng cho <lastmod> trong sitemap và dateModified trong dữ liệu có cấu
+  -- trúc. Khác sua_luc bên dưới: sua_luc là dấu thời gian máy tự ghi mỗi
+  -- lần chạm vào bản ghi, kể cả sửa một dấu phẩy; còn ngay_sua là mốc chủ
+  -- site muốn Google nhìn thấy.
+  ngay_sua   date,
   -- true thì bài nằm ở khối nổi bật đầu trang blog.
   noi_bat    boolean not null default false,
   -- true thì bài biến khỏi mọi danh sách nhưng địa chỉ cũ vẫn sống — dùng
@@ -65,6 +77,13 @@ create table if not exists bai_viet (
   tao_luc    timestamptz not null default now(),
   sua_luc    timestamptz not null default now()
 );
+
+-- ——— Vá cho database đã tạo từ trước ———
+-- "create table if not exists" ở trên KHÔNG thêm cột mới vào bảng đã tồn
+-- tại, nên cột nào sinh sau phải có thêm một dòng alter ở đây. Chạy lại
+-- nhiều lần vẫn an toàn.
+alter table bai_viet add column if not exists tai_lieu jsonb not null default '[]'::jsonb;
+alter table bai_viet add column if not exists ngay_sua date;
 
 -- Trang blog sắp bài theo ngày, mỗi lần build đều chạy truy vấn này.
 create index if not exists bai_viet_ngay_idx

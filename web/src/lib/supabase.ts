@@ -31,6 +31,8 @@ export interface BaiViet {
   lead: string | null;
   than_bai: string;
   nhan: string | null;
+  /** Danh mục "Tài liệu tham khảo", mỗi phần tử là một mục (có thể chứa HTML). */
+  tai_lieu: string[];
   anh: string | null;
   anh_alt: string | null;
   the_tieu_de: string | null;
@@ -38,6 +40,8 @@ export interface BaiViet {
   seo_tieu_de: string | null;
   seo_mo_ta: string | null;
   ngay_dang: string;
+  /** Ngày sửa gần nhất; null nghĩa là chưa sửa lần nào. */
+  ngay_sua: string | null;
   noi_bat: boolean;
   an: boolean;
   da_dang: boolean;

@@ -69,6 +69,14 @@ import VetLoi from "../../components/VetLoi.astro";
         <label class="qt-nhan">Thân bài</label>
         <div id="khung-soan"></div>
         <p class="qt-phu" id="dem-chu"></p>
+
+        <label class="qt-nhan" for="o-tai-lieu">Tài liệu tham khảo</label>
+        <p class="qt-goi-y">
+          Mỗi tài liệu một dòng, không cần đánh số — trang bài tự đánh. Bỏ
+          trống thì khối này không hiện. Với bài y khoa, đây là phần Google
+          dùng để chấm độ tin cậy chuyên môn.
+        </p>
+        <textarea class="qt-o qt-o-cao" id="o-tai-lieu" rows="5"></textarea>
       </fieldset>
 
       <fieldset class="qt-nhom">
@@ -259,6 +267,9 @@ import VetLoi from "../../components/VetLoi.astro";
       nhan: o("o-nhan").value.trim() || null,
       lead: o("o-lead").value.trim() || null,
       than_bai: bo_soan ? bo_soan.layHTML() : "",
+      // Mỗi dòng một tài liệu. Dòng trống bị bỏ, nên xuống dòng thừa không
+      // sinh ra mục rỗng trong danh sách đánh số.
+      tai_lieu: o("o-tai-lieu").value.split("\n").map((d) => d.trim()).filter(Boolean),
       anh: o("o-anh").value.trim() || null,
       anh_alt: o("o-anh-alt").value.trim() || null,
       ngay_dang: o("o-ngay").value || new Date().toISOString().slice(0, 10),
@@ -358,6 +369,7 @@ import VetLoi from "../../components/VetLoi.astro";
         o("o-ngay").value = data.ngay_dang ?? "";
         o("o-noi-bat").checked = !!data.noi_bat;
         o("o-an").checked = !!data.an;
+        o("o-tai-lieu").value = (data.tai_lieu ?? []).join("\n");
         o("o-the-tieu-de").value = data.the_tieu_de ?? "";
         o("o-the-mo-ta").value = data.the_mo_ta ?? "";
         o("o-seo-tieu-de").value = data.seo_tieu_de ?? "";

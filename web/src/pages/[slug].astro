@@ -52,7 +52,9 @@ const schema = {
       description: mo_ta,
       inLanguage: "vi-VN",
       datePublished: bai.ngay_dang,
-      dateModified: bai.ngay_dang,
+      // Bài từng biên tập lại thì dateModified phải là ngày biên tập, không
+      // phải ngày đăng — Google dùng nó để biết nội dung còn mới hay không.
+      dateModified: bai.ngay_sua || bai.ngay_dang,
       ...(anh_day_du ? { image: anh_day_du } : {}),
       author: { "@type": "Person", name: "Bác sĩ Lê Trung Kiên", url: GOC + "/bac-si-le-trung-kien" },
       publisher: { "@type": "Person", name: TEN_SITE, url: GOC + "/" },
@@ -102,9 +104,22 @@ const schema = {
         </div>
       )}
       <div class="article-body">
-        {bai.lead && <p class="lead">{bai.lead}</p>}
-        <Fragment set:html={bai.than_bai} />
+        {/* Ghép đoạn mở đầu vào cùng một chuỗi với thân bài, có xuống dòng
+            ngăn giữa. Để hai thẻ rời nhau thì Astro dán sát "</p><p>" và
+            mất đúng một dấu cách so với bài gốc — không đổi giao diện,
+            nhưng bộ đối chiếu sẽ báo lệch mãi, mà lệch thì phải sửa chứ
+            không phải để đó rồi quen mắt. */}
+        <Fragment set:html={(bai.lead ? `<p class="lead">${bai.lead}</p>\n` : "") + bai.than_bai} />
       </div>
+
+      {bai.tai_lieu?.length > 0 && (
+        <div class="article-refs">
+          <h2>Tài liệu tham khảo</h2>
+          <ol>
+            {bai.tai_lieu.map((m) => <li set:html={m} />)}
+          </ol>
+        </div>
+      )}
     </div>
   </section>
 

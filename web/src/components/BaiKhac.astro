@@ -1,0 +1,35 @@
+---
+// Khối "Bài viết khác" ở cuối mỗi bài. Chuyển từ phần cuối blog-cards.js.
+import type { BaiViet } from "../lib/supabase";
+import TheBai from "./TheBai.astro";
+
+interface Props {
+  danh_sach: BaiViet[];
+  /** Bài đang mở, để không tự giới thiệu chính nó. */
+  tru_slug: string;
+  /** Khối phía trên có nền xanh nhạt không — để xen kẽ nền cho đỡ đơn điệu. */
+  tren_la_alt?: boolean;
+}
+const { danh_sach, tru_slug, tren_la_alt = false } = Astro.props;
+const khac = danh_sach.filter((b) => b.slug !== tru_slug);
+---
+
+{khac.length > 0 && (
+  <section class:list={["section", "blog-related", !tren_la_alt && "section-alt"]}>
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Xem thêm</p>
+        <h2>Bài viết khác</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <div class="related-scroller">
+        {khac.map((b) => <TheBai bai={b} them_lop="related-card" />)}
+      </div>
+      <p class="cv-link-wrap">
+        <a class="cv-link" href="/blog">
+          Xem tất cả <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </p>
+    </div>
+  </section>
+)}

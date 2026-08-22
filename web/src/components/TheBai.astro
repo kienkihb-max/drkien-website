@@ -1,0 +1,31 @@
+---
+// Thẻ một bài viết — mẫu DUY NHẤT, dùng cho cả trang blog lẫn khối "Bài
+// viết khác" ở cuối mỗi bài. Chuyển từ hàm theBai() trong blog-cards.js.
+import type { BaiViet } from "../lib/supabase";
+
+interface Props {
+  bai: BaiViet;
+  /** "event-card-featured" cho khối nổi bật, "related-card" cho cuối bài. */
+  them_lop?: string;
+}
+const { bai, them_lop } = Astro.props;
+
+// Chữ trên thẻ là chữ người đọc thấy, có thể khác tiêu đề bài. Chưa đặt
+// riêng thì lấy tiêu đề bài và mô tả Google.
+const tieu_de = bai.the_tieu_de || bai.tieu_de;
+const mo_ta = bai.the_mo_ta || bai.seo_mo_ta || "";
+---
+
+<a class:list={["event-card", "event-card-link", them_lop]} href={"/" + bai.slug}>
+  {them_lop === "event-card-featured" && <span class="event-badge">Nổi bật</span>}
+  {bai.anh && (
+    <div class="event-img">
+      <img src={"/" + bai.anh.replace(/^\//, "")} alt={bai.anh_alt ?? ""} loading="lazy">
+    </div>
+  )}
+  <h3>{tieu_de}</h3>
+  <p>{mo_ta}</p>
+  <span class="related-more">
+    Đọc bài viết <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+  </span>
+</a>

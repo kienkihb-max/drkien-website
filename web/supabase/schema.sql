@@ -196,6 +196,54 @@ drop policy if exists anh_xoa on storage.objects;
 create policy anh_xoa on storage.objects
   for delete using (bucket_id = 'anh' and duoc_ghi_bai());
 
+-- ——— Bản nháp của bài ĐÃ ĐĂNG ———
+-- Sửa một bài đang chạy trên web thì bản sửa phải nằm chỗ khác, chứ không
+-- được ghi thẳng vào bài. Trước đây bấm "Lưu nháp" trên bài đã đăng là bài
+-- rơi khỏi blog ngay lúc đó: địa chỉ Google đã lập chỉ mục chết, mà không
+-- có một dòng cảnh báo nào.
+--
+-- Bài CHƯA đăng thì không cần bảng này — chính nó đã là bản nháp
+-- (da_dang = false), và người ngoài không đọc được.
+--
+-- Vì sao là bảng riêng chứ không phải thêm một cột vào bai_viet: chính
+-- sách đọc của bai_viet là "for select using (da_dang)", tức MỌI CỘT của
+-- bài đã đăng đều công khai. Thêm cột nháp vào đó là phơi nguyên nội dung
+-- đang sửa dở ra ngoài. Để bảng riêng thì nó kín bằng chính sách, không
+-- phải chống bằng mẹo phân quyền từng cột.
+create table if not exists ban_nhap (
+  -- Một bài chỉ có một bản nháp đang treo. Bài bị xoá thì nháp đi theo.
+  bai_id  uuid primary key references bai_viet(id) on delete cascade,
+  -- Cả form đóng thành một khối JSON, đúng những khoá mà docForm() sinh ra.
+  -- Không dựng lại từng cột ở đây: thêm một ô vào form là phải sửa hai chỗ
+  -- và sớm muộn cũng lệch nhau.
+  du_lieu jsonb not null,
+  sua_luc timestamptz not null default now()
+);
+
+alter table ban_nhap enable row level security;
+
+-- Nháp là thứ chưa ai được thấy. Không có chính sách công khai nào ở đây,
+-- kể cả cho bài đã đăng.
+drop policy if exists ban_nhap_doc on ban_nhap;
+create policy ban_nhap_doc on ban_nhap
+  for select using (duoc_ghi_bai());
+
+drop policy if exists ban_nhap_them on ban_nhap;
+create policy ban_nhap_them on ban_nhap
+  for insert with check (duoc_ghi_bai());
+
+drop policy if exists ban_nhap_sua on ban_nhap;
+create policy ban_nhap_sua on ban_nhap
+  for update using (duoc_ghi_bai()) with check (duoc_ghi_bai());
+
+drop policy if exists ban_nhap_xoa on ban_nhap;
+create policy ban_nhap_xoa on ban_nhap
+  for delete using (duoc_ghi_bai());
+
+drop trigger if exists ban_nhap_sua_luc on ban_nhap;
+create trigger ban_nhap_sua_luc before update on ban_nhap
+  for each row execute function cham_sua_luc();
+
 -- ——— Việc phải làm bằng tay sau khi chạy file này ———
 -- Thay "TEN_GITHUB_CUA_ANH" bằng tên tài khoản GitHub thật rồi chạy dòng
 -- dưới. Chưa làm bước này thì CHÍNH ANH cũng không ghi bài được.

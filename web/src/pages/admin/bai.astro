@@ -31,8 +31,18 @@ import VetLoi from "../../components/VetLoi.astro";
     </div>
     <div class="qt-dau-phai">
       <button class="qt-nut qt-nut-nhe" type="button" id="nut-quay-lai">Quay lại</button>
-      <button class="qt-nut qt-nut-nhe" type="button" id="nut-luu-nhap">Lưu nháp</button>
-      <button class="qt-nut qt-nut-chinh" type="button" id="nut-dang">Đăng bài</button>
+      <!-- Hai chế độ xem, chỉ hiện khi bài đã đăng MÀ đang có bản sửa treo:
+           lúc đó mới có hai bản khác nhau để so. -->
+      <div class="qt-che-do" id="chon-che-do" hidden>
+        <button class="qt-che-do-nut" type="button" id="nut-xem-dang">Bản đã đăng</button>
+        <button class="qt-che-do-nut" type="button" id="nut-xem-nhap">Bản đang sửa</button>
+      </div>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-bo-nhap" hidden>Bỏ bản sửa</button>
+      <!-- Mỗi lúc chỉ MỘT trong hai nút dưới hiện: còn thay đổi chưa lưu thì
+           là "Lưu", lưu xong mới tới "Đăng". Hai nút cạnh nhau là chỗ dễ bấm
+           nhầm nhất, mà bấm nhầm ở đây thì bài rơi khỏi blog. -->
+      <button class="qt-nut qt-nut-chinh" type="button" id="nut-luu" hidden>Lưu</button>
+      <button class="qt-nut qt-nut-chinh" type="button" id="nut-dang" hidden>Đăng</button>
     </div>
   </header>
 
@@ -166,13 +176,34 @@ import VetLoi from "../../components/VetLoi.astro";
 <script>
   import { supabase } from "../../lib/supabase";
   import { taiAnhLen } from "../../lib/tai-anh";
-  import { duongDanAnh } from "../../lib/co-anh.mjs";
+  import { duongDanAnh } from "../../lib/dia-chi-anh.mjs";
 
   const o = (id: string) => document.getElementById(id) as HTMLInputElement;
   const el = (id: string) => document.getElementById(id) as HTMLElement;
 
-  const id_bai = new URLSearchParams(location.search).get("id");
+  let id_bai = new URLSearchParams(location.search).get("id");
   let bo_soan: any = null;
+
+  // ——— Bản đã đăng và bản đang sửa ———
+  // Bài đã đăng thì hai bản sống song song: bản trên web nằm trong bai_viet,
+  // bản đang sửa nằm trong ban_nhap. Người viết xem được cả hai, và bản trên
+  // web chỉ đổi khi bấm Đăng.
+  /** Bài này đang hiện trên web hay chưa. */
+  let bai_da_dang = false;
+  /** Bài đã đăng này có bản sửa treo trong ban_nhap hay không. */
+  let co_ban_nhap = false;
+  /** "nhap" là bản đang sửa (gõ được), "dang" là bản đã đăng (chỉ xem). */
+  let che_do: "nhap" | "dang" = "nhap";
+  /** Ảnh chụp bản đã đăng, để chế độ "Bản đã đăng" khỏi phải hỏi lại server. */
+  let ban_tren_web: Record<string, any> | null = null;
+  /** Bản sửa đang treo, để đổi chế độ qua lại không mất phần đã lưu. */
+  let ban_nhap_hien: Record<string, any> | null = null;
+  /**
+   * Ảnh chụp form ở lần lưu gần nhất, dạng chuỗi JSON. So với hiện tại để
+   * biết còn thay đổi chưa lưu hay không — đó là thứ quyết định hiện nút
+   * "Lưu" hay nút "Đăng".
+   */
+  let moc_sach = "";
 
   // Mốc theo dõi, chỉ có tác dụng khi chạy dev (xem components/VetLoi.astro).
   const vet = (chu: string, ct?: unknown) =>
@@ -369,36 +400,207 @@ import VetLoi from "../../components/VetLoi.astro";
     };
   }
 
-  async function luu(da_dang: boolean) {
+  /** Đổ một khối dữ liệu (bản nháp hoặc bản đã đăng) vào form. */
+  function dienForm(d: Record<string, any>) {
+    o("o-tieu-de").value = d.tieu_de ?? "";
+    o("o-slug").value = d.slug ?? "";
+    o("o-nhan").value = d.nhan ?? "";
+    o("o-lead").value = d.lead ?? "";
+    o("o-anh").value = d.anh ?? "";
+    o("o-anh-alt").value = d.anh_alt ?? "";
+    o("o-anh-rong").value = d.anh_rong ?? "";
+    o("o-anh-cao").value = d.anh_cao ?? "";
+    o("o-ngay").value = d.ngay_dang ?? "";
+    o("o-noi-bat").checked = !!d.noi_bat;
+    o("o-an").checked = !!d.an;
+    o("o-tai-lieu").value = (d.tai_lieu ?? []).join("\n");
+    o("o-the-tieu-de").value = d.the_tieu_de ?? "";
+    o("o-the-mo-ta").value = d.the_mo_ta ?? "";
+    o("o-seo-tieu-de").value = d.seo_tieu_de ?? "";
+    o("o-seo-mo-ta").value = d.seo_mo_ta ?? "";
+    if (bo_soan) bo_soan.datHTML(d.than_bai ?? "");
+    veXemAnh();
+  }
+
+  /** Ghi nhận "form hiện tại đã lưu rồi", rồi vẽ lại đầu trang. */
+  function datMocSach() {
+    moc_sach = JSON.stringify(docForm());
+    veLaiDauTrang();
+  }
+
+  function coThayDoi() {
+    return JSON.stringify(docForm()) !== moc_sach;
+  }
+
+  /**
+   * Bật/tắt gõ cho cả form. Dùng khi xem "Bản đã đăng": đó là ảnh chụp bản
+   * trên web, gõ vào đó thì gõ vào hư không — mà không có gì báo cho biết.
+   */
+  function datKhoaForm(khoa: boolean) {
+    el("man-chinh")
+      .querySelectorAll<HTMLInputElement>("main input, main textarea, main select, main button")
+      .forEach((e) => { e.disabled = khoa; });
+    const vung = el("khung-soan").querySelector(".st-vung") as HTMLElement | null;
+    if (vung) vung.contentEditable = khoa ? "false" : "true";
+    el("khung-soan").classList.toggle("qt-khoa", khoa);
+  }
+
+  /**
+   * Vẽ lại phần đầu trang cho khớp trạng thái.
+   *
+   * Quy tắc một nút: còn thay đổi chưa lưu thì chỉ hiện "Lưu"; lưu xong,
+   * nếu có gì đó chưa lên web thì chỉ hiện "Đăng". Không bao giờ cả hai.
+   */
+  function veLaiDauTrang() {
+    const xem_ban_web = che_do === "dang";
+    const doi = coThayDoi() && !xem_ban_web;
+    // Có thứ chưa lên web: bài chưa đăng bao giờ, hoặc bài đã đăng mà đang
+    // treo một bản sửa.
+    const cho_dang = !!id_bai && (!bai_da_dang || co_ban_nhap);
+
+    el("nut-luu").hidden = !doi;
+    el("nut-dang").hidden = doi || !cho_dang || xem_ban_web;
+    el("nut-bo-nhap").hidden = !co_ban_nhap || doi;
+
+    // Hai chế độ chỉ có nghĩa khi thật sự tồn tại hai bản khác nhau.
+    el("chon-che-do").hidden = !(bai_da_dang && co_ban_nhap);
+    el("nut-xem-nhap").classList.toggle("qt-che-do-chon", che_do === "nhap");
+    el("nut-xem-dang").classList.toggle("qt-che-do-chon", che_do === "dang");
+
+    el("tieu-de-man").textContent = !id_bai
+      ? "Viết bài mới"
+      : xem_ban_web
+        ? "Bản đã đăng (chỉ xem)"
+        : bai_da_dang
+          ? co_ban_nhap ? "Bản đang sửa, chưa lên web" : "Sửa bài đang hiện trên web"
+          : "Bản nháp, chưa lên web";
+  }
+
+  /** Đổi giữa xem bản đã đăng và bản đang sửa. */
+  function doiCheDo(sang: "nhap" | "dang") {
+    if (sang === che_do) return;
+    // Rời bản đang sửa mà còn thay đổi chưa lưu thì mất, nên hỏi trước.
+    if (sang === "dang" && coThayDoi()) {
+      if (!confirm("Còn thay đổi chưa lưu. Xem bản đã đăng sẽ mất phần vừa gõ. Tiếp?")) return;
+    }
+    che_do = sang;
+    if (sang === "dang") {
+      dienForm(ban_tren_web ?? {});
+      datKhoaForm(true);
+    } else {
+      dienForm(ban_nhap_hien ?? ban_tren_web ?? {});
+      datKhoaForm(false);
+      moc_sach = JSON.stringify(docForm());
+    }
+    veLaiDauTrang();
+  }
+
+  /** Dịch lỗi Postgres ra tiếng người. Trùng đường dẫn là lỗi hay gặp nhất. */
+  function baoLoiGhi(error: { code?: string; message: string }, slug: string) {
+    bao(
+      error.code === "23505"
+        ? 'Đường dẫn "' + slug + '" đã có bài khác dùng rồi. Đổi sang chữ khác.'
+        : "Không lưu được: " + error.message,
+      true
+    );
+  }
+
+  /**
+   * Lưu — KHÔNG đăng, không đụng vào bản đang chạy trên web.
+   *
+   * Bài chưa đăng: ghi thẳng vào bài, vì chính nó đã là bản nháp.
+   * Bài đã đăng: ghi sang bảng ban_nhap, bài trên web nguyên vẹn.
+   */
+  async function luu() {
     const d = docForm();
     if (!d.tieu_de || !d.slug) {
       bao("Cần có tiêu đề và đường dẫn.", true);
       return;
     }
 
-    const ban_ghi = { ...d, da_dang };
-    const { data, error } = id_bai
-      ? await supabase.from("bai_viet").update(ban_ghi).eq("id", id_bai).select("id").single()
-      : await supabase.from("bai_viet").insert(ban_ghi).select("id").single();
+    if (!id_bai) {
+      const { data, error } = await supabase
+        .from("bai_viet").insert({ ...d, da_dang: false }).select("id").single();
+      if (error) return baoLoiGhi(error, d.slug);
+      // Gắn id vào địa chỉ để lần lưu sau là sửa chứ không tạo thêm bài.
+      id_bai = data.id;
+      history.replaceState(null, "", "/admin/bai?id=" + id_bai);
+      bai_da_dang = false;
+      vet("đã tạo bài mới", { id_bai });
+    } else if (bai_da_dang) {
+      const { error } = await supabase
+        .from("ban_nhap")
+        .upsert({ bai_id: id_bai, du_lieu: d }, { onConflict: "bai_id" });
+      if (error) return baoLoiGhi(error, d.slug);
+      co_ban_nhap = true;
+      ban_nhap_hien = d;
+      vet("đã lưu bản sửa của bài đã đăng");
+    } else {
+      const { error } = await supabase
+        .from("bai_viet").update({ ...d, da_dang: false }).eq("id", id_bai);
+      if (error) return baoLoiGhi(error, d.slug);
+      vet("đã lưu bài chưa đăng");
+    }
 
-    if (error) {
-      // Đường dẫn trùng là lỗi hay gặp nhất, và thông báo gốc của Postgres
-      // thì khó hiểu — dịch ra tiếng người.
-      bao(
-        error.code === "23505"
-          ? 'Đường dẫn "' + d.slug + '" đã có bài khác dùng rồi. Đổi sang chữ khác.'
-          : "Không lưu được: " + error.message,
-        true
-      );
+    bao(bai_da_dang ? "Đã lưu bản sửa. Bài trên web vẫn là bản cũ." : "Đã lưu.");
+    datMocSach();
+  }
+
+  /**
+   * Đăng — đưa bản đang sửa lên web.
+   *
+   * Bài đã đăng thì bản sửa đang nằm ở ban_nhap: chép sang bài, rồi xoá
+   * nháp đi. Nhân đây đặt ngay_sua = hôm nay, vì đó là mốc Google nhìn thấy
+   * qua dateModified; đăng bản sửa mà không dời mốc thì Google vẫn tưởng
+   * bài y như cũ.
+   */
+  async function dang() {
+    const d = docForm();
+    if (!d.tieu_de || !d.slug) {
+      bao("Cần có tiêu đề và đường dẫn.", true);
+      return;
+    }
+    if (!id_bai) {
+      bao("Lưu bài trước đã.", true);
       return;
     }
 
-    bao(da_dang ? "Đã đăng bài." : "Đã lưu bản nháp.");
-    // Bài mới: gắn id vào địa chỉ để lần lưu sau là sửa chứ không tạo thêm.
-    if (!id_bai && data) {
-      history.replaceState(null, "", "/admin/bai?id=" + data.id);
-      setTimeout(() => location.reload(), 600);
+    const ban_ghi: Record<string, unknown> = { ...d, da_dang: true };
+    // Bài đăng lần đầu thì chưa có gì để "sửa", để trống cho đúng.
+    if (bai_da_dang) ban_ghi.ngay_sua = new Date().toISOString().slice(0, 10);
+
+    const { error } = await supabase.from("bai_viet").update(ban_ghi).eq("id", id_bai);
+    if (error) return baoLoiGhi(error, d.slug);
+
+    if (co_ban_nhap) {
+      const { error: loi_xoa } = await supabase
+        .from("ban_nhap").delete().eq("bai_id", id_bai);
+      // Bài đã lên web rồi, nên nháp sót lại chỉ là rác chứ không sai nội
+      // dung. Nói ra để biết, đừng làm người viết tưởng đăng thất bại.
+      if (loi_xoa) bao("Đã đăng, nhưng bản nháp cũ chưa xoá được: " + loi_xoa.message, true);
+      co_ban_nhap = false;
     }
+
+    // Bản vừa đăng giờ CHÍNH LÀ bản trên web, và không còn bản sửa nào treo.
+    bai_da_dang = true;
+    ban_tren_web = d;
+    ban_nhap_hien = null;
+    bao("Đã đăng bài.");
+    datMocSach();
+  }
+
+  /** Bỏ bản sửa đang treo, quay về đúng bản đang chạy trên web. */
+  async function boBanNhap() {
+    if (!id_bai || !co_ban_nhap) return;
+    if (!confirm("Bỏ bản đang sửa và quay về bản đã đăng? Không lấy lại được.")) return;
+    const { error } = await supabase.from("ban_nhap").delete().eq("bai_id", id_bai);
+    if (error) {
+      bao("Không bỏ được bản sửa: " + error.message, true);
+      return;
+    }
+    co_ban_nhap = false;
+    bao("Đã bỏ bản sửa.");
+    location.reload();
   }
 
   async function nap() {
@@ -440,35 +642,32 @@ import VetLoi from "../../components/VetLoi.astro";
     o("o-lead").addEventListener("input", veLaiSEO);
 
     if (id_bai) {
-      const { data, error } = await supabase
-        .from("bai_viet").select("*").eq("id", id_bai).single();
+      // Đọc một lượt cả bài trên web và bản sửa đang treo. Bản sửa chỉ tồn
+      // tại với bài đã đăng, nên bảng ban_nhap thường là rỗng.
+      const [{ data, error }, { data: nhap }] = await Promise.all([
+        supabase.from("bai_viet").select("*").eq("id", id_bai).single(),
+        supabase.from("ban_nhap").select("du_lieu").eq("bai_id", id_bai).maybeSingle(),
+      ]);
       if (error || !data) {
         bao("Không mở được bài này: " + (error?.message ?? "không tìm thấy"), true);
       } else {
-        el("tieu-de-man").textContent = "Sửa bài";
+        bai_da_dang = !!data.da_dang;
+        ban_tren_web = data;
+        // Nháp của bài chưa đăng là rác sót lại (bài từng đăng rồi bị gỡ
+        // về nháp). Bỏ qua, kẻo hiện hai bản mà thật ra chỉ có một.
+        co_ban_nhap = bai_da_dang && !!nhap?.du_lieu;
+        ban_nhap_hien = co_ban_nhap ? nhap!.du_lieu : null;
+
         el("duong-dan-xem").textContent = "/" + data.slug;
-        o("o-tieu-de").value = data.tieu_de ?? "";
-        o("o-slug").value = data.slug ?? "";
-        o("o-nhan").value = data.nhan ?? "";
-        o("o-lead").value = data.lead ?? "";
-        o("o-anh").value = data.anh ?? "";
-        o("o-anh-alt").value = data.anh_alt ?? "";
-        o("o-anh-rong").value = data.anh_rong ?? "";
-        o("o-anh-cao").value = data.anh_cao ?? "";
-        o("o-ngay").value = data.ngay_dang ?? "";
-        o("o-noi-bat").checked = !!data.noi_bat;
-        o("o-an").checked = !!data.an;
-        o("o-tai-lieu").value = (data.tai_lieu ?? []).join("\n");
-        o("o-the-tieu-de").value = data.the_tieu_de ?? "";
-        o("o-the-mo-ta").value = data.the_mo_ta ?? "";
-        o("o-seo-tieu-de").value = data.seo_tieu_de ?? "";
-        o("o-seo-mo-ta").value = data.seo_mo_ta ?? "";
-        bo_soan.datHTML(data.than_bai ?? "");
+        // Mở ra là thấy bản đang sửa — đó là bản người viết đang làm việc.
+        dienForm(ban_nhap_hien ?? data);
+        vet("đã nạp bài", { bai_da_dang, co_ban_nhap });
 
         // Chữ trên thẻ đã có sẵn trong bài cũ thì coi như người viết đã
         // chọn — đừng để máy điền đè khi sửa lại tiêu đề.
-        if (data.the_tieu_de) tay["o-the-tieu-de"] = true;
-        if (data.the_mo_ta) tay["o-the-mo-ta"] = true;
+        const nguon = ban_nhap_hien ?? data;
+        if (nguon.the_tieu_de) tay["o-the-tieu-de"] = true;
+        if (nguon.the_mo_ta) tay["o-the-mo-ta"] = true;
       }
     } else {
       o("o-ngay").value = new Date().toISOString().slice(0, 10);
@@ -485,14 +684,34 @@ import VetLoi from "../../components/VetLoi.astro";
     veLaiSEO();
     veXemAnh();
 
+    // Đặt mốc SAU khi veLaiSEO() đã điền xong, không thì mấy ô SEO máy tự
+    // điền bị tính là "thay đổi chưa lưu" và nút Lưu hiện ra ngay lúc mở
+    // bài, chưa ai gõ gì cả.
+    datMocSach();
+
     el("man-cho").hidden = true;
     el("man-chinh").hidden = false;
     vet("nap() xong, form đã hiện");
   }
 
   el("nut-quay-lai").addEventListener("click", () => { location.href = "/admin"; });
-  el("nut-luu-nhap").addEventListener("click", () => luu(false));
-  el("nut-dang").addEventListener("click", () => luu(true));
+  el("nut-luu").addEventListener("click", luu);
+  el("nut-dang").addEventListener("click", dang);
+  el("nut-bo-nhap").addEventListener("click", boBanNhap);
+  el("nut-xem-dang").addEventListener("click", () => doiCheDo("dang"));
+  el("nut-xem-nhap").addEventListener("click", () => doiCheDo("nhap"));
+
+  // Gõ hay bấm gì trong form cũng phải soi lại hai cái nút. Bắt ở khung
+  // ngoài thay vì gắn vào từng ô: thêm ô mới sau này khỏi phải nhớ gắn.
+  ["input", "change"].forEach((ten) =>
+    el("man-chinh").addEventListener(ten, () => veLaiDauTrang())
+  );
+
+  // Rời trang mà còn thay đổi chưa lưu thì trình duyệt hỏi lại. Mất một bài
+  // vừa soạn vì bấm nhầm nút Quay lại là chuyện không sửa lại được.
+  window.addEventListener("beforeunload", (e) => {
+    if (che_do === "nhap" && moc_sach && coThayDoi()) e.preventDefault();
+  });
 
   nap();
 </script>

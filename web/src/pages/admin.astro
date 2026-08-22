@@ -108,10 +108,17 @@ import VetLoi from "../components/VetLoi.astro";
   // ——— Danh sách bài ———
   async function veDanhSach() {
     const khung = o("bang-bai");
-    const { data, error } = await supabase
-      .from("bai_viet")
-      .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat")
-      .order("ngay_dang", { ascending: false });
+    // Đọc kèm danh sách bài đang treo bản sửa chưa đăng. Không nhìn ra
+    // chuyện đó từ danh sách thì bản sửa nằm đó bị bỏ quên, còn bài trên web
+    // vẫn là bản cũ mà chẳng ai hiểu vì sao.
+    const [{ data, error }, { data: ds_nhap }] = await Promise.all([
+      supabase
+        .from("bai_viet")
+        .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat")
+        .order("ngay_dang", { ascending: false }),
+      supabase.from("ban_nhap").select("bai_id"),
+    ]);
+    const co_nhap = new Set((ds_nhap ?? []).map((n: { bai_id: string }) => n.bai_id));
 
     if (error) {
       // Lỗi hay gặp nhất ở đây là đăng nhập được nhưng chưa được cấp quyền
@@ -138,11 +145,13 @@ import VetLoi from "../components/VetLoi.astro";
 
     khung.innerHTML = ds.map((b) => {
       const the = !b.da_dang
-        ? '<span class="qt-nhan-an">Bản nháp</span>'
+        ? '<span class="qt-nhan-nho qt-nhan-an">Bản nháp</span>'
         : b.an
-          ? '<span class="qt-nhan-an">Đã gỡ</span>'
-          : "";
-      const noi_bat = b.noi_bat ? '<span class="qt-nhan-noi-bat">Nổi bật</span>' : "";
+          ? '<span class="qt-nhan-nho qt-nhan-an">Đã gỡ</span>'
+          : co_nhap.has(b.id)
+            ? '<span class="qt-nhan-nho qt-nhan-an">Có bản sửa chưa đăng</span>'
+            : "";
+      const noi_bat = b.noi_bat ? '<span class="qt-nhan-nho qt-nhan-noi-bat">Nổi bật</span>' : "";
       return (
         '<div class="qt-bai">' +
         '  <div class="qt-bai-giua">' +

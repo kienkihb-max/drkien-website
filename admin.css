@@ -467,3 +467,26 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 .qt-tha-anh-dang { border-color: var(--qt-chinh); background: #eef4ff; }
 .qt-tha-anh img { max-width: 100%; max-height: 320px; border-radius: 6px; display: block; }
 .qt-tha-anh p { margin: 0 0 10px; color: var(--qt-chu-mo); }
+
+/* ——— Hai chế độ: bản đã đăng / bản đang sửa ——— */
+/* Chỉ hiện khi bài đã đăng mà đang treo một bản sửa, tức khi thật sự có hai
+   bản khác nhau để so. */
+.qt-che-do {
+  display: inline-flex;
+  border: 1px solid var(--qt-vien);
+  border-radius: var(--qt-bo-goc);
+  overflow: hidden;
+}
+.qt-che-do-nut {
+  border: 0;
+  background: #fff;
+  color: var(--qt-chu-mo);
+  padding: 7px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.qt-che-do-nut + .qt-che-do-nut { border-left: 1px solid var(--qt-vien); }
+.qt-che-do-chon { background: var(--qt-chinh); color: #fff; }
+/* Đang xem bản đã đăng: làm mờ hẳn ô soạn thảo để không ai ngồi gõ vào một
+   ảnh chụp rồi tưởng mình đang sửa bài. */
+.qt-khoa { opacity: 0.65; pointer-events: none; }

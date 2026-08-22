@@ -108,6 +108,9 @@ import VetLoi from "../../components/VetLoi.astro";
           <input type="file" id="o-tep-anh" accept="image/*" hidden>
         </div>
         <p class="qt-phu" id="tin-anh"></p>
+        <!-- Chỉ hiện khi đang có ảnh. Đổi ảnh thì cứ thả ảnh mới vào là
+             xong, nút này dành cho lúc muốn bài KHÔNG có ảnh bìa. -->
+        <button class="qt-nut qt-nut-nguy-nhe" type="button" id="nut-bo-anh" hidden>Xoá ảnh</button>
 
         <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh</label>
         <p class="qt-goi-y">
@@ -116,9 +119,10 @@ import VetLoi from "../../components/VetLoi.astro";
         </p>
         <input class="qt-o" type="text" id="o-anh-alt">
 
-        <!-- Đường dẫn thật, để xem lại hoặc dán tay khi cần. -->
-        <label class="qt-nhan" for="o-anh">Đường dẫn ảnh</label>
-        <input class="qt-o" type="text" id="o-anh" placeholder="assets/img/ten-anh.jpg">
+        <!-- Đường dẫn ảnh không hiện ra nữa: máy tự điền khi tải ảnh lên,
+             người viết không có việc gì phải gõ vào đó. Vẫn giữ làm ô ẩn vì
+             đây là thứ thật sự lưu vào database. -->
+        <input type="hidden" id="o-anh">
         <input type="hidden" id="o-anh-rong">
         <input type="hidden" id="o-anh-cao">
       </fieldset>
@@ -254,6 +258,27 @@ import VetLoi from "../../components/VetLoi.astro";
       xem.hidden = true;
       chu.hidden = false;
     }
+    el("nut-bo-anh").hidden = !dia_chi;
+  }
+
+  /**
+   * Bỏ ảnh bìa khỏi bài.
+   *
+   * KHÔNG xoá file trên kho ảnh: bản đang chạy trên web vẫn đang dùng đúng
+   * tấm đó cho tới khi bấm Đăng, xoá file ngay là ảnh trên web chết trước
+   * khi bài kịp đổi. File thừa sẽ đi cùng bài lúc xoá hẳn bài.
+   */
+  function boAnh() {
+    if (!o("o-anh").value.trim()) return;
+    if (!confirm("Bỏ ảnh bìa của bài này?")) return;
+    o("o-anh").value = "";
+    o("o-anh-rong").value = "";
+    o("o-anh-cao").value = "";
+    el("tin-anh").textContent = "";
+    veXemAnh();
+    // Ô ẩn đổi giá trị thì trình duyệt không bắn sự kiện nào, mà hai nút
+    // Lưu/Đăng lại dựa vào đó để biết có gì chưa lưu.
+    veLaiDauTrang();
   }
 
   async function nhanAnh(tep: File | undefined) {
@@ -268,6 +293,9 @@ import VetLoi from "../../components/VetLoi.astro";
       o("o-anh-rong").value = String(kq.rong);
       o("o-anh-cao").value = String(kq.cao);
       veXemAnh();
+      // Ô đường dẫn nay là ô ẩn, đổi giá trị không bắn sự kiện nào — phải
+      // tự gọi để nút Lưu hiện ra.
+      veLaiDauTrang();
       tin.textContent =
         `Xong — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
         (o("o-anh-alt").value.trim() ? "" : " Nhớ điền mô tả ảnh bên dưới.");
@@ -281,7 +309,7 @@ import VetLoi from "../../components/VetLoi.astro";
   o("o-tep-anh").addEventListener("change", (e) => {
     nhanAnh((e.target as HTMLInputElement).files?.[0]);
   });
-  o("o-anh").addEventListener("input", veXemAnh);
+  el("nut-bo-anh").addEventListener("click", boAnh);
 
   // Kéo thả. Phải chặn cả dragover, không thì trình duyệt mở thẳng tấm ảnh
   // ra thay vì đưa cho mình, và người viết mất luôn bài đang soạn dở.

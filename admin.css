@@ -90,6 +90,11 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 .qt-nut-nhe { background: #fff; border-color: var(--qt-vien); color: var(--qt-chu); }
 .qt-nut-nhe:hover:not(:disabled) { border-color: var(--qt-chinh); color: var(--qt-chinh); }
 .qt-nut-nguy { background: var(--qt-nguy); color: #fff; }
+/* Việc nguy hiểm nhưng gỡ lại được — bỏ ảnh bìa chẳng hạn: viền đỏ cảnh
+   báo, nhưng không đặc như nút xoá hẳn bài, để hai thứ đừng trông giống
+   nhau ở chỗ mà bấm nhầm là mất dữ liệu. */
+.qt-nut-nguy-nhe { background: #fff; border-color: var(--qt-nguy); color: var(--qt-nguy); }
+.qt-nut-nguy-nhe:hover:not(:disabled) { background: var(--qt-nguy); color: #fff; }
 .qt-nut-rong { width: 100%; }
 .qt-hang-nut { display: flex; gap: 10px; flex-wrap: wrap; }
 .qt-hang-nut-phai { justify-content: flex-end; margin-top: 16px; }

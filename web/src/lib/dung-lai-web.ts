@@ -49,29 +49,25 @@ export async function dungLaiWeb(): Promise<KetQuaDungLai> {
   }
 
   try {
-    await fetch(dia_chi, { method: "POST" });
-    return { xong: true, chu: "Web đang dựng lại, khoảng 1–2 phút nữa là thấy bài." };
-  } catch {
-    // Trình duyệt chặn vì CORS thì fetch ném lỗi TRƯỚC khi biết máy chủ trả
-    // gì. Gửi lại ở chế độ no-cors: yêu cầu vẫn đi tới nơi, chỉ là mình
-    // không đọc được câu trả lời. Nên câu báo dưới đây không dám khẳng định
-    // là xong.
-    try {
-      await fetch(dia_chi, { method: "POST", mode: "no-cors" });
-      return {
-        xong: true,
-        chu:
-          "Đã gửi yêu cầu dựng lại web (không đọc được kết quả trả về). " +
-          "Khoảng 1–2 phút nữa mở web xem, chưa thấy thì kiểm tra trong Cloudflare.",
-      };
-    } catch (loi) {
-      return {
-        xong: false,
-        chu:
-          "Bài đã đăng, nhưng không gọi được lệnh dựng lại web: " +
-          (loi instanceof Error ? loi.message : String(loi)) +
-          ". Vào Cloudflare bấm Retry deployment là xong.",
-      };
-    }
+    // "no-cors" chứ không phải gọi thường: Cloudflare không cho trang khác
+    // tên miền đọc câu trả lời, nên fetch thường sẽ ném lỗi — dù yêu cầu ĐÃ
+    // tới nơi và web ĐÃ dựng lại. Thử gọi thường trước rồi gọi lại khi lỗi
+    // là dựng hai lần cho mỗi lần bấm Đăng; đã dính đúng vậy hôm nối máy.
+    //
+    // Đổi lại thì mình không biết Cloudflare trả về gì, nên câu báo dưới đây
+    // không dám khẳng định là xong.
+    await fetch(dia_chi, { method: "POST", mode: "no-cors" });
+    return {
+      xong: true,
+      chu: "Web đang dựng lại, khoảng 1–2 phút nữa mở lại là thấy bài.",
+    };
+  } catch (loi) {
+    return {
+      xong: false,
+      chu:
+        "Bài đã đăng, nhưng không gọi được lệnh dựng lại web: " +
+        (loi instanceof Error ? loi.message : String(loi)) +
+        ". Vào Cloudflare bấm Retry deployment là xong.",
+    };
   }
 }

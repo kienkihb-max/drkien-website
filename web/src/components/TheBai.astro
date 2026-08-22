@@ -11,12 +11,10 @@ interface Props {
 }
 const { bai, them_lop } = Astro.props;
 
-// Chữ trên thẻ lấy thẳng từ bài: tiêu đề bài và mô tả Google. Trước đây có
-// hai cột riêng cho chữ trên thẻ, nhưng người viết phải gõ lại lần nữa
-// những gì vừa gõ ở trên — và sửa tiêu đề bài xong thì thẻ ngoài trang blog
-// vẫn đề tên cũ mà không có dấu hiệu gì. Bỏ đi, còn đúng một nguồn.
-const tieu_de = bai.tieu_de;
-const mo_ta = bai.seo_mo_ta || "";
+// Chữ trên thẻ là chữ người đọc thấy, có thể khác tiêu đề bài. Chưa đặt
+// riêng thì lấy tiêu đề bài và mô tả Google.
+const tieu_de = bai.the_tieu_de || bai.tieu_de;
+const mo_ta = bai.the_mo_ta || bai.seo_mo_ta || "";
 ---
 
 <a class:list={["event-card", "event-card-link", them_lop]} href={"/" + bai.slug}>

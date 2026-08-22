@@ -1,0 +1,19 @@
+-- Dựng lại hai cột chữ-trên-thẻ, lấy nguyên văn từ blog-cards.js của
+-- site cũ (commit 7d9bef3~1 trong lịch sử git).
+alter table bai_viet
+  add column if not exists the_tieu_de text,
+  add column if not exists the_mo_ta   text;
+
+update bai_viet set the_tieu_de = 'Câu chuyện về cứu ngải', the_mo_ta = 'Bà đau lưng vì bế cháu cả ngày, và câu nói "mẹ hợp cứu ngải hơn" khiến mình nghĩ lại về một kỹ thuật đã sống hàng nghìn năm giữa thời của đủ loại máy tạo nhiệt.' where slug = 'cau-chuyen-ve-cuu-ngai';
+update bai_viet set the_tieu_de = 'Đau thần kinh tọa: khi nào cần lo, khi nào chỉ cần kiên nhẫn', the_mo_ta = 'Dấu hiệu nào cần đi cấp cứu ngay, dấu hiệu nào chỉ cần theo dõi — và vì sao khoảng 50% người bệnh cải thiện rõ sau 12 tuần dù điều trị bằng cách nào.' where slug = 'dau-lan-xuong-chan-do-re-than-kinh-that-lung';
+update bai_viet set the_tieu_de = 'Công nghệ AI phân tích dáng chạy: Khi khoa học phòng lab bước ra đường chạy', the_mo_ta = 'Vì sao điều này đáng quan tâm, kể cả khi bạn không phải vận động viên chuyên nghiệp' where slug = 'cong-nghe-ai-phan-tich-dang-chay-khi-khoa-hoc-phong-lab-buoc';
+update bai_viet set the_tieu_de = 'SEA Games 31 và một nhiệm vụ đặc biệt', the_mo_ta = 'Kỷ niệm làm công tác y tế tại SEA Games 31: từ áp lực phòng chống COVID-19, theo dõi đoàn Singapore tại Landmark72 đến những cuộc gặp với các VĐV hàng đầu.' where slug = 'sea-games-31-va-mot-nhiem-vu-dac-biet';
+update bai_viet set the_tieu_de = 'Đau lưng dân văn phòng: đừng chờ đau mới khám', the_mo_ta = 'Ghi chép từ buổi talkshow về cột sống cho dân văn phòng: những câu hỏi hay gặp nhất, và vì sao vài phút đứng dậy mỗi giờ lại có giá trị hơn ta tưởng.' where slug = 'dau-cot-song-dan-van-phong-talkshow-tigren';
+update bai_viet set the_tieu_de = 'Những bài học mùa hè có thể theo các em nhiều năm sau', the_mo_ta = 'Buổi tập huấn sơ cứu cho hơn 150 thiếu nhi phường Mai Dịch: vì sao trẻ em cũng cần biết sơ cứu, và những thói quen nhỏ tạo nền tảng sức khỏe lâu dài.' where slug = 'so-cuu-tre-em-tap-huan-mai-dich';
+update bai_viet set the_tieu_de = 'Chuyện lạ trong phòng y tế sự kiện', the_mo_ta = 'Ngất vì đói, chuột rút của staff, sự cố pháo hoa và cả một chiếc flycam rơi trúng đầu khán giả — những ca bệnh không ai nghĩ sẽ gặp.' where slug = 'cau-chuyen-hi-huu-y-te-su-kien';
+update bai_viet set the_tieu_de = 'Vì sao tổn thương stress xương ghe đáng lo ngại?', the_mo_ta = 'Các nghiên cứu cho thấy tổn thương stress xương ghe chiếm khoảng 14–35% tổng số tổn thương stress vùng bàn chân và cổ chân, thường gặp ở vận động viên điền kinh, nhảy xa, bóng rổ và đặc biệt là người chạy bộ.' where slug = 'vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai';
+update bai_viet set the_tieu_de = 'Chuột rút khi chạy bộ: Chuối hay tập tạ?', the_mo_ta = 'Nghiên cứu trên 98 vận động viên marathon cho thấy điều khác biệt không nằm ở nước hay điện giải.' where slug = 'chuot-rut-khi-chay-bo';
+update bai_viet set the_tieu_de = '6 Sự thật về Thoát vị đĩa đệm', the_mo_ta = 'Đĩa đệm không hề "trượt", MRI bất thường gặp cả ở người không đau, và khối thoát vị có thể tự tiêu biến.' where slug = 'van-dong-phuc-hoi-cot-song';
+update bai_viet set the_tieu_de = 'Chạy lại sau tái tạo dây chằng chéo trước', the_mo_ta = 'Vì sao mốc 12 tuần không đủ để quyết định cho chạy lại, và những tiêu chí chức năng cần đạt trước đó.' where slug = 'chuot-rut-khi-van-dong';
+update bai_viet set the_tieu_de = 'Hiểu đúng về hội chứng quá tải thường gặp ở người chạy bộ', the_mo_ta = 'Nhận diện hội chứng quá tải thường gặp ở người chạy bộ, và vì sao điều chỉnh tải vận động quan trọng hơn nghỉ ngơi đơn thuần.' where slug = 'shin-splints-dau-xuong-chay';
+update bai_viet set the_tieu_de = 'Đi làm cả ngày đã đủ vận động chưa?', the_mo_ta = 'Nghịch lý hoạt động thể chất: vì sao lao động chân tay cả ngày không thay được một buổi tập có chủ đích.' where slug = 'xu-huong-phat-trien-yhct';

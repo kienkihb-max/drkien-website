@@ -15,6 +15,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
-    "astro": "^7.2.4"
+    "astro": "^7.2.4",
+    "image-size": "^2.0.2"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
   }
 }

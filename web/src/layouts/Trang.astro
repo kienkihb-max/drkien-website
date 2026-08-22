@@ -7,6 +7,7 @@
 // chép, và thực tế đã có trang lệch canonical với trang khác mà không ai
 // biết. Nay chỉ còn một bản.
 import { TEN_SITE, GOC } from "../data/thong-tin.mjs";
+import { coAnh } from "../lib/co-anh.mjs";
 import BoIcon from "../components/BoIcon.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -42,7 +43,11 @@ const {
   tieu_de,
   mo_ta,
   duong_dan,
-  anh = "assets/img/og-default.jpg",
+  // Ảnh chia sẻ dùng chung của site. Trang chủ, trang hồ sơ và trang blog
+  // đều dùng đúng file này — đừng đổi sang tên khác nếu file đó không có
+  // thật, vì thẻ og:image trỏ vào ảnh không tồn tại thì link chia sẻ lên
+  // Facebook hiện trơ không ảnh, mà trên trang thì chẳng có dấu hiệu gì.
+  anh = "assets/img/og-share.jpg",
   anh_alt = "",
   loai = "website",
   ngay_dang,
@@ -54,6 +59,9 @@ const {
 
 const dia_chi = GOC + (duong_dan ? "/" + duong_dan : "/");
 const anh_day_du = anh.startsWith("http") ? anh : GOC + "/" + anh.replace(/^\//, "");
+// Đo kích thước thật của ảnh chia sẻ. Ghi cứng một cỡ cho mọi trang là sai
+// ở gần như mọi trang — ảnh của site đang từ 565x353 tới 1200x1448.
+const co = anh.startsWith("http") ? { rong: 1200, cao: 630 } : coAnh(anh);
 // Tự thêm " — Bác sĩ Lê Trung Kiên" vào cuối tiêu đề, TRỪ KHI tên đã có sẵn
 // trong đó. Xét theo tên riêng và không phân biệt hoa thường: có trang đặt
 // tiêu đề "Hồ sơ bác sĩ Lê Trung Kiên…" viết thường chữ "bác sĩ", so khớp
@@ -92,8 +100,8 @@ const tieu_de_day_du = /lê trung kiên/i.test(tieu_de)
   <meta property="og:description" content={mo_ta}>
   <meta property="og:url" content={dia_chi}>
   <meta property="og:image" content={anh_day_du}>
-  <meta property="og:image:width" content="1440">
-  <meta property="og:image:height" content="810">
+  <meta property="og:image:width" content={String(co.rong)}>
+  <meta property="og:image:height" content={String(co.cao)}>
   {anh_alt && <meta property="og:image:alt" content={anh_alt}>}
   {loai === "article" && ngay_dang && (
     <>

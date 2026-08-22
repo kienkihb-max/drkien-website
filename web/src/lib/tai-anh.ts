@@ -23,9 +23,14 @@ export interface AnhDaTai {
   co_file: number;
 }
 
-/** Đổi tên file thành dạng không dấu, an toàn cho đường dẫn. */
-function tenAnToan(ten: string) {
-  const duoi = (ten.match(/\.[a-z0-9]+$/i)?.[0] ?? ".jpg").toLowerCase();
+/**
+ * Đổi tên file thành dạng không dấu, an toàn cho đường dẫn.
+ * @param duoi_moi đuôi bắt buộc, dùng khi ảnh đã bị nén lại thành JPEG — để
+ *   tên file khỏi đeo đuôi .png trong khi ruột đã là JPEG.
+ */
+function tenAnToan(ten: string, duoi_moi?: string) {
+  const duoi =
+    duoi_moi ?? (ten.match(/\.[a-z0-9]+$/i)?.[0] ?? ".jpg").toLowerCase();
   return (
     ten
       .replace(/\.[a-z0-9]+$/i, "")
@@ -99,7 +104,10 @@ export async function taiAnhLen(tep: File, thu_muc = "bai"): Promise<AnhDaTai> {
   // Tên file gắn thêm dấu thời gian để tải lại cùng một tên không đè lên
   // ảnh cũ — bài cũ vẫn đang dùng tấm đó.
   const dau_thoi_gian = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const ten = `${thu_muc}/${dau_thoi_gian}-${tenAnToan(tep.name)}`;
+  const ten = `${thu_muc}/${dau_thoi_gian}-${tenAnToan(
+    tep.name,
+    can_ve_lai ? ".jpg" : undefined
+  )}`;
 
   const { error } = await supabase.storage.from("anh").upload(ten, du_lieu, {
     contentType: can_ve_lai ? "image/jpeg" : tep.type,

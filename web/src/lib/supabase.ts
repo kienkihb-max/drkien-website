@@ -50,6 +50,34 @@ export interface BaiViet {
 }
 
 /**
+ * Bài chỉ dùng để thử, KHÔNG BAO GIỜ được ra web thật.
+ *
+ * Dev và web thật dùng chung một database, nên bài để thử mà bấm Đăng là nó
+ * lên web thật ngay, và Google có thể ăn nó trước khi kịp gỡ. Chặn ở đây
+ * thì dù bài có da_dang = true, có nổi bật, có gì đi nữa, lúc build ra web
+ * thật nó vẫn không thành trang, không vào blog, không vào sitemap.
+ *
+ * Chặn bằng danh sách cứng chứ không bằng một cột trong database: cột thì
+ * sửa được từ trang admin, mà đây là thứ không nên đổi được bằng một cú
+ * bấm. Muốn thêm bài thử thì thêm slug vào đây, tức phải đi qua kho mã.
+ */
+const BAI_CHI_DE_THU = ["bai-test"];
+
+/**
+ * Bỏ bài thử khi build ra web thật. Chạy astro dev thì giữ, vì đó đúng là
+ * lúc cần chúng để thử.
+ */
+function boBaiThu(ds: BaiViet[]): BaiViet[] {
+  if (import.meta.env.DEV) return ds;
+  const con = ds.filter((b) => !BAI_CHI_DE_THU.includes(b.slug));
+  const bo = ds.length - con.length;
+  // Nói ra, đừng bỏ im: hôm nào một bài thật bị đặt trùng đường dẫn với bài
+  // thử thì nó biến mất khỏi web mà không có dấu hiệu nào.
+  if (bo) console.log(`[bài thử] bỏ ${bo} bài khỏi bản build: ${BAI_CHI_DE_THU.join(", ")}`);
+  return con;
+}
+
+/**
  * Các bài hiện lên website: đã đăng, chưa bị gỡ, mới nhất trước.
  * Dùng lúc build để sinh trang blog và từng trang bài viết.
  */
@@ -61,7 +89,7 @@ export async function layBaiHienLen(): Promise<BaiViet[]> {
     .eq("an", false)
     .order("ngay_dang", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return boBaiThu(data ?? []);
 }
 
 /**
@@ -75,5 +103,5 @@ export async function layBaiCanSinhFile(): Promise<BaiViet[]> {
     .eq("da_dang", true)
     .order("ngay_dang", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return boBaiThu(data ?? []);
 }

@@ -1063,6 +1063,11 @@ main img.zoomable { cursor: zoom-in; }
 }
 .footer-brand .brand { margin-bottom: 14px; }
 .footer-brand p { font-size: var(--fs-sm); margin-bottom: 20px; }
+/* Nhận cả h3 lẫn h4: footer bản Astro dùng h3 để không nhảy bậc tiêu đề
+   (trang nào không có h3 trong thân thì h2 → h4 là bỏ mất một bậc), còn
+   site-footer.js của bản cũ vẫn đang dựng h4. Giữ cả hai cho tới khi bản
+   cũ nghỉ hẳn. */
+.footer-col h3,
 .footer-col h4 {
   font-size: var(--fs-sm);
   color: var(--text-heading);

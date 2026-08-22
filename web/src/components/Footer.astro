@@ -41,7 +41,7 @@ const nam = new Date().getFullYear();
     </div>
 
     <div class="footer-col">
-      <h4>Địa chỉ phòng khám</h4>
+      <h3>Địa chỉ phòng khám</h3>
       <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> {DIA_CHI}</p>
       <div class="footer-map">
         <iframe src={BAN_DO} title="Bản đồ tới phòng khám" loading="lazy"
@@ -50,14 +50,14 @@ const nam = new Date().getFullYear();
     </div>
 
     <div class="footer-col">
-      <h4>Giờ làm việc</h4>
+      <h3>Giờ làm việc</h3>
       <ul class="footer-hours">
         {GIO.map((d) => <li><span>{d.ngay}</span><span>{d.gio}</span></li>)}
       </ul>
     </div>
 
     <div class="footer-col">
-      <h4>Liên hệ</h4>
+      <h3>Liên hệ</h3>
       <a class="footer-link" href={ZALO} target="_blank" rel="noopener">
         <svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: {SO_ZALO}
       </a>
@@ -68,7 +68,7 @@ const nam = new Date().getFullYear();
 
     {SO_DO_TRANG.map((cot) => (
       <div class="footer-col">
-        <h4>{cot.tieu_de}</h4>
+        <h3>{cot.tieu_de}</h3>
         <ul class="footer-sitemap-list">
           {cot.muc.map((m) => <li><a href={m.trang}>{m.chu}</a></li>)}
         </ul>

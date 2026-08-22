@@ -177,6 +177,7 @@ import VetLoi from "../../components/VetLoi.astro";
   import { supabase } from "../../lib/supabase";
   import { taiAnhLen } from "../../lib/tai-anh";
   import { duongDanAnh } from "../../lib/dia-chi-anh.mjs";
+  import { dungLaiWeb } from "../../lib/dung-lai-web";
 
   const o = (id: string) => document.getElementById(id) as HTMLInputElement;
   const el = (id: string) => document.getElementById(id) as HTMLElement;
@@ -585,8 +586,15 @@ import VetLoi from "../../components/VetLoi.astro";
     bai_da_dang = true;
     ban_tren_web = d;
     ban_nhap_hien = null;
-    bao("Đã đăng bài.");
+    bao("Đã đăng bài. Đang bảo web dựng lại…");
     datMocSach();
+
+    // Bài nằm trong database thì chưa thành trang: web là HTML dựng sẵn,
+    // phải build lại mới có file .html cho bài này. Gọi sau khi đã báo "đã
+    // đăng" và đã đặt mốc sạch — tới đây bài đã nằm yên trong database rồi,
+    // bước dưới hỏng cũng không mất gì.
+    const kq = await dungLaiWeb();
+    bao("Đã đăng bài. " + kq.chu, !kq.xong);
   }
 
   /** Bỏ bản sửa đang treo, quay về đúng bản đang chạy trên web. */

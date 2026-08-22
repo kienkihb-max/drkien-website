@@ -1,0 +1,35 @@
+---
+// Trang báo "không có trang này".
+//
+// Vì sao phải có: Cloudflare Pages, khi kho không có file 404.html, đem
+// TRANG CHỦ ra trả cho mọi địa chỉ sai — kèm mã 200, tức là nói với Google
+// "địa chỉ này có thật". Gõ nhầm một chữ trong đường dẫn là ra một "trang"
+// mới trùng hệt trang chủ. Google gọi đó là soft 404 và trừ điểm.
+//
+// Có file này thì Cloudflare trả đúng mã 404, và người đọc lạc đường có
+// đường quay lại thay vì tưởng mình đang ở trang chủ.
+import Trang from "../layouts/Trang.astro";
+---
+
+<Trang
+  tieu_de="Không tìm thấy trang"
+  mo_ta="Địa chỉ này không có trên website. Có thể bài đã đổi đường dẫn hoặc bạn gõ nhầm một chữ."
+  duong_dan="404"
+  khong_lap_chi_muc={true}
+  loai_trang="article"
+  lop_body="subpage"
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <h1>Không tìm thấy trang này</h1>
+      <p class="lead">
+        Địa chỉ bạn vừa mở không có trên website. Có thể bài viết đã đổi
+        đường dẫn, hoặc đường link bạn nhận được bị thiếu mất một chữ.
+      </p>
+      <p class="cv-link-wrap">
+        <a class="btn btn-primary" href="/">Về trang chủ</a>
+        <a class="btn" href="/blog">Xem các bài viết</a>
+      </p>
+    </div>
+  </section>
+</Trang>

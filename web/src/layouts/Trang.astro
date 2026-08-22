@@ -33,6 +33,12 @@ interface Props {
   ngay_dang?: string;
   /** Dữ liệu có cấu trúc (JSON-LD) riêng của trang, nếu có. */
   schema?: unknown;
+  /**
+   * Trang không được Google lập chỉ mục, ví dụ trang báo lỗi 404. Bỏ luôn
+   * canonical: trang 404 mà trỏ canonical về chính nó là đang bảo Google
+   * "đây là một trang thật, cứ lưu vào".
+   */
+  khong_lap_chi_muc?: boolean;
   /** Đặt vào thuộc tính data-page của <html>, style.css dựa vào đó. */
   loai_trang?: string;
   /** Thêm class cho <body>, ví dụ "subpage". */
@@ -58,6 +64,7 @@ const {
   loai = "website",
   ngay_dang,
   schema,
+  khong_lap_chi_muc = false,
   loai_trang,
   lop_body,
   scripts = [],
@@ -90,7 +97,9 @@ const tieu_de_day_du = /lê trung kiên/i.test(tieu_de)
 
   <title>{tieu_de_day_du}</title>
   <meta name="description" content={mo_ta}>
-  <link rel="canonical" href={dia_chi}>
+  {khong_lap_chi_muc
+    ? <meta name="robots" content="noindex, follow" />
+    : <link rel="canonical" href={dia_chi} />}
 
   <!-- Tải font không chặn hiển thị: trình duyệt vẽ chữ bằng font hệ thống
        trước, đổi sang font riêng khi tải xong. Chữ hiện sớm hơn trên mạng chậm. -->

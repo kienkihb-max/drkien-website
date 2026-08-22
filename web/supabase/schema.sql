@@ -251,3 +251,45 @@ create trigger ban_nhap_sua_luc before update on ban_nhap
 --   insert into nguoi_viet (tai_khoan_github, ghi_chu)
 --   values ('ten_github_cua_anh', 'Chủ site')
 --   on conflict do nothing;
+
+-- ——— Cấu hình kín ———
+-- Chỗ để những giá trị mà trang quản trị cần dùng nhưng KHÔNG được nằm
+-- trong mã nguồn: mã nguồn của site là tĩnh, ai xem trang cũng tải về đọc
+-- được, kể cả người không đăng nhập.
+--
+-- Giá trị đầu tiên phải cất ở đây là "moc_dung_lai" — địa chỉ Deploy Hook
+-- của Cloudflare Pages. Gọi vào địa chỉ đó là web dựng lại; nó không hỏi
+-- mật khẩu, nên ai biết địa chỉ cũng bắt web dựng lại được. Không sập được
+-- site, nhưng đủ để người rảnh rỗi làm phiền, nên cất kín.
+--
+-- Bảng này KHÔNG có chính sách ghi. RLS mặc định là cấm, nên qua API thì
+-- không ai thêm/sửa/xoá được — kể cả người viết bài. Muốn đổi giá trị phải
+-- vào Supabase → SQL Editor, đúng như bảng nguoi_viet.
+create table if not exists cau_hinh (
+  khoa    text primary key,
+  gia_tri text not null,
+  ghi_chu text,
+  sua_luc timestamptz not null default now()
+);
+
+alter table cau_hinh enable row level security;
+
+-- Đọc: chỉ người có quyền ghi bài. Người đọc bình thường không thấy gì.
+drop policy if exists cau_hinh_doc on cau_hinh;
+create policy cau_hinh_doc on cau_hinh
+  for select using (duoc_ghi_bai());
+
+drop trigger if exists cau_hinh_sua_luc on cau_hinh;
+create trigger cau_hinh_sua_luc before update on cau_hinh
+  for each row execute function cham_sua_luc();
+
+-- ——— Việc phải làm bằng tay: nối Cloudflare ———
+-- Sau khi tạo Deploy Hook trong Cloudflare Pages (Settings → Builds &
+-- deployments → Deploy hooks), chép địa chỉ nó cho rồi chạy dòng dưới.
+-- Chưa làm bước này thì đăng bài vẫn chạy bình thường, chỉ là web không tự
+-- dựng lại — trang quản trị sẽ nói rõ điều đó chứ không im lặng.
+--
+--   insert into cau_hinh (khoa, gia_tri, ghi_chu)
+--   values ('moc_dung_lai', 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/...',
+--           'Deploy Hook của Cloudflare Pages, nhánh main')
+--   on conflict (khoa) do update set gia_tri = excluded.gia_tri, sua_luc = now();

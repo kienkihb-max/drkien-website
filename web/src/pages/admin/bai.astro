@@ -28,6 +28,9 @@ import VetLoi from "../../components/VetLoi.astro";
     <div class="qt-dau-trai">
       <strong><a href="/admin">Quản trị blog</a></strong>
       <span class="qt-kho" id="nhan-tai-khoan"></span>
+      <!-- Để bên TRÁI, cách xa Lưu/Đăng: đây là nút duy nhất trong trang gây
+           mất hẳn dữ liệu, đặt cạnh mấy nút hay bấm là sớm muộn cũng bấm nhầm. -->
+      <button class="qt-nut qt-nut-nguy" type="button" id="nut-xoa" hidden>Xoá bài</button>
     </div>
     <div class="qt-dau-phai">
       <button class="qt-nut qt-nut-nhe" type="button" id="nut-quay-lai">Quay lại</button>
@@ -462,6 +465,8 @@ import VetLoi from "../../components/VetLoi.astro";
     el("nut-luu").hidden = !doi;
     el("nut-dang").hidden = doi || !cho_dang || xem_ban_web;
     el("nut-bo-nhap").hidden = !co_ban_nhap || doi;
+    // Bài chưa lưu lần nào thì chưa có gì để xoá — bấm Quay lại là xong.
+    el("nut-xoa").hidden = !id_bai;
 
     // Hai chế độ chỉ có nghĩa khi thật sự tồn tại hai bản khác nhau.
     el("chon-che-do").hidden = !(bai_da_dang && co_ban_nhap);
@@ -597,6 +602,73 @@ import VetLoi from "../../components/VetLoi.astro";
     bao("Đã đăng bài. " + kq.chu, !kq.xong);
   }
 
+  /**
+   * Xoá hẳn bài khỏi database, kèm ảnh của nó trên kho.
+   *
+   * Đây là việc KHÔNG lấy lại được, nên bắt gõ đúng đường dẫn bài mới chịu
+   * làm — hộp "Bạn có chắc không?" thì ai cũng bấm OK theo phản xạ.
+   *
+   * Với bài đang chạy trên web, xoá hẳn hầu như luôn là lựa chọn sai: mọi
+   * link đã chia sẻ ra ngoài sẽ thành trang lỗi, và Google mất luôn thứ hạng
+   * của địa chỉ đó. Cái cần dùng là "Gỡ khỏi danh sách" — nên chỗ này nói
+   * thẳng điều đó trước khi hỏi.
+   */
+  async function xoaBai() {
+    if (!id_bai) return;
+    const slug = o("o-slug").value.trim();
+
+    const canh_bao = bai_da_dang
+      ? "BÀI NÀY ĐANG TRÊN WEB.\n\n" +
+        "Xoá hẳn thì mọi link đã chia sẻ ra ngoài sẽ thành trang lỗi, và " +
+        "Google mất luôn thứ hạng của địa chỉ này.\n\n" +
+        "Chỉ muốn nó biến khỏi trang blog thôi thì bấm Cancel, rồi tích " +
+        '"Gỡ khỏi danh sách" và Đăng lại — địa chỉ cũ vẫn sống.\n\n'
+      : "";
+
+    const go = prompt(
+      canh_bao + "Xoá hẳn bài, không lấy lại được. Gõ đúng đường dẫn của bài để xác nhận:",
+      ""
+    );
+    if (go === null) return;
+    if (go.trim() !== slug) {
+      bao("Gõ chưa khớp \"" + slug + "\" nên chưa xoá gì cả.", true);
+      return;
+    }
+
+    bao("Đang xoá…");
+
+    // Ảnh trước, bài sau. Ngược lại thì lỡ xoá bài xong mà xoá ảnh hỏng, ảnh
+    // nằm lại trong kho vĩnh viễn mà không còn bài nào nhắc tới để lần ra.
+    const { data: ds_anh, error: loi_liet } = await supabase.storage.from("anh").list(slug);
+    if (loi_liet) {
+      bao("Không đọc được kho ảnh của bài: " + loi_liet.message + ". Chưa xoá gì cả.", true);
+      return;
+    }
+    if (ds_anh?.length) {
+      const { error: loi_anh } = await supabase.storage
+        .from("anh")
+        .remove(ds_anh.map((a: { name: string }) => slug + "/" + a.name));
+      if (loi_anh) {
+        bao("Không xoá được ảnh của bài: " + loi_anh.message + ". Chưa xoá bài.", true);
+        return;
+      }
+    }
+
+    // Bản nháp treo (nếu có) tự đi theo nhờ "on delete cascade" trong schema.
+    const { error } = await supabase.from("bai_viet").delete().eq("id", id_bai);
+    if (error) {
+      bao("Không xoá được bài: " + error.message, true);
+      return;
+    }
+
+    // Bài đang trên web thì phải dựng lại, không thì trang cũ vẫn nằm đó.
+    if (bai_da_dang) await dungLaiWeb();
+
+    // Rời trang ngay: form đang giữ một bài không còn tồn tại, ở lại chỉ tổ
+    // bấm nhầm Lưu rồi nó mọc lại thành bài mới.
+    location.href = "/admin";
+  }
+
   /** Bỏ bản sửa đang treo, quay về đúng bản đang chạy trên web. */
   async function boBanNhap() {
     if (!id_bai || !co_ban_nhap) return;
@@ -730,6 +802,7 @@ import VetLoi from "../../components/VetLoi.astro";
   el("nut-luu").addEventListener("click", mot_lan(luu));
   el("nut-dang").addEventListener("click", mot_lan(dang));
   el("nut-bo-nhap").addEventListener("click", boBanNhap);
+  el("nut-xoa").addEventListener("click", mot_lan(xoaBai));
   el("nut-xem-dang").addEventListener("click", () => doiCheDo("dang"));
   el("nut-xem-nhap").addEventListener("click", () => doiCheDo("nhap"));
 

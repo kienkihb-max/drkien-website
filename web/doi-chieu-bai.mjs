@@ -8,9 +8,12 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 
-const GOC = "C:/Users/Admin/Desktop/drkien-website-cms-blog";
+// Gốc kho mã, suy ra từ chỗ đặt file này — đừng ghi đường dẫn cứng, kho
+// mã còn được chép sang máy khác, sang ổ khác.
+const GOC = fileURLToPath(new URL("..", import.meta.url));
 
 const dom = new JSDOM("<!doctype html><body>");
 global.window = dom.window;

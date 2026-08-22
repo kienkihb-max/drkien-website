@@ -1,0 +1,202 @@
+---
+// Trang này chuyển từ dieu-tri.html của site tĩnh cũ.
+// Toàn bộ thẻ SEO nay do layouts/Trang.astro sinh — sửa tiêu đề hay mô tả
+// thì sửa ở mấy dòng thuộc tính ngay dưới đây, đừng thêm thẻ meta vào thân.
+import Trang from "../layouts/Trang.astro";
+import DuongDan from "../components/DuongDan.astro";
+---
+
+<Trang
+  tieu_de="Châm cứu, vật lý trị liệu — Bác sĩ Lê Trung Kiên"
+  mo_ta="Bác sĩ Lê Trung Kiên thăm khám và điều trị đau cơ xương khớp, chấn thương thể thao bằng châm cứu, vật lý trị liệu tại Bệnh viện Đa khoa Y học cổ truyền Hà Nội."
+  duong_dan="dieu-tri"
+  anh="assets/img/treatment-dienecham-ward.jpg"
+  anh_alt="Điện châm điều trị tại khoa Y học cổ truyền"
+  loai_trang="service"
+  lop_body="subpage"
+  scripts={["thong-tin.js","seo-schema.js","service-cards.js","lightbox.js","sticky-cta.js"]}
+>
+<section class="section cv-hero">
+    <div class="container">
+      <DuongDan hien_tai="Thăm khám &amp; điều trị" />
+      <h1>Châm cứu, vật lý trị liệu cho đau cơ xương khớp &amp; chấn thương thể thao</h1>
+      <p class="lead">
+        Mình theo đuổi định hướng điều trị kết hợp giữa Y học cổ truyền và Y học hiện đại, tập
+        trung vào các bệnh lý cơ xương khớp, phục hồi chức năng và chấn thương thể thao. Mục tiêu
+        không chỉ là giảm triệu chứng đau mà còn phục hồi vận động, cải thiện chức năng và giúp
+        người bệnh sớm trở lại sinh hoạt, lao động hoặc tập luyện thể thao.
+      </p>
+      <div class="offer-actions">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+          Tư vấn điều trị <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container runner-grid">
+      <div class="runner-media">
+        <div class="runner-media-featured">
+          <img src="/assets/img/treatment-dienecham-ward.jpg" alt="Điện châm điều trị cho bệnh nhân tại khoa Y học cổ truyền" loading="lazy">
+        </div>
+      </div>
+      <div>
+        <p class="section-label">Điểm khác biệt</p>
+        <h2>Kết hợp cổ truyền &amp; hiện đại</h2>
+        <p class="lead">
+          Mình áp dụng cách tiếp cận kết hợp giữa Y học cổ truyền và kiến thức y học thể thao hiện
+          đại, giúp đánh giá toàn diện nguyên nhân gây đau và xây dựng kế hoạch điều trị phù hợp
+          cho từng người bệnh.
+        </p>
+        <p class="lead">
+          Triết lý điều trị của mình là hướng tới phục hồi chức năng bền vững, giảm phụ thuộc
+          thuốc, kết hợp các kỹ thuật Y học cổ truyền có bằng chứng với vận động trị liệu và thay
+          đổi lối sống phù hợp.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Chuyên môn</p>
+        <h2>Lĩnh vực tập trung</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <div class="cards-3col">
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-activity"/></svg> Y học cổ truyền</h3>
+          <ul class="list-check">
+            <li>Châm cứu, điện châm, thủy châm</li>
+            <li>Cứu ngải, giác hơi, xoa bóp bấm huyệt</li>
+            <li>Điều trị bằng thuốc Y học cổ truyền</li>
+            <li>Kết hợp các phương pháp không dùng thuốc trong quản lý đau và phục hồi chức năng</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-bone"/></svg> Cơ xương khớp – PHCN</h3>
+          <ul class="list-check">
+            <li>Đau cổ vai gáy</li>
+            <li>Đau thắt lưng, thoát vị đĩa đệm</li>
+            <li>Đau thần kinh tọa</li>
+            <li>Thoái hóa cột sống, thoái hóa khớp</li>
+            <li>Viêm quanh khớp vai</li>
+            <li>Đau cơ, đau cân cơ do quá tải vận động</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-run"/></svg> Y học thể thao</h3>
+          <ul class="list-check">
+            <li>Bong gân cổ chân</li>
+            <li>Chấn thương phần mềm</li>
+            <li>Viêm gân Achilles</li>
+            <li>Đau gối ở người chạy bộ</li>
+            <li>Hội chứng đau dải chậu chày (IT Band Syndrome)</li>
+            <li>Đau cẳng chân do chạy bộ (Shin Splints)</li>
+            <li>Các chấn thương do tập luyện và thi đấu thể thao phong trào</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Ca lâm sàng</p>
+        <h2>Kết quả điều trị thực tế</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <div class="case-study">
+        <img src="/assets/img/case-facial-palsy.jpg" alt="Bệnh nhân trước và sau điều trị liệt dây thần kinh số VII ngoại biên sau phẫu thuật u não, 11/08/2025 và 03/09/2025" loading="lazy">
+        <div>
+          <h3>Liệt VII ngoại biên sau phẫu thuật u não</h3>
+          <p>Hình ảnh trước và sau một liệu trình điều trị phục hồi (11/08/2025 → 03/09/2025), được chia sẻ với sự đồng ý của bệnh nhân.</p>
+        </div>
+      </div>
+      <p class="section-label" style="text-align: center; margin-top: 48px;">Phản hồi từ người bệnh</p>
+      <div class="shots-marquee">
+        <div class="shots-track">
+          <div class="shots-grid">
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-neckshoulder-3b-thumb.jpg" data-full="/assets/img/feedback-neckshoulder-3b.jpg" alt="Bệnh nhân đau cổ vai gáy sau 3 buổi châm cứu" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-backpain-cstl-thumb.jpg" data-full="/assets/img/feedback-backpain-cstl.jpg" alt="Bệnh nhân đau lưng cấp do thoát vị đĩa đệm cột sống thắt lưng" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-neckheadache-4b-thumb.jpg" data-full="/assets/img/feedback-neckheadache-4b.jpg" alt="Bệnh nhân đau cổ gáy, đau đầu, chóng mặt sau 4 buổi điều trị bằng châm cứu" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/testimonial-4-zalo-achilles-thumb.jpg" data-full="/assets/img/testimonial-4-zalo-achilles.jpg" alt="Tin nhắn Zalo bệnh nhân viêm gân chày sau, đã hoàn thành marathon sub 4 giờ" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-tranthap-marathon-thumb.jpg" data-full="/assets/img/feedback-fb-tranthap-marathon.jpg" alt="Bài đăng Facebook cảm ơn bác sĩ Kiên hỗ trợ phục hồi cơ trước giải HN Midnight 2024" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-trungkien-diary-thumb.jpg" data-full="/assets/img/feedback-fb-trungkien-diary.jpg" alt="Nhật ký tập luyện VnExpress Marathon Hải Phòng, kết hợp phục hồi cùng bác sĩ Kiên" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-ngocphuong.png" alt="Bài đăng Facebook chia sẻ hành trình điều trị chấn thương khi chạy bộ" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-vanquang.jpg" alt="Bài đăng Facebook giới thiệu bác sĩ Kiên đồng hành cùng cộng đồng chạy bộ" loading="lazy"></div>
+            </figure>
+          </div>
+          <div class="shots-grid" aria-hidden="true">
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-neckshoulder-3b-thumb.jpg" data-full="/assets/img/feedback-neckshoulder-3b.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-backpain-cstl-thumb.jpg" data-full="/assets/img/feedback-backpain-cstl.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-neckheadache-4b-thumb.jpg" data-full="/assets/img/feedback-neckheadache-4b.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/testimonial-4-zalo-achilles-thumb.jpg" data-full="/assets/img/testimonial-4-zalo-achilles.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-tranthap-marathon-thumb.jpg" data-full="/assets/img/feedback-fb-tranthap-marathon.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-trungkien-diary-thumb.jpg" data-full="/assets/img/feedback-fb-trungkien-diary.jpg" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-ngocphuong.png" alt="" loading="lazy"></div>
+            </figure>
+            <figure class="shot-card">
+              <div class="shot-thumb"><img src="/assets/img/feedback-fb-vanquang.jpg" alt="" loading="lazy"></div>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cards-2col">
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Địa chỉ</h3>
+          <!-- Địa chỉ và bản đồ do thong-tin.js điền — sửa trong file đó -->
+          <div data-tt="dia-chi-ban-do"></div>
+        </div>
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-clock"/></svg> Giờ đón khách</h3>
+          <div data-tt="gio"></div>
+        </div>
+      </div>
+      <p class="cv-link-wrap">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+          Tư vấn điều trị <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong file đó -->
+  <section class="section service-related"></section>
+</Trang>

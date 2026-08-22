@@ -449,3 +449,21 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   animation: qt-xoay 0.8s linear infinite;
 }
 @keyframes qt-xoay { to { transform: rotate(360deg); } }
+
+/* ————— Khung kéo thả ảnh bìa ————— */
+.qt-tha-anh {
+  border: 2px dashed var(--qt-vien);
+  border-radius: var(--qt-bo-goc);
+  background: #fafbfd;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  transition: border-color 0.15s, background 0.15s;
+}
+/* Đang rê ảnh qua khung: đổi màu để biết thả vào đây là trúng chỗ. */
+.qt-tha-anh-dang { border-color: var(--qt-chinh); background: #eef4ff; }
+.qt-tha-anh img { max-width: 100%; max-height: 320px; border-radius: 6px; display: block; }
+.qt-tha-anh p { margin: 0 0 10px; color: var(--qt-chu-mo); }

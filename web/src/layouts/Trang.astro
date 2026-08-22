@@ -7,7 +7,7 @@
 // chép, và thực tế đã có trang lệch canonical với trang khác mà không ai
 // biết. Nay chỉ còn một bản.
 import { TEN_SITE, GOC } from "../data/thong-tin.mjs";
-import { coAnh } from "../lib/co-anh.mjs";
+import { coAnh, laAnhNgoai } from "../lib/co-anh.mjs";
 import BoIcon from "../components/BoIcon.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -22,6 +22,11 @@ interface Props {
   /** Ảnh hiện khi chia sẻ lên Facebook/Zalo. Đường dẫn tương đối trong site. */
   anh?: string;
   anh_alt?: string;
+  /**
+   * Kích thước ảnh chia sẻ, chỉ cần truyền khi ảnh nằm ngoài site (Supabase
+   * Storage) — ảnh trong repo thì lúc build tự đo từ file.
+   */
+  anh_co?: { rong: number; cao: number } | null;
   /** "website" trang thường, "article" bài blog, "profile" trang hồ sơ. */
   loai?: "website" | "article" | "profile";
   /** Chỉ dùng cho bài viết. */
@@ -49,6 +54,7 @@ const {
   // Facebook hiện trơ không ảnh, mà trên trang thì chẳng có dấu hiệu gì.
   anh = "assets/img/og-share.jpg",
   anh_alt = "",
+  anh_co = null,
   loai = "website",
   ngay_dang,
   schema,
@@ -58,10 +64,14 @@ const {
 } = Astro.props;
 
 const dia_chi = GOC + (duong_dan ? "/" + duong_dan : "/");
-const anh_day_du = anh.startsWith("http") ? anh : GOC + "/" + anh.replace(/^\//, "");
+const anh_day_du = laAnhNgoai(anh) ? anh : GOC + "/" + anh.replace(/^\//, "");
 // Đo kích thước thật của ảnh chia sẻ. Ghi cứng một cỡ cho mọi trang là sai
-// ở gần như mọi trang — ảnh của site đang từ 565x353 tới 1200x1448.
-const co = anh.startsWith("http") ? { rong: 1200, cao: 630 } : coAnh(anh);
+// ở gần như mọi trang — ảnh của site đang từ 565x353 tới 1600x1191.
+//
+// Ảnh trong repo thì đo thẳng từ file. Ảnh trên Supabase Storage thì không
+// có file trên đĩa để đo, nên dùng số đã ghi lại lúc tải lên (trang truyền
+// vào qua anh_co).
+const co = laAnhNgoai(anh) ? anh_co ?? { rong: 1200, cao: 630 } : coAnh(anh);
 // Tự thêm " — Bác sĩ Lê Trung Kiên" vào cuối tiêu đề, TRỪ KHI tên đã có sẵn
 // trong đó. Xét theo tên riêng và không phân biệt hoa thường: có trang đặt
 // tiêu đề "Hồ sơ bác sĩ Lê Trung Kiên…" viết thường chữ "bác sĩ", so khớp

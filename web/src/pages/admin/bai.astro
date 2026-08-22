@@ -81,10 +81,34 @@ import VetLoi from "../../components/VetLoi.astro";
 
       <fieldset class="qt-nhom">
         <legend>Ảnh bìa</legend>
+        <p class="qt-goi-y">
+          Ảnh này hiện ở đầu bài, trên thẻ ngoài trang blog, và là ảnh người
+          ta thấy khi bài được chia sẻ lên Facebook hay Zalo. Ảnh to sẽ tự
+          thu nhỏ còn 1600px và nén lại trước khi tải lên.
+        </p>
+
+        <div class="qt-tha-anh" id="tha-anh">
+          <img id="xem-anh" alt="" hidden>
+          <div id="tha-anh-chu">
+            <p>Kéo ảnh thả vào đây, hoặc</p>
+            <button class="qt-nut" type="button" id="nut-chon-anh">Chọn ảnh từ máy</button>
+          </div>
+          <input type="file" id="o-tep-anh" accept="image/*" hidden>
+        </div>
+        <p class="qt-phu" id="tin-anh"></p>
+
+        <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh</label>
+        <p class="qt-goi-y">
+          Tả đúng những gì có trong ảnh, cho người khiếm thị và cho Google.
+          Ảnh có mặt bác sĩ thì viết đủ "Bác sĩ Lê Trung Kiên", đừng viết tắt.
+        </p>
+        <input class="qt-o" type="text" id="o-anh-alt">
+
+        <!-- Đường dẫn thật, để xem lại hoặc dán tay khi cần. -->
         <label class="qt-nhan" for="o-anh">Đường dẫn ảnh</label>
         <input class="qt-o" type="text" id="o-anh" placeholder="assets/img/ten-anh.jpg">
-        <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh</label>
-        <input class="qt-o" type="text" id="o-anh-alt">
+        <input type="hidden" id="o-anh-rong">
+        <input type="hidden" id="o-anh-cao">
       </fieldset>
 
       <fieldset class="qt-nhom">
@@ -141,6 +165,8 @@ import VetLoi from "../../components/VetLoi.astro";
 
 <script>
   import { supabase } from "../../lib/supabase";
+  import { taiAnhLen } from "../../lib/tai-anh";
+  import { duongDanAnh } from "../../lib/co-anh.mjs";
 
   const o = (id: string) => document.getElementById(id) as HTMLInputElement;
   const el = (id: string) => document.getElementById(id) as HTMLElement;
@@ -169,6 +195,65 @@ import VetLoi from "../../components/VetLoi.astro";
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
   }
+
+  // ——— Ảnh bìa ———
+  function veXemAnh() {
+    const dia_chi = o("o-anh").value.trim();
+    const xem = o("xem-anh") as unknown as HTMLImageElement;
+    const chu = el("tha-anh-chu");
+    if (dia_chi) {
+      xem.src = duongDanAnh(dia_chi);
+      xem.hidden = false;
+      chu.hidden = true;
+    } else {
+      xem.hidden = true;
+      chu.hidden = false;
+    }
+  }
+
+  async function nhanAnh(tep: File | undefined) {
+    if (!tep) return;
+    const tin = el("tin-anh");
+    tin.className = "qt-phu";
+    tin.textContent = "Đang thu nhỏ và tải ảnh lên…";
+    try {
+      // Xếp ảnh theo slug bài để kho ảnh không thành một đống phẳng.
+      const kq = await taiAnhLen(tep, o("o-slug").value.trim() || "chung");
+      o("o-anh").value = kq.dia_chi;
+      o("o-anh-rong").value = String(kq.rong);
+      o("o-anh-cao").value = String(kq.cao);
+      veXemAnh();
+      tin.textContent =
+        `Xong — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
+        (o("o-anh-alt").value.trim() ? "" : " Nhớ điền mô tả ảnh bên dưới.");
+    } catch (e) {
+      tin.className = "qt-loi";
+      tin.textContent = (e as Error).message;
+    }
+  }
+
+  el("nut-chon-anh").addEventListener("click", () => o("o-tep-anh").click());
+  o("o-tep-anh").addEventListener("change", (e) => {
+    nhanAnh((e.target as HTMLInputElement).files?.[0]);
+  });
+  o("o-anh").addEventListener("input", veXemAnh);
+
+  // Kéo thả. Phải chặn cả dragover, không thì trình duyệt mở thẳng tấm ảnh
+  // ra thay vì đưa cho mình, và người viết mất luôn bài đang soạn dở.
+  const khung_tha = el("tha-anh");
+  ["dragenter", "dragover"].forEach((ten) =>
+    khung_tha.addEventListener(ten, (e) => {
+      e.preventDefault();
+      khung_tha.classList.add("qt-tha-anh-dang");
+    })
+  );
+  ["dragleave", "drop"].forEach((ten) =>
+    khung_tha.addEventListener(ten, () => khung_tha.classList.remove("qt-tha-anh-dang"))
+  );
+  khung_tha.addEventListener("drop", (e) => {
+    e.preventDefault();
+    nhanAnh((e as DragEvent).dataTransfer?.files?.[0]);
+  });
 
   // ——— Tự điền SEO ———
   // Chủ site không phải dân SEO, nên toàn bộ phần này máy lo: đường dẫn,
@@ -272,6 +357,8 @@ import VetLoi from "../../components/VetLoi.astro";
       tai_lieu: o("o-tai-lieu").value.split("\n").map((d) => d.trim()).filter(Boolean),
       anh: o("o-anh").value.trim() || null,
       anh_alt: o("o-anh-alt").value.trim() || null,
+      anh_rong: Number(o("o-anh-rong").value) || null,
+      anh_cao: Number(o("o-anh-cao").value) || null,
       ngay_dang: o("o-ngay").value || new Date().toISOString().slice(0, 10),
       noi_bat: o("o-noi-bat").checked,
       an: o("o-an").checked,
@@ -366,6 +453,8 @@ import VetLoi from "../../components/VetLoi.astro";
         o("o-lead").value = data.lead ?? "";
         o("o-anh").value = data.anh ?? "";
         o("o-anh-alt").value = data.anh_alt ?? "";
+        o("o-anh-rong").value = data.anh_rong ?? "";
+        o("o-anh-cao").value = data.anh_cao ?? "";
         o("o-ngay").value = data.ngay_dang ?? "";
         o("o-noi-bat").checked = !!data.noi_bat;
         o("o-an").checked = !!data.an;
@@ -394,6 +483,7 @@ import VetLoi from "../../components/VetLoi.astro";
     // Chạy một lượt sau khi form đã có dữ liệu: bài cũ thiếu mô tả Google
     // (như mấy bài đăng trước khi có phần này) sẽ được điền ngay.
     veLaiSEO();
+    veXemAnh();
 
     el("man-cho").hidden = true;
     el("man-chinh").hidden = false;

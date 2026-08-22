@@ -48,8 +48,18 @@ create table if not exists bai_viet (
   tai_lieu   jsonb not null default '[]'::jsonb,
 
   -- Ảnh bìa: hiện ở đầu bài, trên thẻ blog, và khi chia sẻ Facebook/Zalo.
+  -- Có hai dạng đường dẫn cùng tồn tại:
+  --   "assets/img/ten.jpg"  ảnh cũ nằm trong repo
+  --   "https://….supabase.co/storage/…"  ảnh tải lên qua CMS
   anh        text,
   anh_alt    text,
+  -- Kích thước thật của ảnh bìa, đo ngay lúc tải lên.
+  -- Facebook dựa vào hai số này để dựng khung xem trước; sai thì ảnh méo
+  -- hoặc bị cắt. Ảnh trong repo thì lúc build tự đo được từ file, còn ảnh
+  -- trên Storage thì không — nên phải ghi lại từ lúc trình duyệt còn cầm
+  -- tấm ảnh trong tay.
+  anh_rong   integer,
+  anh_cao    integer,
 
   -- Chữ hiện trên thẻ ở trang blog (người đọc thấy).
   the_tieu_de text,
@@ -84,6 +94,8 @@ create table if not exists bai_viet (
 -- nhiều lần vẫn an toàn.
 alter table bai_viet add column if not exists tai_lieu jsonb not null default '[]'::jsonb;
 alter table bai_viet add column if not exists ngay_sua date;
+alter table bai_viet add column if not exists anh_rong integer;
+alter table bai_viet add column if not exists anh_cao integer;
 
 -- Trang blog sắp bài theo ngày, mỗi lần build đều chạy truy vấn này.
 create index if not exists bai_viet_ngay_idx
@@ -152,6 +164,37 @@ create policy bai_viet_xoa on bai_viet
 drop policy if exists nguoi_viet_doc on nguoi_viet;
 create policy nguoi_viet_doc on nguoi_viet
   for select using (duoc_ghi_bai());
+
+-- ——— Kho ảnh ———
+-- Ảnh tải lên qua CMS nằm ở Supabase Storage, không đẩy vào kho mã. Để
+-- trong kho mã thì CMS phải có quyền ghi vào GitHub — đúng cái quyền vừa
+-- bỏ đi khi chuyển sang đăng nhập bằng tài khoản.
+--
+-- Phần này phải nằm SAU hàm duoc_ghi_bai() bên trên, vì mấy policy dưới
+-- gọi tới nó.
+--
+-- Bucket để công khai: ảnh bài viết vốn để mọi người xem, và trình thu
+-- thập của Google với Facebook phải đọc được mà không cần đăng nhập.
+insert into storage.buckets (id, name, public)
+values ('anh', 'anh', true)
+on conflict (id) do update set public = true;
+
+-- Đọc: ai cũng xem được. Ghi: chỉ người có tên trong nguoi_viet.
+drop policy if exists anh_doc on storage.objects;
+create policy anh_doc on storage.objects
+  for select using (bucket_id = 'anh');
+
+drop policy if exists anh_tai_len on storage.objects;
+create policy anh_tai_len on storage.objects
+  for insert with check (bucket_id = 'anh' and duoc_ghi_bai());
+
+drop policy if exists anh_sua on storage.objects;
+create policy anh_sua on storage.objects
+  for update using (bucket_id = 'anh' and duoc_ghi_bai());
+
+drop policy if exists anh_xoa on storage.objects;
+create policy anh_xoa on storage.objects
+  for delete using (bucket_id = 'anh' and duoc_ghi_bai());
 
 -- ——— Việc phải làm bằng tay sau khi chạy file này ———
 -- Thay "TEN_GITHUB_CUA_ANH" bằng tên tài khoản GitHub thật rồi chạy dòng

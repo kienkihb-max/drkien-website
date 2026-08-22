@@ -2,6 +2,7 @@
 // Thẻ một bài viết — mẫu DUY NHẤT, dùng cho cả trang blog lẫn khối "Bài
 // viết khác" ở cuối mỗi bài. Chuyển từ hàm theBai() trong blog-cards.js.
 import type { BaiViet } from "../lib/supabase";
+import { duongDanAnh } from "../lib/co-anh.mjs";
 
 interface Props {
   bai: BaiViet;
@@ -20,7 +21,7 @@ const mo_ta = bai.the_mo_ta || bai.seo_mo_ta || "";
   {them_lop === "event-card-featured" && <span class="event-badge">Nổi bật</span>}
   {bai.anh && (
     <div class="event-img">
-      <img src={"/" + bai.anh.replace(/^\//, "")} alt={bai.anh_alt ?? ""} loading="lazy">
+      <img src={duongDanAnh(bai.anh)} alt={bai.anh_alt ?? ""} loading="lazy">
     </div>
   )}
   <h3>{tieu_de}</h3>

@@ -11,6 +11,7 @@ import DongTacGia from "../components/DongTacGia.astro";
 import BaiKhac from "../components/BaiKhac.astro";
 import { layBaiCanSinhFile, layBaiHienLen, type BaiViet } from "../lib/supabase";
 import { GOC, TEN_SITE } from "../data/thong-tin.mjs";
+import { duongDanAnh, laAnhNgoai } from "../lib/co-anh.mjs";
 
 export async function getStaticPaths() {
   const tat_ca = await layBaiCanSinhFile();
@@ -28,7 +29,13 @@ interface Props {
 const { bai, hien_len } = Astro.props;
 
 const dia_chi = GOC + "/" + bai.slug;
-const anh_day_du = bai.anh ? GOC + "/" + bai.anh.replace(/^\//, "") : undefined;
+// Ảnh trên Supabase Storage đã là địa chỉ đầy đủ rồi; chỉ ảnh trong repo
+// mới cần ghép thêm tên miền vào trước.
+const anh_day_du = bai.anh
+  ? laAnhNgoai(bai.anh)
+    ? bai.anh
+    : GOC + "/" + bai.anh.replace(/^\//, "")
+  : undefined;
 const mo_ta = bai.seo_mo_ta ?? bai.the_mo_ta ?? "";
 
 // Nhãn dạng "Blog · Y học cổ truyền" — tách lấy phần chuyên mục cho
@@ -79,6 +86,7 @@ const schema = {
   duong_dan={bai.slug}
   anh={bai.anh ?? undefined}
   anh_alt={bai.anh_alt ?? ""}
+  anh_co={bai.anh_rong && bai.anh_cao ? { rong: bai.anh_rong, cao: bai.anh_cao } : null}
   loai="article"
   ngay_dang={bai.ngay_dang}
   loai_trang="article"
@@ -100,7 +108,8 @@ const schema = {
     <div class="container">
       {bai.anh && (
         <div class="article-hero-img">
-          <img src={"/" + bai.anh.replace(/^\//, "")} alt={bai.anh_alt ?? ""} loading="lazy">
+          <img src={duongDanAnh(bai.anh)} alt={bai.anh_alt ?? ""} loading="lazy"
+               width={bai.anh_rong ?? undefined} height={bai.anh_cao ?? undefined}>
         </div>
       )}
       <div class="article-body">

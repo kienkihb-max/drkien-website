@@ -24,6 +24,24 @@ const MAC_DINH = { rong: 1200, cao: 630 };
 const nho = new Map();
 
 /**
+ * Đường dẫn để đặt vào thẻ <img src>.
+ *
+ * Site đang có hai loại ảnh sống chung: ảnh cũ nằm trong repo
+ * ("assets/img/a.jpg") và ảnh tải lên qua CMS nằm ở Supabase Storage
+ * ("https://…"). Gắn cứng dấu "/" vào đầu như trước là biến địa chỉ
+ * Storage thành "/https://…" và ảnh chết.
+ */
+export function duongDanAnh(anh) {
+  if (!anh) return "";
+  return /^https?:\/\//i.test(anh) ? anh : "/" + anh.replace(/^\//, "");
+}
+
+/** Ảnh nằm ngoài site thì không đo được từ file trên đĩa. */
+export function laAnhNgoai(anh) {
+  return /^https?:\/\//i.test(anh || "");
+}
+
+/**
  * @param {string} duong_dan Đường dẫn ảnh trong site, ví dụ "assets/img/a.jpg"
  * @returns {{rong: number, cao: number}}
  */

@@ -1,0 +1,112 @@
+---
+// Trang một bài viết. Mỗi bài trong database thành một file .html riêng
+// lúc build — đúng như site cũ, chỉ khác là không còn chép tay.
+//
+// getStaticPaths lấy CẢ bài đã gỡ khỏi danh sách (an = true). Bài gỡ không
+// hiện ở danh sách nào, nhưng file vẫn phải tồn tại: link đã chia sẻ ra
+// ngoài hoặc đã lên Google mà thành 404 là mất người đọc và mất điểm.
+import Trang from "../layouts/Trang.astro";
+import DuongDan from "../components/DuongDan.astro";
+import DongTacGia from "../components/DongTacGia.astro";
+import BaiKhac from "../components/BaiKhac.astro";
+import { layBaiCanSinhFile, layBaiHienLen, type BaiViet } from "../lib/supabase";
+import { GOC, TEN_SITE } from "../data/thong-tin";
+
+export async function getStaticPaths() {
+  const tat_ca = await layBaiCanSinhFile();
+  const hien_len = await layBaiHienLen();
+  return tat_ca.map((bai) => ({
+    params: { slug: bai.slug },
+    props: { bai, hien_len },
+  }));
+}
+
+interface Props {
+  bai: BaiViet;
+  hien_len: BaiViet[];
+}
+const { bai, hien_len } = Astro.props;
+
+const dia_chi = GOC + "/" + bai.slug;
+const anh_day_du = bai.anh ? GOC + "/" + bai.anh.replace(/^\//, "") : undefined;
+const mo_ta = bai.seo_mo_ta ?? bai.the_mo_ta ?? "";
+
+// Nhãn dạng "Blog · Y học cổ truyền" — tách lấy phần chuyên mục cho
+// breadcrumb, còn "Blog" là nấc trỏ về trang danh sách.
+const chuyen_muc = (bai.nhan ?? "")
+  .split("·")
+  .map((s) => s.trim())
+  .filter((s) => s && s !== "Blog");
+
+// Dữ liệu có cấu trúc cho Google. Dựng sẵn phía máy chủ thay vì để JS sinh
+// lúc chạy, vì đây đúng là thứ quyết định bài có được hiện dạng kết quả
+// giàu thông tin hay không.
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "MedicalScholarlyArticle",
+      "@id": dia_chi + "#baiviet",
+      headline: bai.tieu_de.slice(0, 110),
+      name: bai.tieu_de,
+      description: mo_ta,
+      inLanguage: "vi-VN",
+      datePublished: bai.ngay_dang,
+      dateModified: bai.ngay_dang,
+      ...(anh_day_du ? { image: anh_day_du } : {}),
+      author: { "@type": "Person", name: "Bác sĩ Lê Trung Kiên", url: GOC + "/bac-si-le-trung-kien" },
+      publisher: { "@type": "Person", name: TEN_SITE, url: GOC + "/" },
+      mainEntityOfPage: dia_chi,
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": dia_chi + "#breadcrumb",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Trang chủ", item: GOC + "/" },
+        { "@type": "ListItem", position: 2, name: "Blog", item: GOC + "/blog" },
+        { "@type": "ListItem", position: 3, name: bai.tieu_de, item: dia_chi },
+      ],
+    },
+  ],
+};
+---
+
+<Trang
+  tieu_de={bai.seo_tieu_de ?? bai.tieu_de}
+  mo_ta={mo_ta}
+  duong_dan={bai.slug}
+  anh={bai.anh ?? undefined}
+  anh_alt={bai.anh_alt ?? ""}
+  loai="article"
+  ngay_dang={bai.ngay_dang}
+  loai_trang="article"
+  lop_body="subpage"
+  schema={schema}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan
+        giua={[{ chu: "Blog", dia_chi: "/blog" }, ...chuyen_muc.map((c) => ({ chu: c }))]}
+        hien_tai={bai.tieu_de}
+      />
+      <h1>{bai.tieu_de}</h1>
+      <DongTacGia ngay={bai.ngay_dang} />
+    </div>
+  </section>
+
+  <section class="section section-article">
+    <div class="container">
+      {bai.anh && (
+        <div class="article-hero-img">
+          <img src={"/" + bai.anh.replace(/^\//, "")} alt={bai.anh_alt ?? ""} loading="lazy">
+        </div>
+      )}
+      <div class="article-body">
+        {bai.lead && <p class="lead">{bai.lead}</p>}
+        <Fragment set:html={bai.than_bai} />
+      </div>
+    </div>
+  </section>
+
+  <BaiKhac danh_sach={hien_len} tru_slug={bai.slug} tren_la_alt={false} />
+</Trang>

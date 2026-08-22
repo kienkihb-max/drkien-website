@@ -1,0 +1,110 @@
+---
+// Trang danh sách blog — nay đọc từ database thay vì mảng chép tay trong
+// blog-cards.js.
+//
+// Truy vấn chạy LÚC BUILD, không phải lúc người đọc mở trang: kết quả được
+// in thẳng vào file .html. Nhờ vậy database nằm sau CMS mà Google vẫn đọc
+// được toàn bộ danh sách bài, và trang không chậm đi vì phải chờ mạng.
+import Trang from "../layouts/Trang.astro";
+import TheBai from "../components/TheBai.astro";
+import DuongDan from "../components/DuongDan.astro";
+import { layBaiHienLen } from "../lib/supabase";
+
+const bai = await layBaiHienLen();
+const noi_bat = bai.filter((b) => b.noi_bat);
+const con_lai = bai.filter((b) => !b.noi_bat);
+
+// Ba bài báo mời viết. Đây là danh sách tay, không thuộc CMS — bài trên báo
+// người khác đăng, không phải bài của site.
+const BAO_CHI = [
+  {
+    nguon: "AloBacsi.com",
+    tieu_de: "Bí quyết chạy bộ an toàn, tránh xa chấn thương",
+    dia_chi: "https://alobacsi.com/bi-quyet-chay-bo-an-toan-tranh-xa-chan-thuong.html",
+  },
+  {
+    nguon: "Sức khỏe & Cộng đồng",
+    tieu_de:
+      "Đắp thuốc lá, thuốc lào hay rắc bột kháng sinh lên vết thương: Sai một bước nhỏ, hậu quả có thể rất lớn",
+    dia_chi:
+      "https://suckhoevacongdong.com/dap-thuoc-la-thuoc-lao-hay-rac-bot-khang-sinh-len-vet-thuong-sai-mot-buoc-nho-hau-qua-co-the-rat-lon-4941.html",
+  },
+  {
+    nguon: "Tạp chí Y học Việt Nam",
+    tieu_de:
+      "Tác dụng của phương pháp điện châm kết hợp bột ngâm trĩ trên bệnh nhân sau mổ trĩ",
+    dia_chi: "https://tapchiyhocvietnam.vn/index.php/vmj/article/view/14542",
+  },
+];
+---
+
+<Trang
+  tieu_de="Blog Y học Thể thao & Y học cổ truyền"
+  mo_ta="Kiến thức và cập nhật về chấn thương thể thao, đau cơ xương khớp và phục hồi chức năng dựa trên bằng chứng khoa học."
+  duong_dan="blog"
+  loai_trang="blog"
+  lop_body="subpage"
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan hien_tai="Blog" />
+      <h1>Y học Thể thao &amp; Y học cổ truyền</h1>
+      <p class="lead">
+        Nơi chia sẻ các kiến thức và cập nhật mới về chấn thương thể thao, đau cơ xương khớp và
+        phục hồi chức năng dựa trên bằng chứng khoa học. Các bài viết tập trung vào vai trò của
+        vận động trị liệu, phục hồi chức năng và Y học cổ truyền trong điều trị và tối ưu hóa
+        khả năng vận động cho người bệnh.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Bài viết cá nhân</p>
+        <h2>Ghi chép &amp; chia sẻ chuyên môn</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+
+      <div class="blog-list">
+        {noi_bat.length > 0 && (
+          <div class="events-featured-grid">
+            {noi_bat.map((b) => <TheBai bai={b} them_lop="event-card-featured" />)}
+          </div>
+        )}
+        {con_lai.length > 0 && (
+          <div class="events-grid">
+            {con_lai.map((b) => <TheBai bai={b} />)}
+          </div>
+        )}
+        {bai.length === 0 && (
+          <p class="text-center">Chưa có bài viết nào.</p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Trên báo chí</p>
+        <h2>Chia sẻ chuyên môn &amp; nghiên cứu khoa học</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <div class="press-list">
+        {BAO_CHI.map((m) => (
+          <a class="press-item" href={m.dia_chi} target="_blank" rel="noopener">
+            <span class="press-source">{m.nguon}</span>
+            <span class="press-title">{m.tieu_de}</span>
+            <svg class="icon icon-sm press-arrow"><use href="#ic-arrow"/></svg>
+          </a>
+        ))}
+      </div>
+      <p class="cv-link-wrap">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+          Nhắn Zalo để được tư vấn <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </p>
+    </div>
+  </section>
+</Trang>

@@ -201,7 +201,14 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   border-bottom: 1px solid var(--qt-vien);
   background: #fafbfd;
   position: sticky;
-  top: 58px; /* nằm ngay dưới thanh đầu trang khi cuộn */
+  /* PHẢI là 0, đừng đổi thành 58px cho "nằm dưới thanh đầu trang".
+     .st ở trên có overflow:hidden, mà overflow:hidden biến .st thành vùng
+     cuộn riêng — thanh nút bám vào .st chứ không bám vào trang. Lúc đó
+     top:58px không còn nghĩa "cách đỉnh trang 58px" mà thành "đẩy xuống
+     58px so với chỗ của mình", vĩnh viễn, kể cả khi chưa cuộn. Hậu quả:
+     thanh nút nền đục đè lên 58px đầu của vùng soạn, tức là che đúng dòng
+     chữ đầu tiên — gõ vào thấy bộ đếm nhảy mà màn hình trống trơn. */
+  top: 0;
   z-index: 10;
 }
 .st-nut {

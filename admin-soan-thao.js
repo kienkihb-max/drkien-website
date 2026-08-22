@@ -114,6 +114,232 @@ window.SoanThao = (function () {
     });
   }
 
+  // ——— Tự dọn dáng cho đẹp ———
+  // donDep() lo phần an toàn: bỏ thẻ lạ, bỏ class Word. Còn chuanHoa() lo
+  // phần thẩm mỹ: đoán xem đoạn nào đáng ra là tiêu đề, đoạn nào đáng ra là
+  // gạch đầu dòng. Chữ dán vào hay mất đúng hai thứ đó — người viết thấy nó
+  // là tiêu đề vì nó in đậm và đứng một mình, nhưng dán sang thì nó chỉ còn
+  // là một <p> như mọi đoạn khác.
+
+  // Dấu mở đầu một gạch đầu dòng, gõ kiểu nào cũng nhận.
+  var DAU_GACH = /^\s*[-–—•·*+]\s+/;
+  // "1." "1)" "1 -" … mở đầu một danh sách đánh số.
+  var DAU_SO = /^\s*\d{1,2}\s*[.)\-]\s+/;
+  // Đoạn kết thúc bằng dấu câu thì gần như chắc chắn là câu văn, không phải
+  // tiêu đề. Dấu hai chấm là ngoại lệ: "Ba điều cần nhớ:" vẫn là tiêu đề.
+  var KET_CAU = /[.!?;,…]$/;
+
+  // Một đoạn có "dáng tiêu đề" không: ngắn, đứng một mình, không kết thúc
+  // như một câu. Ngưỡng 80 ký tự là chỗ tiêu đề tiếng Việt hầu như không
+  // vượt qua, còn câu văn thường thì vượt.
+  function dangTieuDe(chu, toan_bo_dam) {
+    chu = chu.replace(/\s+/g, " ").trim();
+    if (!chu) return false;
+    if (chu.length > 80) return false;
+    if (DAU_GACH.test(chu) || DAU_SO.test(chu)) return false;
+    if (KET_CAU.test(chu)) return false;
+    // Không in đậm thì phải thật ngắn mới dám đoán là tiêu đề, kẻo biến một
+    // câu văn cụt giữa bài thành tiêu đề.
+    return toan_bo_dam || chu.length <= 45;
+  }
+
+  // Đoạn này có phải chỉ gồm chữ in đậm? Claude và ChatGPT hay xuống dòng
+  // một cụm in đậm để làm tiêu đề mục, thay vì dùng thẻ tiêu đề thật.
+  function toanBoDam(el) {
+    var chu = el.textContent.replace(/\s+/g, " ").trim();
+    if (!chu) return false;
+    var dam = "";
+    Array.prototype.forEach.call(el.querySelectorAll("strong"), function (s) {
+      dam += s.textContent;
+    });
+    return dam.replace(/\s+/g, " ").trim() === chu;
+  }
+
+  // Gom những đoạn liên tiếp cùng mở đầu bằng gạch/số thành một danh sách.
+  function gomDanhSach(hop) {
+    var con = Array.prototype.slice.call(hop.children);
+    var i = 0;
+    while (i < con.length) {
+      var el = con[i];
+      var la_gach = el.tagName === "P" && DAU_GACH.test(el.textContent);
+      var la_so = el.tagName === "P" && DAU_SO.test(el.textContent);
+      if (!la_gach && !la_so) {
+        i++;
+        continue;
+      }
+      // Vét tiếp các đoạn cùng loại nằm ngay sau nó.
+      var cung_loai = [];
+      var j = i;
+      while (j < con.length) {
+        var e = con[j];
+        if (e.tagName !== "P") break;
+        if (la_gach ? !DAU_GACH.test(e.textContent) : !DAU_SO.test(e.textContent)) break;
+        cung_loai.push(e);
+        j++;
+      }
+      // Một dòng lẻ mở đầu bằng dấu gạch chưa chắc là danh sách — có khi chỉ
+      // là câu văn dùng dấu gạch ngang. Cần ít nhất hai dòng mới gom.
+      if (cung_loai.length < 2) {
+        i = j;
+        continue;
+      }
+      var ds = document.createElement(la_so ? "ol" : "ul");
+      cung_loai.forEach(function (e) {
+        var li = document.createElement("li");
+        while (e.firstChild) li.appendChild(e.firstChild);
+        // Bỏ dấu đầu dòng đi, vì <ul>/<ol> tự vẽ lại dấu đó.
+        li.innerHTML = li.innerHTML.replace(la_so ? DAU_SO : DAU_GACH, "");
+        ds.appendChild(li);
+      });
+      hop.insertBefore(ds, cung_loai[0]);
+      cung_loai.forEach(function (e) {
+        e.remove();
+      });
+      i = j;
+    }
+  }
+
+  function chuanHoa(hop) {
+    // Khoảng trắng cứng của Word làm chữ giãn lạ khi xuống dòng.
+    Array.prototype.forEach.call(hop.querySelectorAll("*"), function (el) {
+      Array.prototype.forEach.call(el.childNodes, function (n) {
+        if (n.nodeType === 3 && n.nodeValue.indexOf(" ") >= 0)
+          n.nodeValue = n.nodeValue.replace(/ /g, " ");
+      });
+    });
+
+    // Word gói chữ trong <li> vào thêm một lớp <p> — gỡ ra cho gọn.
+    Array.prototype.forEach.call(hop.querySelectorAll("li > p"), function (p) {
+      if (p.parentNode.children.length === 1) boVo(p);
+    });
+
+    gomDanhSach(hop);
+
+    // Đoạn có dáng tiêu đề thì nâng thành <h2>. Làm SAU khi gom danh sách,
+    // để dòng "- Điều một" không bị hiểu nhầm là tiêu đề ngắn.
+    Array.prototype.slice.call(hop.children).forEach(function (el) {
+      if (el.tagName !== "P") return;
+      if (el.querySelector("img, a")) return;
+      if (!dangTieuDe(el.textContent, toanBoDam(el))) return;
+      var h = thayTen(el, "H2");
+      // Tiêu đề đã to sẵn, in đậm bên trong chỉ làm nó nặng thêm.
+      Array.prototype.slice.call(h.querySelectorAll("strong, em")).forEach(boVo);
+    });
+
+    return hop;
+  }
+
+  // ——— Đọc Markdown ———
+  // Bài soạn ở Claude hay ChatGPT rồi dán sang có hai đường: copy thẳng từ
+  // khung chat thì clipboard mang theo HTML đã dàn sẵn (đường trên), còn
+  // copy từ khối mã hoặc đi vòng qua Notepad thì chỉ còn Markdown thô —
+  // "## Tiêu đề", "**đậm**", "- gạch đầu dòng". Đường dưới lo phần đó, nếu
+  // không thì mấy dấu ## sẽ nằm chình ình trong bài đã đăng.
+
+  // Chỉ nhận diện đúng mấy dấu Markdown mà người viết thật sự hay dùng.
+  // Nhận thêm bảng biểu hay chú thích chỉ tổ đoán sai.
+  var CO_MARKDOWN = /^\s{0,3}#{1,4}\s+\S|\*\*\S|^\s{0,3}[-*+]\s+\S|^\s{0,3}\d{1,2}[.)]\s+\S|\[[^\]]+\]\([^)]+\)/m;
+
+  // Định dạng nằm trong một dòng: đậm, nghiêng, liên kết.
+  // Chạy sau khi đã thoát HTML, nên chữ của người dùng không thể thành thẻ.
+  function markdownTrongDong(chu) {
+    // Thoát HTML TRƯỚC, rồi mới đặt thẻ của mình vào. Ngược lại thì một dấu
+    // ngoặc nhọn người viết gõ ra sẽ thành thẻ thật trong bài.
+    return window.BaiViet.thoat(chu)
+      .replace(/\*\*\*(\S(?:[^*]*\S)?)\*\*\*/g, "<strong><em>$1</em></strong>")
+      .replace(/\*\*(\S(?:[^*]*\S)?)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[\s(])\*(\S(?:[^*]*\S)?)\*(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, function (_, chu_hien, dich) {
+        return '<a href="' + dich.replace(/"/g, "&quot;") + '">' + chu_hien + "</a>";
+      });
+  }
+
+  function markdownSangHTML(chu) {
+    var dong = chu.replace(/\r/g, "").split("\n");
+    var ra = [];
+    var dang_ds = null; // "ul" | "ol" | null
+    var doan = []; // các dòng đang gom lại thành một đoạn văn
+
+    function xongDoan() {
+      if (!doan.length) return;
+      // Xuống dòng đơn lẻ giữa đoạn chỉ là chữ dài bị ngắt — nối lại.
+      ra.push("<p>" + markdownTrongDong(doan.join(" ")) + "</p>");
+      doan = [];
+    }
+    function xongDanhSach() {
+      if (!dang_ds) return;
+      ra.push("</" + dang_ds + ">");
+      dang_ds = null;
+    }
+    function moDanhSach(loai) {
+      if (dang_ds === loai) return;
+      xongDanhSach();
+      ra.push("<" + loai + ">");
+      dang_ds = loai;
+    }
+
+    dong.forEach(function (d) {
+      var t = d.trim();
+
+      if (!t) {
+        xongDoan();
+        xongDanhSach();
+        return;
+      }
+
+      // Đường kẻ ngang "---" chỉ để phân đoạn khi soạn, bài viết không dùng.
+      if (/^\s{0,3}([-*_])\s*(\1\s*){2,}$/.test(t)) {
+        xongDoan();
+        xongDanhSach();
+        return;
+      }
+
+      var tieu_de = t.match(/^\s{0,3}(#{1,4})\s+(.+?)\s*#*$/);
+      if (tieu_de) {
+        xongDoan();
+        xongDanhSach();
+        // Bài viết chỉ dùng h2/h3/h4 — h1 đã là tiêu đề trang, có thêm cái
+        // nữa trong thân bài là sai cấu trúc và Google chấm điểm thấp. Nên
+        // "#" và "##" đều về h2: Claude với ChatGPT hay lấy "##" làm mức
+        // ngoài cùng, dịch thẳng thành h3 là bài thiếu hẳn một bậc tiêu đề.
+        var bac = Math.min(4, Math.max(2, tieu_de[1].length));
+        ra.push("<h" + bac + ">" + markdownTrongDong(tieu_de[2]) + "</h" + bac + ">");
+        return;
+      }
+
+      var gach = t.match(/^\s{0,3}[-*+]\s+(.+)$/);
+      if (gach) {
+        xongDoan();
+        moDanhSach("ul");
+        ra.push("<li>" + markdownTrongDong(gach[1]) + "</li>");
+        return;
+      }
+
+      var so = t.match(/^\s{0,3}\d{1,2}[.)]\s+(.+)$/);
+      if (so) {
+        xongDoan();
+        moDanhSach("ol");
+        ra.push("<li>" + markdownTrongDong(so[1]) + "</li>");
+        return;
+      }
+
+      var trich = t.match(/^\s{0,3}>\s?(.*)$/);
+      if (trich) {
+        xongDoan();
+        xongDanhSach();
+        ra.push("<blockquote><p>" + markdownTrongDong(trich[1]) + "</p></blockquote>");
+        return;
+      }
+
+      xongDanhSach();
+      doan.push(t);
+    });
+
+    xongDoan();
+    xongDanhSach();
+    return ra.join("");
+  }
+
   function donDep(html) {
     var hop = document.createElement("div");
     hop.innerHTML = html;
@@ -137,6 +363,18 @@ window.SoanThao = (function () {
     return hop.innerHTML;
   }
 
+  // Dọn sạch RỒI nắn dáng. Đây là việc của nút "Chuẩn hóa", người viết bấm
+  // thì mới chạy — không tự chạy lúc dán và càng không chạy lúc lưu.
+  // chuanHoa() ĐOÁN dáng, mà đoán thì có lúc sai: chạy ngầm thì bài tự đổi
+  // mà không rõ vì sao, còn chạy lúc lưu thì một đoạn vừa được sửa tay từ
+  // tiêu đề về đoạn thường sẽ bị nâng lại sau mỗi lần lưu, sửa mấy cũng
+  // không đứng yên. Thành nút bấm thì đoán sai chỉ cần Ctrl+Z là xong.
+  function nanDang(html) {
+    var hop = document.createElement("div");
+    hop.innerHTML = donDep(html);
+    return chuanHoa(hop).innerHTML;
+  }
+
   // ——— Thanh công cụ ———
   // Mỗi nút: nhãn hiện trên màn hình, chú thích khi rê chuột, và việc phải làm.
   function dungThanhCongCu(bo) {
@@ -157,6 +395,7 @@ window.SoanThao = (function () {
       { chu: "Ảnh", chu_thich: "Chèn ảnh minh họa kèm chú thích", lam: function () { bo.chenAnh(); } },
       { chu: "Chú thích¹", chu_thich: "Chèn số chú thích, tự đánh số tiếp", lam: function () { bo.chuThich(); } },
       { nhom: true },
+      { chu: "✨ Chuẩn hóa", chu_thich: "Đoán và sửa lại dáng cả bài: đoạn ngắn đứng riêng thành tiêu đề, các dòng gạch đầu dòng gom thành danh sách. Đoán sai thì Ctrl+Z.", lam: function () { bo.chuanHoaCaBai(); } },
       { chu: "Xóa định dạng", chu_thich: "Trả chữ đang bôi đen về chữ thường", lam: function () { bo.lenh("removeFormat"); } },
       { chu: "</> HTML", chu_thich: "Xem và sửa thẳng mã HTML của bài", lam: function () { bo.doiCheDo(); } },
     ];
@@ -254,6 +493,18 @@ window.SoanThao = (function () {
         document.execCommand("insertHTML", false, "<sup>" + so + "</sup>");
       },
 
+      // Nút "Chuẩn hóa": nắn dáng cả bài một lượt.
+      // Ghi đè bằng insertHTML sau khi bôi đen tất cả, chứ không gán thẳng
+      // vào innerHTML — làm vậy trình duyệt mới ghi được một bước vào lịch
+      // sử hoàn tác, để đoán sai thì Ctrl+Z là quay lại nguyên trạng.
+      chuanHoaCaBai: function () {
+        var moi = nanDang(vung.innerHTML);
+        if (!moi || moi === vung.innerHTML) return;
+        vung.focus();
+        document.execCommand("selectAll", false, null);
+        document.execCommand("insertHTML", false, moi);
+      },
+
       doiCheDo: function () {
         if (dang_xem_ma) {
           vung.innerHTML = donDep(tho.value);
@@ -314,35 +565,57 @@ window.SoanThao = (function () {
     }
 
     // ——— Dán chữ ———
-    // Lấy đúng phần chữ, bỏ hết định dạng nguồn. Chữ soạn sẵn trong Word
-    // thường ngăn đoạn bằng dòng trống, nên dòng trống được hiểu là sang
-    // đoạn mới; còn xuống dòng đơn lẻ chỉ là chữ dài bị ngắt, nối lại.
+    // Ba đường vào, xét theo thứ tự:
+    //
+    //   1. Clipboard có HTML (copy từ khung chat Claude/ChatGPT, từ Word,
+    //      Google Docs, hay một trang web) — giữ nguyên tiêu đề, in đậm,
+    //      danh sách, liên kết; donDep() chỉ vứt phần rác.
+    //   2. Chỉ có chữ thường nhưng nhìn ra dấu Markdown ("##", "**", "- ")
+    //      — dịch Markdown sang thẻ.
+    //   3. Chữ thường trơn — dòng trống là sang đoạn mới, xuống dòng đơn lẻ
+    //      chỉ là chữ dài bị ngắt nên nối lại.
+    //
+    // Cả ba đường đều CHỈ giữ đúng những gì nguồn có, không tự đoán thêm.
+    // Phần đoán dáng nằm ở nút "Chuẩn hóa", bấm hay không là quyền người
+    // viết. Dù đi đường nào cũng chui qua donDep() ở cuối, nên không có cách
+    // nào để một thẻ lạ hay một dòng style của Word lọt được vào bài.
     vung.addEventListener("paste", function (e) {
       e.preventDefault();
-      var chu = (e.clipboardData || window.clipboardData).getData("text/plain") || "";
-      if (!chu.trim()) return;
+      var bang = e.clipboardData || window.clipboardData;
+      var html = (bang.getData("text/html") || "").trim();
+      var chu = bang.getData("text/plain") || "";
+      if (!html && !chu.trim()) return;
 
-      var doan = chu
-        .replace(/\r/g, "")
-        .split(/\n\s*\n+/)
-        .map(function (d) {
-          return d.replace(/\n/g, " ").trim();
-        })
-        .filter(Boolean);
-
-      if (doan.length < 2) {
-        document.execCommand("insertText", false, doan[0] || "");
-        return;
-      }
-      document.execCommand(
-        "insertHTML",
-        false,
-        doan
+      var ket;
+      if (html) {
+        // Word bọc nội dung trong mấy mốc <!--StartFragment-->; cắt lấy
+        // đúng phần bên trong cho khỏi kéo theo cả thẻ <style> của Word.
+        var manh = html.match(/<!--\s*StartFragment\s*-->([\s\S]*?)<!--\s*EndFragment\s*-->/i);
+        ket = donDep(manh ? manh[1] : html);
+      } else if (CO_MARKDOWN.test(chu)) {
+        ket = donDep(markdownSangHTML(chu));
+      } else {
+        var doan = chu
+          .replace(/\r/g, "")
+          .split(/\n\s*\n+/)
           .map(function (d) {
-            return "<p>" + window.BaiViet.thoat(d) + "</p>";
+            return d.replace(/\n/g, " ").trim();
           })
-          .join("")
-      );
+          .filter(Boolean);
+        if (doan.length < 2) {
+          document.execCommand("insertText", false, doan[0] || "");
+          return;
+        }
+        ket = donDep(
+          doan
+            .map(function (d) {
+              return "<p>" + window.BaiViet.thoat(d) + "</p>";
+            })
+            .join("")
+        );
+      }
+
+      if (ket) document.execCommand("insertHTML", false, ket);
     });
 
     try {

@@ -1,11 +1,14 @@
 // Thông tin phòng khám — NGUỒN DUY NHẤT cho toàn bộ site.
 //
-// Địa chỉ, giờ làm việc, số Zalo, Facebook chỉ có mặt ở đây. Sửa một chỗ này
-// là đổi đồng thời header, footer, thẻ dịch vụ và mọi trang.
+// Sửa địa chỉ, giờ làm việc, số Zalo, Facebook ở đây là đổi đồng thời:
+//   - header, footer, trang bài (component Astro import thẳng file này)
+//   - web/public/thong-tin.js (do dong-bo-tinh.mjs SINH RA từ file này,
+//     cho mấy script còn chạy phía trình duyệt như seo-schema.js và
+//     service-cards.js dùng qua window.THONG_TIN)
 //
-// Đây là bản chuyển từ thong-tin.js sang. Khác biệt duy nhất: chữ được Astro
-// in thẳng vào HTML lúc build, thay vì JS điền vào lúc trang chạy — nên
-// Google đọc được địa chỉ và giờ làm việc, điều trước đây nó không thấy.
+// Để đuôi .mjs chứ không phải .ts vì cả Astro lẫn script build đều phải
+// đọc được nó. Đây là điểm mấu chốt: có đúng một chỗ chứa số điện thoại,
+// không có bản thứ hai để lệch.
 
 export const DIA_CHI = "Ngõ 8, Ngô Quyền, Hà Đông, Hà Nội";
 export const SO_ZALO = "034 590 1772";

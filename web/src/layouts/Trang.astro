@@ -6,7 +6,7 @@
 // Trước đây mỗi file .html tự chép tay ~20 dòng thẻ meta. 22 trang là 22 bản
 // chép, và thực tế đã có trang lệch canonical với trang khác mà không ai
 // biết. Nay chỉ còn một bản.
-import { TEN_SITE, GOC } from "../data/thong-tin";
+import { TEN_SITE, GOC } from "../data/thong-tin.mjs";
 import BoIcon from "../components/BoIcon.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -21,8 +21,8 @@ interface Props {
   /** Ảnh hiện khi chia sẻ lên Facebook/Zalo. Đường dẫn tương đối trong site. */
   anh?: string;
   anh_alt?: string;
-  /** "website" cho trang thường, "article" cho bài blog. */
-  loai?: "website" | "article";
+  /** "website" trang thường, "article" bài blog, "profile" trang hồ sơ. */
+  loai?: "website" | "article" | "profile";
   /** Chỉ dùng cho bài viết. */
   ngay_dang?: string;
   /** Dữ liệu có cấu trúc (JSON-LD) riêng của trang, nếu có. */
@@ -31,6 +31,11 @@ interface Props {
   loai_trang?: string;
   /** Thêm class cho <body>, ví dụ "subpage". */
   lop_body?: string;
+  /**
+   * Các file JS trong public/ mà riêng trang này cần, ví dụ ["lightbox.js"].
+   * Header, footer và bộ icon đã dựng sẵn phía máy chủ nên KHÔNG khai ở đây.
+   */
+  scripts?: string[];
 }
 
 const {
@@ -44,11 +49,19 @@ const {
   schema,
   loai_trang,
   lop_body,
+  scripts = [],
 } = Astro.props;
 
 const dia_chi = GOC + (duong_dan ? "/" + duong_dan : "/");
 const anh_day_du = anh.startsWith("http") ? anh : GOC + "/" + anh.replace(/^\//, "");
-const tieu_de_day_du = tieu_de.includes(TEN_SITE) ? tieu_de : tieu_de + " — " + TEN_SITE;
+// Tự thêm " — Bác sĩ Lê Trung Kiên" vào cuối tiêu đề, TRỪ KHI tên đã có sẵn
+// trong đó. Xét theo tên riêng và không phân biệt hoa thường: có trang đặt
+// tiêu đề "Hồ sơ bác sĩ Lê Trung Kiên…" viết thường chữ "bác sĩ", so khớp
+// nguyên văn thì trượt và tiêu đề bị nối thêm một lần nữa, dài gấp rưỡi rồi
+// Google cắt cụt.
+const tieu_de_day_du = /lê trung kiên/i.test(tieu_de)
+  ? tieu_de
+  : tieu_de + " — " + TEN_SITE;
 ---
 
 <!DOCTYPE html>
@@ -104,6 +117,12 @@ const tieu_de_day_du = tieu_de.includes(TEN_SITE) ? tieu_de : tieu_de + " — " 
 </main>
 
 <Footer />
+
+{/* Mấy phần còn chạy phía trình duyệt, chưa chuyển thành component Astro.
+    thong-tin.js điền các chỗ đánh dấu data-tt, seo-schema.js sinh dữ liệu
+    có cấu trúc cho trang tĩnh. Nạp is:inline để giữ nguyên là script cổ
+    điển — chúng dùng biến toàn cục window, đóng gói thành module là hỏng. */}
+{scripts.map((ten) => <script is:inline src={"/" + ten}></script>)}
 
 </body>
 </html>

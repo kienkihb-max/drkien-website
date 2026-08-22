@@ -11,7 +11,7 @@
 //
 // Chạy tự động qua "predev" và "prebuild" trong package.json.
 
-import { cp, mkdir } from "node:fs/promises";
+import { cp, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,8 +24,11 @@ const DICH = join(THU_MUC_WEB, "public");
 const CAN_CHEP = [
   "style.css",
   "admin.css",
+  // Hai file này còn chạy phía trình duyệt và cần window.THONG_TIN, do
+  // thong-tin.js sinh ra bên dưới cấp cho.
+  "seo-schema.js",
+  "service-cards.js",
   "favicon.ico",
-  "favicon.svg",
   "robots.txt",
   "CNAME",
   "googlea4e3191517fb9432.html",
@@ -57,7 +60,70 @@ for (const ten of CAN_CHEP) {
   chep++;
 }
 
-console.log(`[đồng bộ tĩnh] đã chép ${chep} mục sang web/public`);
+// ——— Sinh thong-tin.js cho trình duyệt ———
+// KHÔNG chép thong-tin.js của site cũ sang: file đó chứa sẵn số Zalo và địa
+// chỉ, chép qua là có hai bản cùng một thông tin, sửa một bản thì bản kia
+// lệch mà không ai biết. Thay vào đó sinh nó ra từ src/data/thong-tin.mjs —
+// nguồn duy nhất mà header, footer và các trang Astro cũng đang dùng.
+const TT = await import("./src/data/thong-tin.mjs");
+
+const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
+// Sửa nội dung tại web/src/data/thong-tin.mjs rồi chạy lại build.
+//
+// Có mặt là để mấy script còn chạy phía trình duyệt (seo-schema.js,
+// service-cards.js) đọc được thông tin phòng khám qua window.THONG_TIN.
+(function () {
+  var TT = ${JSON.stringify(
+    {
+      DIA_CHI: TT.DIA_CHI,
+      SO_ZALO: TT.SO_ZALO,
+      ZALO: TT.ZALO,
+      FACEBOOK: TT.FACEBOOK,
+      GIO: TT.GIO,
+      BAN_DO: TT.BAN_DO,
+    },
+    null,
+    2
+  ).replace(/\n/g, "\n  ")};
+
+  window.THONG_TIN = TT;
+
+  TT.htmlBanDo = function () {
+    return '<div class="footer-map"><iframe src="' + TT.BAN_DO +
+      '" title="Bản đồ tới phòng khám" loading="lazy" ' +
+      'referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>';
+  };
+
+  TT.htmlGio = function () {
+    return '<ul class="footer-hours">' + TT.GIO.map(function (d) {
+      return "<li><span>" + d.ngay + "</span><span>" + d.gio + "</span></li>";
+    }).join("") + "</ul>";
+  };
+
+  var MAU = {
+    "dia-chi": function () { return TT.DIA_CHI; },
+    "dia-chi-ban-do": function () { return "<p>" + TT.DIA_CHI + "</p>" + TT.htmlBanDo(); },
+    "ban-do": function () { return TT.htmlBanDo(); },
+    "gio": function () { return TT.htmlGio(); },
+    "so-zalo": function () { return TT.SO_ZALO; },
+  };
+
+  document.querySelectorAll("[data-tt]").forEach(function (el) {
+    var mau = MAU[el.getAttribute("data-tt")];
+    if (mau) el.innerHTML = mau();
+  });
+
+  document.querySelectorAll("[data-tt-href]").forEach(function (el) {
+    el.setAttribute("href", el.getAttribute("data-tt-href") === "facebook" ? TT.FACEBOOK : TT.ZALO);
+    el.setAttribute("target", "_blank");
+    el.setAttribute("rel", "noopener");
+  });
+})();
+`;
+
+await writeFile(join(DICH, "thong-tin.js"), js_thong_tin, "utf8");
+
+console.log(`[đồng bộ tĩnh] đã chép ${chep} mục sang web/public, và sinh thong-tin.js`);
 if (thieu.length) {
   // Không dừng build: thiếu một file lẻ thì trang vẫn chạy, chỉ hỏng đúng
   // chỗ dùng nó. Nhưng phải kêu lên, kẻo lỗi 404 âm thầm.

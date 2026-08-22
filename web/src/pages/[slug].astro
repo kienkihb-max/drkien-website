@@ -10,7 +10,7 @@ import DuongDan from "../components/DuongDan.astro";
 import DongTacGia from "../components/DongTacGia.astro";
 import BaiKhac from "../components/BaiKhac.astro";
 import { layBaiCanSinhFile, layBaiHienLen, type BaiViet } from "../lib/supabase";
-import { GOC, TEN_SITE } from "../data/thong-tin";
+import { GOC, TEN_SITE } from "../data/thong-tin.mjs";
 
 export async function getStaticPaths() {
   const tat_ca = await layBaiCanSinhFile();

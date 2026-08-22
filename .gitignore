@@ -5,3 +5,14 @@ _template/
 .claude/worktrees/
 .DS_Store
 Thumbs.db
+
+# ——— Phần Astro + Supabase ———
+web/node_modules/
+web/dist/
+web/.astro/
+# Bản sao tài nguyên tĩnh do web/dong-bo-tinh.mjs tự chép từ gốc repo sang.
+# Nguồn duy nhất vẫn là ảnh và style ở gốc — commit thêm bản sao là kho
+# phình gấp đôi và từ đó có hai bản của mỗi tấm ảnh.
+web/public/
+# Khoá Supabase của từng máy. Bản mẫu là web/.env.example, có commit.
+web/.env

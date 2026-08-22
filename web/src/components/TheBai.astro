@@ -1,32 +1,33 @@
 ---
-// Thẻ một bài viết — mẫu DUY NHẤT, dùng cho cả trang blog lẫn khối "Bài
-// viết khác" ở cuối mỗi bài. Chuyển từ hàm theBai() trong blog-cards.js.
+// Thẻ một bài viết — dùng cho cả trang blog lẫn khối "Bài viết khác" ở cuối
+// mỗi bài.
+//
+// Phần dựng HTML nằm ở src/lib/the-bai.ts, không nằm ở đây: trang soạn bài
+// cũng phải vẽ đúng tấm thẻ này để xem trước, mà nó chạy trong trình duyệt
+// nên không gọi được component Astro. Hai bản chép tay là ô xem trước sẽ
+// nói dối lúc nào không hay.
 import type { BaiViet } from "../lib/supabase";
-import { duongDanAnh } from "../lib/co-anh.mjs";
+import { htmlTheBai } from "../lib/the-bai";
 
 interface Props {
   bai: BaiViet;
   /** "event-card-featured" cho khối nổi bật, "related-card" cho cuối bài. */
   them_lop?: string;
 }
-const { bai, them_lop } = Astro.props;
+const { bai, them_lop = "" } = Astro.props;
 
 // Chữ trên thẻ là chữ người đọc thấy, có thể khác tiêu đề bài. Chưa đặt
 // riêng thì lấy tiêu đề bài và mô tả Google.
-const tieu_de = bai.the_tieu_de || bai.tieu_de;
-const mo_ta = bai.the_mo_ta || bai.seo_mo_ta || "";
+const html = htmlTheBai(
+  {
+    slug: bai.slug,
+    tieu_de: bai.the_tieu_de || bai.tieu_de,
+    mo_ta: bai.the_mo_ta || bai.seo_mo_ta || "",
+    anh: bai.anh,
+    anh_alt: bai.anh_alt,
+  },
+  them_lop
+);
 ---
 
-<a class:list={["event-card", "event-card-link", them_lop]} href={"/" + bai.slug}>
-  {them_lop === "event-card-featured" && <span class="event-badge">Nổi bật</span>}
-  {bai.anh && (
-    <div class="event-img">
-      <img src={duongDanAnh(bai.anh)} alt={bai.anh_alt ?? ""} loading="lazy">
-    </div>
-  )}
-  <h3>{tieu_de}</h3>
-  <p>{mo_ta}</p>
-  <span class="related-more">
-    Đọc bài viết <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
-  </span>
-</a>
+<Fragment set:html={html} />

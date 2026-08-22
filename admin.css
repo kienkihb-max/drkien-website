@@ -96,6 +96,13 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 .qt-nut-nguy-nhe { background: #fff; border-color: var(--qt-nguy); color: var(--qt-nguy); }
 .qt-nut-nguy-nhe:hover:not(:disabled) { background: var(--qt-nguy); color: #fff; }
 .qt-nut-rong { width: 100%; }
+
+/* Ô nhập bên trái, thẻ xem trước bên phải. Màn hẹp thì xếp dọc — thẻ tụt
+   xuống dưới vẫn hơn là bóp cả hai cột đến mức không đọc được. */
+/* Bố cục hai cột (ô nhập | thẻ xem trước) đã có sẵn ở cuối file, mục
+   "Thẻ xem trước trên trang blog" — đừng khai lại ở đây. Bản khai lại từng
+   nằm đúng chỗ này và bị bản dưới đè, làm cột nhập hẹp còn 206px mà nhìn
+   CSS ở trên thì thấy hoàn toàn hợp lý. */
 .qt-hang-nut { display: flex; gap: 10px; flex-wrap: wrap; }
 .qt-hang-nut-phai { justify-content: flex-end; margin-top: 16px; }
 
@@ -266,10 +273,26 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 .st-vung a { color: var(--qt-chinh); }
 
 /* ————— Thẻ xem trước trên trang blog ————— */
-/* Mô phỏng .event-card của style.css, đủ giống để cân nhắc độ dài chữ. */
+/* Thẻ nay là thẻ THẬT, dựng trong một iframe chạy style.css của website
+   (xem .qt-xem-the bên dưới). Mấy lớp .qt-the-xem phía sau là bản mô phỏng
+   của trang quản trị đời trước, giữ lại chưa dùng tới. */
 .qt-hai-cot { display: flex; gap: 24px; align-items: flex-start; }
 .qt-cot-nhap { flex: 1; min-width: 0; }
 .qt-cot-xem { width: 300px; flex-shrink: 0; position: sticky; top: 130px; }
+/* Khung chứa thẻ thật.
+   Iframe rộng hẳn 1200px để style.css áp bộ quy tắc DESKTOP — khung hẹp thì
+   nó tưởng đang trên điện thoại và thu nhỏ cỡ chữ, xem trước ra một đằng mà
+   trang thật một nẻo. Rồi thu cả khung lại bằng transform cho vừa cột 300px,
+   và cắt phần thừa bằng lớp bọc overflow:hidden. Tỉ lệ và chiều cao do JS
+   tính, vì chỉ nó mới biết thẻ cao bao nhiêu sau khi ảnh tải xong. */
+.qt-xem-khung { width: 100%; overflow: hidden; }
+.qt-xem-the {
+  width: 1200px;
+  border: 0;
+  background: transparent;
+  display: block;
+  transform-origin: 0 0;
+}
 @media (max-width: 720px) {
   .qt-hai-cot { flex-direction: column; }
   .qt-cot-xem { width: 100%; position: static; }

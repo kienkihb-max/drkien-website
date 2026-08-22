@@ -143,11 +143,26 @@ import VetLoi from "../../components/VetLoi.astro";
           không điền đè. Tiêu đề bài dài thì đây là chỗ đặt câu ngắn hơn.
         </p>
 
-        <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
-        <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="70">
+        <div class="qt-hai-cot">
+          <div class="qt-cot-nhap">
+            <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
+            <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="70">
 
-        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
-        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3" data-dem="160"></textarea>
+            <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
+            <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3" data-dem="160"></textarea>
+          </div>
+
+          <!-- Xem trước bằng iframe chứ không vẽ thẳng vào trang: thẻ cần
+               style.css của website, mà trang quản trị chạy admin.css —
+               nhét hai bộ vào chung một trang là chúng đè lên nhau. Trong
+               khung riêng thì thẻ hiện đúng y như người đọc thấy. -->
+          <div class="qt-cot-xem">
+            <p class="qt-nhan">Xem trước trên trang blog</p>
+            <div class="qt-xem-khung" id="xem-khung">
+              <iframe class="qt-xem-the" id="xem-the" title="Xem trước thẻ bài viết" scrolling="no"></iframe>
+            </div>
+          </div>
+        </div>
       </fieldset>
 
       <fieldset class="qt-nhom">
@@ -195,6 +210,7 @@ import VetLoi from "../../components/VetLoi.astro";
   import { duongDanAnh } from "../../lib/dia-chi-anh.mjs";
   import { dungLaiWeb } from "../../lib/dung-lai-web";
   import { xoaBaiVaAnh } from "../../lib/xoa-bai";
+  import { htmlTheBai } from "../../lib/the-bai";
 
   const o = (id: string) => document.getElementById(id) as HTMLInputElement;
   const el = (id: string) => document.getElementById(id) as HTMLElement;
@@ -276,6 +292,7 @@ import VetLoi from "../../components/VetLoi.astro";
     o("o-anh-cao").value = "";
     el("tin-anh").textContent = "";
     veXemAnh();
+    veXemThe();
     // Ô ẩn đổi giá trị thì trình duyệt không bắn sự kiện nào, mà hai nút
     // Lưu/Đăng lại dựa vào đó để biết có gì chưa lưu.
     veLaiDauTrang();
@@ -293,6 +310,7 @@ import VetLoi from "../../components/VetLoi.astro";
       o("o-anh-rong").value = String(kq.rong);
       o("o-anh-cao").value = String(kq.cao);
       veXemAnh();
+      veXemThe();
       // Ô đường dẫn nay là ô ẩn, đổi giá trị không bắn sự kiện nào — phải
       // tự gọi để nút Lưu hiện ra.
       veLaiDauTrang();
@@ -339,8 +357,13 @@ import VetLoi from "../../components/VetLoi.astro";
   // Ô nào người viết đã tự gõ thì đánh dấu, để không bị máy ghi đè.
   const tay: Record<string, boolean> = {};
   ["o-the-tieu-de", "o-the-mo-ta"].forEach((id) => {
-    o(id).addEventListener("input", () => { tay[id] = true; });
+    o(id).addEventListener("input", () => {
+      tay[id] = true;
+      veXemThe();
+    });
   });
+  // Mô tả ảnh không hiện trên thẻ nhưng là chữ thay cho ảnh khi ảnh hỏng.
+  o("o-anh-alt").addEventListener("input", veXemThe);
 
   // Cắt một đoạn dài thành mô tả: ưu tiên dừng ở trọn câu, quá dài thì cắt
   // ở ranh giới từ rồi thêm dấu ba chấm. Cắt giữa từ trông rất cẩu thả trên
@@ -390,6 +413,81 @@ import VetLoi from "../../components/VetLoi.astro";
     return (vung.textContent || "").replace(/\s+/g, " ").trim();
   }
 
+  // ——— Xem trước thẻ blog ———
+  // Khung rỗng dựng một lần, sau đó chỉ thay ruột — dựng lại cả khung mỗi
+  // lần gõ một chữ thì ảnh nháy liên tục và style.css phải tải lại.
+
+  /** Bề ngang thật của một thẻ trên trang blog desktop, tính bằng px. */
+  const THE_RONG = 368;
+  const KHUNG_XEM =
+    '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">' +
+    '<link rel="stylesheet" href="/style.css">' +
+    '<script src="/icons.js"><\/script>' +
+    // Không lề, không nền: khung chỉ để đựng đúng một tấm thẻ, phần thừa
+    // nào cũng thành viền xám thừa trong trang quản trị.
+    // Bề ngang đúng bằng một thẻ trên trang blog desktop: lưới 3 cột trong
+    // container 1200px, trừ lề và khe giữa các thẻ.
+    "<style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}" +
+    "#cho{width:" + THE_RONG + "px}" +
+    // Đây là ảnh chụp, không phải trang thật: chặn bấm để khỏi lạc sang
+    // trang khác ngay trong khung xem trước.
+    "a{pointer-events:none}</style>" +
+    '</head><body><div id="cho"></div></body></html>';
+
+  const khung_xem = o("xem-the") as unknown as HTMLIFrameElement;
+  let khung_san_sang = false;
+  khung_xem.addEventListener("load", () => {
+    khung_san_sang = true;
+    veXemThe();
+  });
+  khung_xem.srcdoc = KHUNG_XEM;
+  // Cửa sổ đổi bề ngang thì cột cũng đổi, tỉ lệ thu nhỏ phải tính lại.
+  window.addEventListener("resize", caoBangNoiDung);
+
+  function veXemThe() {
+    if (!khung_san_sang) return;
+    const cho = khung_xem.contentDocument?.getElementById("cho");
+    if (!cho) return;
+    cho.innerHTML = htmlTheBai({
+      slug: o("o-slug").value.trim() || "bai-moi",
+      // Ô trên thẻ để trống thì thẻ thật cũng lấy tiêu đề bài — xem trước
+      // phải đi theo đúng luật đó.
+      tieu_de: o("o-the-tieu-de").value.trim() || o("o-tieu-de").value.trim(),
+      mo_ta: o("o-the-mo-ta").value.trim() || o("o-seo-mo-ta").value.trim(),
+      anh: o("o-anh").value.trim() || null,
+      anh_alt: o("o-anh-alt").value.trim(),
+    });
+    caoBangNoiDung();
+  }
+
+  /**
+   * Kéo khung cao đúng bằng tấm thẻ, để không có thanh cuộn.
+   *
+   * Ảnh trong thẻ tải xong mới biết cao bao nhiêu, nên đo lại một lần nữa
+   * lúc ảnh xong — đo một lần là khung hụt đúng chiều cao tấm ảnh.
+   */
+  function caoBangNoiDung() {
+    const doc = khung_xem.contentDocument;
+    const than = doc?.body;
+    const boc = el("xem-khung");
+    if (!than || !boc) return;
+    const dat = () => {
+      const cao = Math.ceil(than.scrollHeight);
+      // Thu cả tấm thẻ 368px xuống vừa bề ngang cột. Không bao giờ phóng to:
+      // cột rộng hơn thẻ thì để thẻ đúng cỡ thật của nó.
+      const ti_le = Math.min(1, boc.clientWidth / THE_RONG);
+      khung_xem.style.height = cao + "px";
+      khung_xem.style.transform = "scale(" + ti_le + ")";
+      // Iframe đã bị thu nhỏ nhưng ô chứa nó thì không tự co theo — phải đặt
+      // tay, không thì dưới thẻ hở ra một mảng trắng bằng phần đã thu.
+      boc.style.height = Math.ceil(cao * ti_le) + "px";
+    };
+    dat();
+    doc!.querySelectorAll("img").forEach((anh) => {
+      if (!anh.complete) anh.addEventListener("load", dat, { once: true });
+    });
+  }
+
   function veLaiSEO() {
     const tieu_de = o("o-tieu-de").value.trim();
     o("o-seo-tieu-de").value = tieu_de ? tieu_de + DUOI_TIEU_DE : "";
@@ -400,6 +498,7 @@ import VetLoi from "../../components/VetLoi.astro";
     if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = mo_ta;
 
     veLaiDem();
+    veXemThe();
   }
 
   // Đếm ký tự cho mấy ô có data-dem, và bôi đỏ khi vượt mức. Mô tả dài quá

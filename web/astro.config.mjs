@@ -1,8 +1,13 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import nhatKyDev from "./dev-nhat-ky.mjs";
 
 // https://astro.build/config
 export default defineConfig({
+  // Ghi lỗi ở trình duyệt xuống web/nhat-ky-dev.log. Chỉ hoạt động khi
+  // "astro dev"; lúc build thì integration này tự tắt.
+  integrations: [nhatKyDev()],
+
   // Địa chỉ thật của site. Astro dùng nó để sinh sitemap và các URL tuyệt
   // đối — sai chỗ này là canonical sai trên toàn bộ trang.
   site: "https://bacsikien.com",

@@ -1,0 +1,101 @@
+---
+// Gom lỗi ở trình duyệt gửi về máy chủ dev — CHỈ chạy lúc dev.
+//
+// Đặt component này vào trang cần theo dõi. Lúc "astro build" thì
+// import.meta.env.DEV là false nên cả khối biến mất, bản thật sạch trơn.
+//
+// Bắt bốn nguồn:
+//   window.onerror            lỗi JS không ai bắt
+//   unhandledrejection        promise gãy không ai bắt (hay gặp nhất với
+//                             mấy lời gọi Supabase)
+//   console.error             lỗi do chính mã của mình in ra
+//   mốc do trang tự báo        gọi window.vet("...") ở chỗ cần soi
+---
+
+{import.meta.env.DEV && (
+  <script is:inline>
+    (function () {
+      var TRANG = location.pathname;
+
+      function gui(muc, chu, chi_tiet) {
+        try {
+          // keepalive để gói vẫn đi được khi trang đang chuyển hướng —
+          // không có nó thì đúng những lỗi ngay trước lúc rời trang lại
+          // là những lỗi bị mất.
+          fetch("/__nhat-ky", {
+            method: "POST",
+            keepalive: true,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              muc: muc,
+              trang: TRANG,
+              chu: String(chu).slice(0, 2000),
+              chi_tiet: chi_tiet ? String(chi_tiet).slice(0, 4000) : "",
+            }),
+          }).catch(function () {});
+        } catch (e) {}
+      }
+
+      // Để trang gọi tay ở chỗ cần soi: window.vet("nap() xong").
+      window.vet = function (chu, chi_tiet) { gui("MOC", chu, chi_tiet); };
+
+      window.addEventListener("error", function (e) {
+        gui(
+          "LOI",
+          e.message,
+          (e.filename || "") + ":" + (e.lineno || 0) + "\n" + (e.error && e.error.stack ? e.error.stack : "")
+        );
+      });
+
+      window.addEventListener("unhandledrejection", function (e) {
+        var l = e.reason;
+        gui("PROMISE", (l && l.message) || String(l), l && l.stack ? l.stack : "");
+      });
+
+      var loi_goc = console.error;
+      console.error = function () {
+        try {
+          gui("CONSOLE", Array.prototype.map.call(arguments, function (x) {
+            if (x instanceof Error) return x.message + "\n" + x.stack;
+            if (typeof x === "object") { try { return JSON.stringify(x); } catch (e) { return String(x); } }
+            return String(x);
+          }).join(" "));
+        } catch (e) {}
+        loi_goc.apply(console, arguments);
+      };
+
+      // ——— Theo dõi thao tác gõ ———
+      // Để trả lời được câu "ô nào không nhận chữ": ghi lại ô nào được
+      // chạm vào, và mỗi lần gõ thì ô đó có nhận ký tự không. Không có cái
+      // này thì chỉ còn cách đoán.
+      function tenO(el) {
+        if (!el || el === document.body) return "(ngoài ô nhập)";
+        return (
+          (el.tagName || "?").toLowerCase() +
+          (el.id ? "#" + el.id : "") +
+          (el.className && typeof el.className === "string"
+            ? "." + el.className.split(/\s+/).join(".")
+            : "")
+        );
+      }
+
+      document.addEventListener("focusin", function (e) {
+        gui("CHAM", tenO(e.target));
+      });
+
+      // Gõ nhanh thì mỗi ký tự một dòng là ngập nhật ký — chỉ ghi lần đầu
+      // rồi nghỉ 1 giây.
+      var lan_cuoi = 0;
+      document.addEventListener("input", function (e) {
+        var gio = Date.now();
+        if (gio - lan_cuoi < 1000) return;
+        lan_cuoi = gio;
+        var t = e.target;
+        var noi_dung = t.value !== undefined ? t.value : t.textContent;
+        gui("GO", tenO(t), "đang có " + String(noi_dung || "").length + " ký tự");
+      });
+
+      gui("MOC", "trang mở");
+    })();
+  </script>
+)}

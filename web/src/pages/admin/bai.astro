@@ -88,11 +88,35 @@ import VetLoi from "../../components/VetLoi.astro";
       </fieldset>
 
       <fieldset class="qt-nhom">
-        <legend>Chữ hiện trên thẻ và trên Google</legend>
-        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ blog</label>
-        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3"></textarea>
-        <label class="qt-nhan" for="o-seo-mo-ta">Mô tả trên Google</label>
-        <textarea class="qt-o qt-o-cao" id="o-seo-mo-ta" rows="3"></textarea>
+        <legend>Chữ hiện trên thẻ blog</legend>
+        <p class="qt-goi-y">
+          Đây là chữ người đọc thấy trên trang blog. Máy điền sẵn theo tiêu đề
+          và đoạn mở đầu; anh sửa được, và sửa rồi thì máy thôi không điền đè.
+        </p>
+
+        <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
+        <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="70">
+
+        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
+        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3" data-dem="160"></textarea>
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Chữ hiện trên Google</legend>
+        <p class="qt-goi-y">
+          Hai ô này máy tự sinh và khoá lại — chủ site không phải nghĩ về SEO.
+          Muốn đổi thì sửa tiêu đề hoặc đoạn mở đầu, chúng sẽ đổi theo.
+        </p>
+
+        <label class="qt-nhan" for="o-seo-tieu-de">
+          Tiêu đề trên Google <span class="qt-tu-dong">tự sinh</span>
+        </label>
+        <input class="qt-o" type="text" id="o-seo-tieu-de" data-dem="60" disabled>
+
+        <label class="qt-nhan" for="o-seo-mo-ta">
+          Mô tả trên Google <span class="qt-tu-dong">tự sinh</span>
+        </label>
+        <textarea class="qt-o qt-o-cao" id="o-seo-mo-ta" rows="3" data-dem="160" disabled></textarea>
       </fieldset>
     </form>
   </main>
@@ -138,6 +162,96 @@ import VetLoi from "../../components/VetLoi.astro";
       .replace(/^-+|-+$/g, "");
   }
 
+  // ——— Tự điền SEO ———
+  // Chủ site không phải dân SEO, nên toàn bộ phần này máy lo: đường dẫn,
+  // tiêu đề Google, mô tả Google. Hai ô hiển thị trên thẻ blog vẫn sửa được
+  // vì đó là chữ người đọc thấy; gõ tay rồi thì máy thôi không điền đè.
+
+  const DUOI_TIEU_DE = " — Bác sĩ Lê Trung Kiên";
+
+  // Ô nào người viết đã tự gõ thì đánh dấu, để không bị máy ghi đè.
+  const tay: Record<string, boolean> = {};
+  ["o-the-tieu-de", "o-the-mo-ta"].forEach((id) => {
+    o(id).addEventListener("input", () => { tay[id] = true; });
+  });
+
+  // Cắt một đoạn dài thành mô tả: ưu tiên dừng ở trọn câu, quá dài thì cắt
+  // ở ranh giới từ rồi thêm dấu ba chấm. Cắt giữa từ trông rất cẩu thả trên
+  // trang kết quả Google.
+  function catMoTa(chu: string, muc: number) {
+    chu = (chu || "").replace(/\s+/g, " ").trim();
+    if (chu.length <= muc) return chu;
+    const cat = chu.slice(0, muc);
+    const het_cau = Math.max(cat.lastIndexOf(". "), cat.lastIndexOf("! "), cat.lastIndexOf("? "));
+    if (het_cau > muc * 0.55) return cat.slice(0, het_cau + 1);
+    return cat.slice(0, cat.lastIndexOf(" ")) + "…";
+  }
+
+  // Nguồn để sinh mô tả: ưu tiên đoạn mở đầu, không có thì lấy đoạn văn đầu
+  // tiên của thân bài.
+  //
+  // Trang admin cũ chỉ đọc ô "đoạn mở đầu", nên bài nào bỏ trống ô đó là mô
+  // tả Google trống theo — đúng chuyện vừa xảy ra với bài test: dán nguyên
+  // bài vào thân bài, không điền lead, thế là Google phải tự bịa đoạn mô tả.
+  function nguonMoTa() {
+    const lead = o("o-lead").value.trim();
+    if (lead) return lead;
+
+    const vung = el("khung-soan")?.querySelector(".st-vung");
+    if (!vung) return "";
+
+    // Gom các đoạn văn cho tới khi đủ dài, thay vì chỉ lấy đoạn đầu.
+    //
+    // Lấy mỗi đoạn đầu là hỏng đúng kiểu bài hay gặp: dòng mở bài thường là
+    // một câu tựa ngắn cụt ("Khi chạy bộ không chỉ là chuyện của đôi chân"),
+    // ra mô tả 44 ký tự trong khi Google hiển thị được tới 160 — vừa phí
+    // chỗ vừa không nói được bài viết về cái gì.
+    const doan: string[] = [];
+    vung.querySelectorAll("p").forEach((p) => {
+      const chu = (p.textContent || "").replace(/\s+/g, " ").trim();
+      if (!chu) return;
+      // Dòng ngắn mà không kết thúc bằng dấu câu thì là tựa, không phải câu
+      // văn — bỏ qua, trừ khi cả bài chẳng có gì khác để lấy.
+      const la_tua = chu.length < 60 && !/[.!?…]$/.test(chu);
+      if (la_tua && doan.length === 0) return;
+      doan.push(chu);
+    });
+
+    const gom = doan.join(" ").trim();
+    if (gom) return gom;
+    // Cả bài toàn dòng ngắn: đành lấy nguyên chữ trong ô.
+    return (vung.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  function veLaiSEO() {
+    const tieu_de = o("o-tieu-de").value.trim();
+    o("o-seo-tieu-de").value = tieu_de ? tieu_de + DUOI_TIEU_DE : "";
+    if (!tay["o-the-tieu-de"]) o("o-the-tieu-de").value = tieu_de;
+
+    const mo_ta = catMoTa(nguonMoTa(), 160);
+    o("o-seo-mo-ta").value = mo_ta;
+    if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = mo_ta;
+
+    veLaiDem();
+  }
+
+  // Đếm ký tự cho mấy ô có data-dem, và bôi đỏ khi vượt mức. Mô tả dài quá
+  // thì Google cắt ngang, ngắn quá thì nó bỏ luôn không dùng.
+  function veLaiDem() {
+    document.querySelectorAll<HTMLElement>("[data-dem]").forEach((el_o) => {
+      const muc = Number(el_o.getAttribute("data-dem"));
+      const dai = ((el_o as HTMLInputElement).value || "").length;
+      let dem = el_o.nextElementSibling as HTMLElement | null;
+      if (!dem || !dem.classList.contains("qt-dem")) {
+        dem = document.createElement("p");
+        dem.className = "qt-dem";
+        el_o.after(dem);
+      }
+      dem.textContent = dai + "/" + muc + " ký tự";
+      dem.classList.toggle("qt-dem-qua", dai > muc);
+    });
+  }
+
   function docForm() {
     return {
       slug: o("o-slug").value.trim(),
@@ -150,7 +264,9 @@ import VetLoi from "../../components/VetLoi.astro";
       ngay_dang: o("o-ngay").value || new Date().toISOString().slice(0, 10),
       noi_bat: o("o-noi-bat").checked,
       an: o("o-an").checked,
+      the_tieu_de: o("o-the-tieu-de").value.trim() || null,
       the_mo_ta: o("o-the-mo-ta").value.trim() || null,
+      seo_tieu_de: o("o-seo-tieu-de").value.trim() || null,
       seo_mo_ta: o("o-seo-mo-ta").value.trim() || null,
     };
   }
@@ -218,7 +334,12 @@ import VetLoi from "../../components/VetLoi.astro";
       const ky_tu = (vung?.textContent || "").trim().length;
       el("dem-chu").textContent =
         "Khoảng " + bo_soan.demChu() + " từ · " + ky_tu + " ký tự.";
+      // Thân bài cũng là nguồn sinh mô tả khi đoạn mở đầu bỏ trống.
+      veLaiSEO();
     });
+
+    o("o-tieu-de").addEventListener("input", veLaiSEO);
+    o("o-lead").addEventListener("input", veLaiSEO);
 
     if (id_bai) {
       const { data, error } = await supabase
@@ -237,9 +358,16 @@ import VetLoi from "../../components/VetLoi.astro";
         o("o-ngay").value = data.ngay_dang ?? "";
         o("o-noi-bat").checked = !!data.noi_bat;
         o("o-an").checked = !!data.an;
+        o("o-the-tieu-de").value = data.the_tieu_de ?? "";
         o("o-the-mo-ta").value = data.the_mo_ta ?? "";
+        o("o-seo-tieu-de").value = data.seo_tieu_de ?? "";
         o("o-seo-mo-ta").value = data.seo_mo_ta ?? "";
         bo_soan.datHTML(data.than_bai ?? "");
+
+        // Chữ trên thẻ đã có sẵn trong bài cũ thì coi như người viết đã
+        // chọn — đừng để máy điền đè khi sửa lại tiêu đề.
+        if (data.the_tieu_de) tay["o-the-tieu-de"] = true;
+        if (data.the_mo_ta) tay["o-the-mo-ta"] = true;
       }
     } else {
       o("o-ngay").value = new Date().toISOString().slice(0, 10);
@@ -250,6 +378,10 @@ import VetLoi from "../../components/VetLoi.astro";
         if (!slug_tay) o("o-slug").value = tenFile(o("o-tieu-de").value);
       });
     }
+
+    // Chạy một lượt sau khi form đã có dữ liệu: bài cũ thiếu mô tả Google
+    // (như mấy bài đăng trước khi có phần này) sẽ được điền ngay.
+    veLaiSEO();
 
     el("man-cho").hidden = true;
     el("man-chinh").hidden = false;

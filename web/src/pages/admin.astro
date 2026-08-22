@@ -1,0 +1,183 @@
+---
+// Trang quản trị blog.
+//
+// Khác hẳn các trang còn lại của site: đây KHÔNG phải trang cho người đọc,
+// nên không có header, footer, cũng không cần SEO — ngược lại còn phải chặn
+// Google lập chỉ mục.
+//
+// Đăng nhập bằng GitHub qua Supabase Auth: bấm một nút, không nhập gì.
+// Trang cũ bắt dán token GitHub vì nó ghi bài thẳng vào kho mã; nay bài nằm
+// trong database nên không cần quyền đó nữa.
+//
+// Dùng lại nguyên admin.css của trang cũ để giao diện không lệch.
+---
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Quản trị blog — Bác sĩ Lê Trung Kiên</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<!-- ————— Màn hình đăng nhập ————— -->
+<section class="qt-vao" id="man-vao" hidden>
+  <div class="qt-vao-hop">
+    <h1>Quản trị blog</h1>
+    <p class="qt-phu">
+      Đăng nhập bằng tài khoản GitHub của bạn. Chỉ tài khoản đã được cấp
+      quyền mới đăng được bài.
+    </p>
+    <p class="qt-loi" id="loi-vao" hidden></p>
+    <button class="qt-nut qt-nut-chinh qt-nut-rong" type="button" id="nut-github">
+      Đăng nhập bằng GitHub
+    </button>
+  </div>
+</section>
+
+<!-- ————— Khung chính ————— -->
+<div id="man-chinh" hidden>
+  <header class="qt-dau">
+    <div class="qt-dau-trai">
+      <strong>Quản trị blog</strong>
+      <span class="qt-kho" id="nhan-tai-khoan"></span>
+    </div>
+    <div class="qt-dau-phai">
+      <a class="qt-nut qt-nut-nhe" href="/blog" target="_blank" rel="noopener">Xem trang blog</a>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-ra">Đăng xuất</button>
+    </div>
+  </header>
+
+  <main class="qt-than">
+    <div class="qt-hang-tieu-de">
+      <div>
+        <h2>Bài viết</h2>
+        <p class="qt-phu" id="tom-tat-danh-sach"></p>
+      </div>
+      <a class="qt-nut qt-nut-chinh" href="/admin/bai">+ Viết bài mới</a>
+    </div>
+    <div id="bang-bai"><p class="qt-phu">Đang tải…</p></div>
+  </main>
+</div>
+
+<!-- Màn hình chờ: hiện ngay từ đầu để không nháy màn hình đăng nhập rồi lại
+     nhảy sang khung chính khi hoá ra đã đăng nhập sẵn. -->
+<div class="qt-lop qt-lop-cho" id="man-cho">
+  <p class="qt-phu">Đang kiểm tra đăng nhập…</p>
+</div>
+
+<script>
+  import { supabase } from "../lib/supabase";
+
+  const o = (id: string) => document.getElementById(id) as HTMLElement;
+  const hien = (id: string, co: boolean) => { o(id).hidden = !co; };
+
+  function thoat(c: unknown) {
+    return String(c ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // ——— Đăng nhập / đăng xuất ———
+  o("nut-github").addEventListener("click", async () => {
+    const loi = o("loi-vao");
+    loi.hidden = true;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      // Quay lại đúng trang này sau khi GitHub xác nhận xong.
+      options: { redirectTo: window.location.origin + "/admin" },
+    });
+    if (error) {
+      loi.textContent = "Không đăng nhập được: " + error.message;
+      loi.hidden = false;
+    }
+  });
+
+  o("nut-ra").addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/admin";
+  });
+
+  // ——— Danh sách bài ———
+  async function veDanhSach() {
+    const khung = o("bang-bai");
+    const { data, error } = await supabase
+      .from("bai_viet")
+      .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat")
+      .order("ngay_dang", { ascending: false });
+
+    if (error) {
+      // Lỗi hay gặp nhất ở đây là đăng nhập được nhưng chưa được cấp quyền
+      // ghi. Nói thẳng cách sửa, thay vì in mã lỗi khó hiểu.
+      khung.innerHTML =
+        '<p class="qt-loi">Không đọc được danh sách bài: ' + thoat(error.message) +
+        "</p><p class='qt-phu'>Nếu đây là lần chạy đầu, nhiều khả năng tài khoản " +
+        "GitHub này chưa có tên trong bảng <code>nguoi_viet</code>. Xem hướng dẫn " +
+        "ở cuối file <code>web/supabase/schema.sql</code>.</p>";
+      return;
+    }
+
+    const ds = data ?? [];
+    const dang_hien = ds.filter((b) => b.da_dang && !b.an).length;
+    const nhap = ds.filter((b) => !b.da_dang).length;
+    o("tom-tat-danh-sach").textContent =
+      ds.length ? dang_hien + " bài đang hiện · " + nhap + " bản nháp" : "";
+
+    if (!ds.length) {
+      khung.innerHTML =
+        '<p class="qt-phu">Chưa có bài nào. Bấm "Viết bài mới" để bắt đầu.</p>';
+      return;
+    }
+
+    khung.innerHTML = ds.map((b) => {
+      const the = !b.da_dang
+        ? '<span class="qt-nhan-an">Bản nháp</span>'
+        : b.an
+          ? '<span class="qt-nhan-an">Đã gỡ</span>'
+          : "";
+      const noi_bat = b.noi_bat ? '<span class="qt-nhan-noi-bat">Nổi bật</span>' : "";
+      return (
+        '<div class="qt-bai">' +
+        '  <div class="qt-bai-giua">' +
+        '    <p class="qt-bai-tieu-de">' + thoat(b.tieu_de) + the + noi_bat + "</p>" +
+        '    <p class="qt-bai-meta">/' + thoat(b.slug) + " · " + thoat(b.ngay_dang) + "</p>" +
+        "  </div>" +
+        '  <div class="qt-bai-nut">' +
+        '    <a class="qt-nut qt-nut-nhe" href="/admin/bai?id=' + thoat(b.id) + '">Sửa</a>' +
+        "  </div>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  // ——— Quyết định hiện màn nào ———
+  async function dungTrang() {
+    const { data } = await supabase.auth.getSession();
+    const phien = data.session;
+
+    hien("man-cho", false);
+    if (!phien) {
+      hien("man-vao", true);
+      hien("man-chinh", false);
+      return;
+    }
+
+    const ten = phien.user.user_metadata?.user_name ?? phien.user.email ?? "";
+    o("nhan-tai-khoan").textContent = String(ten);
+    hien("man-vao", false);
+    hien("man-chinh", true);
+    await veDanhSach();
+  }
+
+  // Sau khi GitHub chuyển hướng về, Supabase cần một nhịp để đọc phiên từ
+  // địa chỉ trang; onAuthStateChange bắt đúng thời điểm đó.
+  supabase.auth.onAuthStateChange(() => { dungTrang(); });
+  dungTrang();
+</script>
+
+</body>
+</html>

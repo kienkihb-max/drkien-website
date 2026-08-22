@@ -1,0 +1,245 @@
+---
+// Soạn bài mới hoặc sửa bài có sẵn.
+//   /admin/bai         → bài mới
+//   /admin/bai?id=...  → sửa bài đó
+//
+// Đây mới là VỎ: đủ để bài nằm được trong database và đăng lên. Trình soạn
+// thảo dùng lại admin-soan-thao.js của trang cũ nguyên xi — phần nâng cấp
+// soạn thảo làm ở bước sau.
+---
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Soạn bài — Quản trị blog</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<div id="man-chinh" hidden>
+  <header class="qt-dau">
+    <div class="qt-dau-trai">
+      <strong><a href="/admin">Quản trị blog</a></strong>
+      <span class="qt-kho" id="nhan-tai-khoan"></span>
+    </div>
+    <div class="qt-dau-phai">
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-quay-lai">Quay lại</button>
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-luu-nhap">Lưu nháp</button>
+      <button class="qt-nut qt-nut-chinh" type="button" id="nut-dang">Đăng bài</button>
+    </div>
+  </header>
+
+  <main class="qt-than">
+    <div class="qt-hang-tieu-de">
+      <div>
+        <h2 id="tieu-de-man">Viết bài mới</h2>
+        <p class="qt-phu" id="duong-dan-xem"></p>
+      </div>
+    </div>
+
+    <p class="qt-bao" id="bao" hidden></p>
+
+    <form id="form-bai" autocomplete="off">
+      <fieldset class="qt-nhom">
+        <legend>Nội dung bài viết</legend>
+
+        <label class="qt-nhan" for="o-tieu-de">Tiêu đề bài viết</label>
+        <input class="qt-o" type="text" id="o-tieu-de" required>
+
+        <label class="qt-nhan" for="o-slug">Đường dẫn</label>
+        <p class="qt-goi-y">
+          Chốt một lần lúc tạo bài. Bài đã đăng mà đổi đường dẫn thì mọi link
+          đã chia sẻ ra ngoài sẽ thành trang lỗi và bài mất thứ hạng Google.
+        </p>
+        <input class="qt-o" type="text" id="o-slug" required>
+
+        <label class="qt-nhan" for="o-nhan">Chuyên mục</label>
+        <input class="qt-o" type="text" id="o-nhan" placeholder="Blog · Y học cổ truyền">
+
+        <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
+        <textarea class="qt-o qt-o-cao" id="o-lead" rows="3"></textarea>
+
+        <label class="qt-nhan">Thân bài</label>
+        <div id="khung-soan"></div>
+        <p class="qt-phu" id="dem-chu"></p>
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Ảnh bìa</legend>
+        <label class="qt-nhan" for="o-anh">Đường dẫn ảnh</label>
+        <input class="qt-o" type="text" id="o-anh" placeholder="assets/img/ten-anh.jpg">
+        <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh</label>
+        <input class="qt-o" type="text" id="o-anh-alt">
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Hiển thị</legend>
+        <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
+        <input class="qt-o qt-o-hep" type="date" id="o-ngay">
+        <label><input type="checkbox" id="o-noi-bat"> Đưa lên khối nổi bật đầu trang blog</label>
+        <label><input type="checkbox" id="o-an"> Gỡ khỏi danh sách (địa chỉ cũ vẫn sống)</label>
+      </fieldset>
+
+      <fieldset class="qt-nhom">
+        <legend>Chữ hiện trên thẻ và trên Google</legend>
+        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ blog</label>
+        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3"></textarea>
+        <label class="qt-nhan" for="o-seo-mo-ta">Mô tả trên Google</label>
+        <textarea class="qt-o qt-o-cao" id="o-seo-mo-ta" rows="3"></textarea>
+      </fieldset>
+    </form>
+  </main>
+</div>
+
+<div class="qt-lop qt-lop-cho" id="man-cho">
+  <p class="qt-phu">Đang tải…</p>
+</div>
+
+<!-- Trình soạn thảo của trang cũ, dùng lại nguyên xi. BaiViet phải nạp
+     trước vì SoanThao gọi BaiViet.thoat() lúc dán chữ. -->
+<script is:inline src="/admin-bai-viet.js"></script>
+<script is:inline src="/admin-soan-thao.js"></script>
+
+<script>
+  import { supabase } from "../../lib/supabase";
+
+  const o = (id: string) => document.getElementById(id) as HTMLInputElement;
+  const el = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const id_bai = new URLSearchParams(location.search).get("id");
+  let bo_soan: any = null;
+
+  function bao(chu: string, loi = false) {
+    const b = el("bao");
+    b.textContent = chu;
+    b.className = "qt-bao " + (loi ? "qt-bao-loi" : "qt-bao-tot");
+    b.hidden = false;
+  }
+
+  // Đổi tiêu đề thành đường dẫn: bỏ dấu tiếng Việt, thay khoảng trắng bằng
+  // gạch nối. Chỉ chạy khi tạo bài mới.
+  function tenFile(chu: string) {
+    return chu
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/đ/g, "d").replace(/Đ/g, "D")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function docForm() {
+    return {
+      slug: o("o-slug").value.trim(),
+      tieu_de: o("o-tieu-de").value.trim(),
+      nhan: o("o-nhan").value.trim() || null,
+      lead: o("o-lead").value.trim() || null,
+      than_bai: bo_soan ? bo_soan.layHTML() : "",
+      anh: o("o-anh").value.trim() || null,
+      anh_alt: o("o-anh-alt").value.trim() || null,
+      ngay_dang: o("o-ngay").value || new Date().toISOString().slice(0, 10),
+      noi_bat: o("o-noi-bat").checked,
+      an: o("o-an").checked,
+      the_mo_ta: o("o-the-mo-ta").value.trim() || null,
+      seo_mo_ta: o("o-seo-mo-ta").value.trim() || null,
+    };
+  }
+
+  async function luu(da_dang: boolean) {
+    const d = docForm();
+    if (!d.tieu_de || !d.slug) {
+      bao("Cần có tiêu đề và đường dẫn.", true);
+      return;
+    }
+
+    const ban_ghi = { ...d, da_dang };
+    const { data, error } = id_bai
+      ? await supabase.from("bai_viet").update(ban_ghi).eq("id", id_bai).select("id").single()
+      : await supabase.from("bai_viet").insert(ban_ghi).select("id").single();
+
+    if (error) {
+      // Đường dẫn trùng là lỗi hay gặp nhất, và thông báo gốc của Postgres
+      // thì khó hiểu — dịch ra tiếng người.
+      bao(
+        error.code === "23505"
+          ? 'Đường dẫn "' + d.slug + '" đã có bài khác dùng rồi. Đổi sang chữ khác.'
+          : "Không lưu được: " + error.message,
+        true
+      );
+      return;
+    }
+
+    bao(da_dang ? "Đã đăng bài." : "Đã lưu bản nháp.");
+    // Bài mới: gắn id vào địa chỉ để lần lưu sau là sửa chứ không tạo thêm.
+    if (!id_bai && data) {
+      history.replaceState(null, "", "/admin/bai?id=" + data.id);
+      setTimeout(() => location.reload(), 600);
+    }
+  }
+
+  async function nap() {
+    const { data: phien_data } = await supabase.auth.getSession();
+    const phien = phien_data.session;
+    if (!phien) {
+      location.href = "/admin";
+      return;
+    }
+    el("nhan-tai-khoan").textContent = String(
+      phien.user.user_metadata?.user_name ?? phien.user.email ?? ""
+    );
+
+    bo_soan = (window as any).SoanThao.tao({
+      khung: el("khung-soan"),
+      khiChonAnh: () => alert("Kho ảnh sẽ làm ở bước sau."),
+    });
+    bo_soan.khiDoi(() => {
+      el("dem-chu").textContent = "Khoảng " + bo_soan.demChu() + " chữ.";
+    });
+
+    if (id_bai) {
+      const { data, error } = await supabase
+        .from("bai_viet").select("*").eq("id", id_bai).single();
+      if (error || !data) {
+        bao("Không mở được bài này: " + (error?.message ?? "không tìm thấy"), true);
+      } else {
+        el("tieu-de-man").textContent = "Sửa bài";
+        el("duong-dan-xem").textContent = "/" + data.slug;
+        o("o-tieu-de").value = data.tieu_de ?? "";
+        o("o-slug").value = data.slug ?? "";
+        o("o-nhan").value = data.nhan ?? "";
+        o("o-lead").value = data.lead ?? "";
+        o("o-anh").value = data.anh ?? "";
+        o("o-anh-alt").value = data.anh_alt ?? "";
+        o("o-ngay").value = data.ngay_dang ?? "";
+        o("o-noi-bat").checked = !!data.noi_bat;
+        o("o-an").checked = !!data.an;
+        o("o-the-mo-ta").value = data.the_mo_ta ?? "";
+        o("o-seo-mo-ta").value = data.seo_mo_ta ?? "";
+        bo_soan.datHTML(data.than_bai ?? "");
+      }
+    } else {
+      o("o-ngay").value = new Date().toISOString().slice(0, 10);
+      // Bài mới: đường dẫn chạy theo tiêu đề cho tới khi người viết sửa tay.
+      let slug_tay = false;
+      o("o-slug").addEventListener("input", () => { slug_tay = true; });
+      o("o-tieu-de").addEventListener("input", () => {
+        if (!slug_tay) o("o-slug").value = tenFile(o("o-tieu-de").value);
+      });
+    }
+
+    el("man-cho").hidden = true;
+    el("man-chinh").hidden = false;
+  }
+
+  el("nut-quay-lai").addEventListener("click", () => { location.href = "/admin"; });
+  el("nut-luu-nhap").addEventListener("click", () => luu(false));
+  el("nut-dang").addEventListener("click", () => luu(true));
+
+  nap();
+</script>
+
+</body>
+</html>

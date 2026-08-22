@@ -1,0 +1,73 @@
+---
+// Header + thanh điều hướng dùng chung cho toàn site.
+// Thêm/bớt mục menu ở đây là đổi đồng thời trên tất cả các trang.
+//
+// Chuyển từ site-header.js sang. Khác biệt: menu được in thẳng vào HTML lúc
+// build thay vì do JS dựng lúc chạy, nên Google thấy được toàn bộ liên kết
+// nội bộ ngay từ lần đọc đầu — trước đây nó phải chạy JS mới thấy.
+import { ZALO } from "../data/thong-tin";
+
+interface Props {
+  /** Tên trang hiện tại, dạng slug không đuôi: "blog", "dieu-tri"… */
+  trang?: string;
+}
+const { trang = "" } = Astro.props;
+const la_trang_chu = trang === "" || trang === "index";
+
+// Trên trang chủ neo thẳng tới section; ở trang con phải quay về "/" trước.
+const toiTrangChu = (neo: string) => (la_trang_chu ? neo : "/" + neo);
+
+const MUC_DICH_VU = [
+  { trang: "/y-te-su-kien", chu: "Y tế sự kiện" },
+  { trang: "/dien-gia-seminar", chu: "Diễn giả" },
+  { trang: "/dieu-tri", chu: "Điều trị" },
+];
+---
+
+<header class="site-header" id={la_trang_chu ? "top" : undefined}>
+  <div class="container header-inner">
+    <a href={la_trang_chu ? "#top" : "/"} class="brand">
+      <!-- Bản rút gọn (không vòng chữ): ô logo chỉ 44px, ở cỡ đó vòng chữ
+           thành vệt mờ. Bản đầy đủ là assets/img/logo-bs-kien.svg. -->
+      <img class="brand-mark" src="/assets/img/logo-bs-kien-mark.svg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
+      <span class="brand-text">ThS.BS Lê Trung Kiên</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNav">
+      <a href={la_trang_chu ? "#top" : "/"}>Trang chủ</a>
+      <div class="nav-dropdown">
+        <a href={toiTrangChu("#offerings")}>
+          Dịch vụ
+          <svg class="icon icon-sm nav-dropdown-arrow"><use href="#ic-chevron-down"/></svg>
+        </a>
+        <div class="nav-dropdown-menu">
+          {MUC_DICH_VU.map((m) => <a href={m.trang}>{m.chu}</a>)}
+        </div>
+      </div>
+      <a href="/bac-si-le-trung-kien">Giới thiệu</a>
+      <a href="/blog">Blog</a>
+      <a href={ZALO} target="_blank" rel="noopener" class="nav-cta">Liên hệ</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Nút hamburger trên mobile. Đây là phần duy nhất của header thật sự cần
+  // JS — còn lại đã là HTML sẵn.
+  const nut = document.getElementById("navToggle");
+  const menu = document.getElementById("siteNav");
+  if (nut && menu) {
+    nut.addEventListener("click", () => {
+      const dang_mo = menu.classList.toggle("open");
+      nut.setAttribute("aria-expanded", String(dang_mo));
+    });
+    menu.querySelectorAll("a").forEach((lien_ket) => {
+      lien_ket.addEventListener("click", () => {
+        menu.classList.remove("open");
+        nut.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
+</script>

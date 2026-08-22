@@ -1,0 +1,82 @@
+---
+// Footer dùng chung cho toàn site — chuyển từ site-footer.js sang.
+// Địa chỉ, giờ, Zalo, Facebook lấy từ data/thong-tin.ts, đừng viết lại ở đây.
+import { DIA_CHI, GIO, ZALO, SO_ZALO, FACEBOOK, BAN_DO } from "../data/thong-tin";
+
+// Sơ đồ trang — hai cột cuối của hàng footer. Thêm cột thì nhớ sửa số cột
+// của .footer-grid trong style.css.
+const SO_DO_TRANG = [
+  {
+    tieu_de: "Dịch vụ",
+    muc: [
+      { trang: "/y-te-su-kien", chu: "Y tế sự kiện" },
+      { trang: "/dien-gia-seminar", chu: "Diễn giả seminar" },
+      { trang: "/dieu-tri", chu: "Thăm khám & điều trị" },
+    ],
+  },
+  {
+    tieu_de: "Đọc thêm",
+    muc: [
+      { trang: "/#experience", chu: "Nền tảng chuyên môn" },
+      { trang: "/#stories", chu: "Chia sẻ từ bệnh nhân" },
+      { trang: "/#credibility", chu: "Uy tín chuyên môn" },
+      { trang: "/blog", chu: "Blog" },
+    ],
+  },
+];
+
+// Năm bản quyền chốt lúc build. Trước đây JS lấy năm của MÁY NGƯỜI ĐỌC — máy
+// ai lệch đồng hồ là footer hiện sai năm.
+const nam = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href="/" class="brand">
+        <img class="brand-mark" src="/assets/img/logo-bs-kien-mark.svg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
+        <span class="brand-text">ThS.BS Lê Trung Kiên</span>
+      </a>
+      <p>Y học cổ truyền · Y tế thể thao · Diễn giả sức khỏe</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Địa chỉ phòng khám</h4>
+      <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> {DIA_CHI}</p>
+      <div class="footer-map">
+        <iframe src={BAN_DO} title="Bản đồ tới phòng khám" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Giờ làm việc</h4>
+      <ul class="footer-hours">
+        {GIO.map((d) => <li><span>{d.ngay}</span><span>{d.gio}</span></li>)}
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Liên hệ</h4>
+      <a class="footer-link" href={ZALO} target="_blank" rel="noopener">
+        <svg class="icon icon-sm"><use href="#ic-chat"/></svg> Zalo: {SO_ZALO}
+      </a>
+      <a class="footer-link" href={FACEBOOK} target="_blank" rel="noopener">
+        <svg class="icon icon-sm"><use href="#ic-facebook"/></svg> Facebook
+      </a>
+    </div>
+
+    {SO_DO_TRANG.map((cot) => (
+      <div class="footer-col">
+        <h4>{cot.tieu_de}</h4>
+        <ul class="footer-sitemap-list">
+          {cot.muc.map((m) => <li><a href={m.trang}>{m.chu}</a></li>)}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© {nam} ThS.BS Lê Trung Kiên — Y học cổ truyền.</p>
+  </div>
+</footer>

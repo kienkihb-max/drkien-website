@@ -1,0 +1,109 @@
+---
+// Khung chung của MỌI trang. Đây là chỗ duy nhất sinh ra thẻ <head>, nên
+// toàn bộ SEO của site nằm ở file này — thiếu một thẻ ở đây là thiếu trên
+// tất cả các trang, và ngược lại, sửa đúng ở đây là sửa xong cả site.
+//
+// Trước đây mỗi file .html tự chép tay ~20 dòng thẻ meta. 22 trang là 22 bản
+// chép, và thực tế đã có trang lệch canonical với trang khác mà không ai
+// biết. Nay chỉ còn một bản.
+import { TEN_SITE, GOC } from "../data/thong-tin";
+import BoIcon from "../components/BoIcon.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  /** Tiêu đề hiện trên tab và trên Google. Đã kèm sẵn " — Bác sĩ Lê Trung Kiên". */
+  tieu_de: string;
+  /** Mô tả hiện dưới tiêu đề trên Google. Nên 120–160 ký tự. */
+  mo_ta: string;
+  /** Đường dẫn không có đuôi .html, ví dụ "blog" hay "" cho trang chủ. */
+  duong_dan: string;
+  /** Ảnh hiện khi chia sẻ lên Facebook/Zalo. Đường dẫn tương đối trong site. */
+  anh?: string;
+  anh_alt?: string;
+  /** "website" cho trang thường, "article" cho bài blog. */
+  loai?: "website" | "article";
+  /** Chỉ dùng cho bài viết. */
+  ngay_dang?: string;
+  /** Dữ liệu có cấu trúc (JSON-LD) riêng của trang, nếu có. */
+  schema?: unknown;
+  /** Đặt vào thuộc tính data-page của <html>, style.css dựa vào đó. */
+  loai_trang?: string;
+  /** Thêm class cho <body>, ví dụ "subpage". */
+  lop_body?: string;
+}
+
+const {
+  tieu_de,
+  mo_ta,
+  duong_dan,
+  anh = "assets/img/og-default.jpg",
+  anh_alt = "",
+  loai = "website",
+  ngay_dang,
+  schema,
+  loai_trang,
+  lop_body,
+} = Astro.props;
+
+const dia_chi = GOC + (duong_dan ? "/" + duong_dan : "/");
+const anh_day_du = anh.startsWith("http") ? anh : GOC + "/" + anh.replace(/^\//, "");
+const tieu_de_day_du = tieu_de.includes(TEN_SITE) ? tieu_de : tieu_de + " — " + TEN_SITE;
+---
+
+<!DOCTYPE html>
+<html lang="vi" data-page={loai_trang} data-ngay-dang={ngay_dang}>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{tieu_de_day_du}</title>
+  <meta name="description" content={mo_ta}>
+  <link rel="canonical" href={dia_chi}>
+
+  <!-- Tải font không chặn hiển thị: trình duyệt vẽ chữ bằng font hệ thống
+       trước, đổi sang font riêng khi tải xong. Chữ hiện sớm hơn trên mạng chậm. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <meta property="og:type" content={loai}>
+  <meta property="og:site_name" content={TEN_SITE}>
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:title" content={tieu_de_day_du}>
+  <meta property="og:description" content={mo_ta}>
+  <meta property="og:url" content={dia_chi}>
+  <meta property="og:image" content={anh_day_du}>
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="810">
+  {anh_alt && <meta property="og:image:alt" content={anh_alt}>}
+  {loai === "article" && ngay_dang && (
+    <>
+      <meta property="article:published_time" content={ngay_dang + "T08:00:00+07:00"}>
+      <meta property="article:author" content="Bác sĩ Lê Trung Kiên">
+    </>
+  )}
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="stylesheet" href="/style.css">
+
+  {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)}></script>}
+</head>
+<body class={lop_body}>
+
+<BoIcon />
+<Header trang={duong_dan} />
+
+<main>
+  <slot />
+</main>
+
+<Footer />
+
+</body>
+</html>

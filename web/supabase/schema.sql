@@ -61,11 +61,13 @@ create table if not exists bai_viet (
   anh_rong   integer,
   anh_cao    integer,
 
-  -- Chữ hiện trên thẻ ở trang blog (người đọc thấy).
-  the_tieu_de text,
-  the_mo_ta   text,
-  -- Chữ hiện trên Google (máy đọc). Tách riêng vì hai chỗ này cần độ dài
-  -- khác nhau, gộp làm một là hỏng một trong hai.
+  -- Chữ hiện trên Google. Sinh ra từ tiêu đề và đoạn mở đầu, chứ không bắt
+  -- người viết gõ.
+  --
+  -- Từng có thêm hai cột the_tieu_de/the_mo_ta cho chữ hiện trên thẻ ngoài
+  -- trang blog. Đã bỏ (drop column): chúng bắt gõ lại đúng những gì vừa gõ ở
+  -- trên, và sửa tiêu đề bài xong thì thẻ vẫn đề tên cũ mà không có dấu hiệu
+  -- gì. Nay thẻ lấy thẳng tiêu đề bài và seo_mo_ta.
   seo_tieu_de text,
   seo_mo_ta   text,
 

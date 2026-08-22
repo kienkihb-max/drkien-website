@@ -64,15 +64,16 @@ import VetLoi from "../../components/VetLoi.astro";
         <label class="qt-nhan" for="o-tieu-de">Tiêu đề bài viết</label>
         <input class="qt-o" type="text" id="o-tieu-de" required>
 
-        <label class="qt-nhan" for="o-slug">Đường dẫn</label>
-        <p class="qt-goi-y">
-          Chốt một lần lúc tạo bài. Bài đã đăng mà đổi đường dẫn thì mọi link
-          đã chia sẻ ra ngoài sẽ thành trang lỗi và bài mất thứ hạng Google.
-        </p>
-        <input class="qt-o" type="text" id="o-slug" required>
-
         <label class="qt-nhan" for="o-nhan">Chuyên mục</label>
-        <input class="qt-o" type="text" id="o-nhan" placeholder="Blog · Y học cổ truyền">
+        <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là những
+             mục các bài đang dùng, gom lại lúc mở trang. Thêm bảng nữa là
+             thêm chỗ để lệch — sửa tên mục ở bảng mà bài vẫn giữ tên cũ. -->
+        <select class="qt-o" id="o-nhan">
+          <option value="">— Chưa chọn —</option>
+        </select>
+        <!-- Chỉ hiện khi chọn "Mục mới". Gõ xong thì Lưu là mục đó có mặt
+             trong danh sách của những bài sau. -->
+        <input class="qt-o" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
 
         <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
         <textarea class="qt-o qt-o-cao" id="o-lead" rows="3"></textarea>
@@ -130,20 +131,9 @@ import VetLoi from "../../components/VetLoi.astro";
         <label><input type="checkbox" id="o-an"> Gỡ khỏi danh sách (địa chỉ cũ vẫn sống)</label>
       </fieldset>
 
-      <fieldset class="qt-nhom">
-        <legend>Chữ hiện trên thẻ blog</legend>
-        <p class="qt-goi-y">
-          Đây là chữ người đọc thấy trên trang blog. Máy điền sẵn theo tiêu đề
-          và đoạn mở đầu; anh sửa được, và sửa rồi thì máy thôi không điền đè.
-        </p>
-
-        <label class="qt-nhan" for="o-the-tieu-de">Tiêu đề trên thẻ</label>
-        <input class="qt-o" type="text" id="o-the-tieu-de" data-dem="70">
-
-        <label class="qt-nhan" for="o-the-mo-ta">Mô tả trên thẻ</label>
-        <textarea class="qt-o qt-o-cao" id="o-the-mo-ta" rows="3" data-dem="160"></textarea>
-      </fieldset>
-
+      <!-- Không còn khối "Chữ hiện trên thẻ blog": hai ô đó lặp lại đúng
+           tiêu đề và đoạn mở đầu đã gõ ở trên. Chữ trên thẻ vẫn sinh ra từ
+           hai thứ ấy, chỉ là không bắt gõ lại lần nữa. -->
       <fieldset class="qt-nhom">
         <legend>Chữ hiện trên Google</legend>
         <p class="qt-goi-y">
@@ -160,6 +150,15 @@ import VetLoi from "../../components/VetLoi.astro";
           Mô tả trên Google <span class="qt-tu-dong">tự sinh</span>
         </label>
         <textarea class="qt-o qt-o-cao" id="o-seo-mo-ta" rows="3" data-dem="160" disabled></textarea>
+
+        <!-- Đường dẫn để cuối cùng và khoá lại: nó sinh ra từ tiêu đề, và
+             đổi nó ở bài đã đăng là làm chết mọi link đã chia sẻ ra ngoài
+             cùng thứ hạng Google của bài. Không phải thứ nên đặt ngay dưới
+             tiêu đề, nơi tay dễ chạm vào nhất. -->
+        <label class="qt-nhan" for="o-slug">
+          Đường dẫn <span class="qt-tu-dong">tự sinh</span>
+        </label>
+        <input class="qt-o" type="text" id="o-slug" disabled>
       </fieldset>
     </form>
   </main>
@@ -291,16 +290,10 @@ import VetLoi from "../../components/VetLoi.astro";
 
   // ——— Tự điền SEO ———
   // Chủ site không phải dân SEO, nên toàn bộ phần này máy lo: đường dẫn,
-  // tiêu đề Google, mô tả Google. Hai ô hiển thị trên thẻ blog vẫn sửa được
-  // vì đó là chữ người đọc thấy; gõ tay rồi thì máy thôi không điền đè.
+  // chữ trên thẻ blog, tiêu đề và mô tả trên Google. Tất cả sinh ra từ hai
+  // thứ người viết thật sự gõ: tiêu đề bài và đoạn mở đầu.
 
   const DUOI_TIEU_DE = " — Bác sĩ Lê Trung Kiên";
-
-  // Ô nào người viết đã tự gõ thì đánh dấu, để không bị máy ghi đè.
-  const tay: Record<string, boolean> = {};
-  ["o-the-tieu-de", "o-the-mo-ta"].forEach((id) => {
-    o(id).addEventListener("input", () => { tay[id] = true; });
-  });
 
   // Cắt một đoạn dài thành mô tả: ưu tiên dừng ở trọn câu, quá dài thì cắt
   // ở ranh giới từ rồi thêm dấu ba chấm. Cắt giữa từ trông rất cẩu thả trên
@@ -353,12 +346,7 @@ import VetLoi from "../../components/VetLoi.astro";
   function veLaiSEO() {
     const tieu_de = o("o-tieu-de").value.trim();
     o("o-seo-tieu-de").value = tieu_de ? tieu_de + DUOI_TIEU_DE : "";
-    if (!tay["o-the-tieu-de"]) o("o-the-tieu-de").value = tieu_de;
-
-    const mo_ta = catMoTa(nguonMoTa(), 160);
-    o("o-seo-mo-ta").value = mo_ta;
-    if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = mo_ta;
-
+    o("o-seo-mo-ta").value = catMoTa(nguonMoTa(), 160);
     veLaiDem();
   }
 
@@ -379,11 +367,79 @@ import VetLoi from "../../components/VetLoi.astro";
     });
   }
 
+  // ——— Chuyên mục ———
+  // Trong database, cột nhan có dạng "Blog · Y học thể thao": phần "Blog"
+  // là nấc breadcrumb chung của mọi bài, phần sau mới là chuyên mục. Người
+  // viết chỉ chọn phần sau — bắt gõ cả chữ "Blog ·" là kiểu gì cũng có bài
+  // gõ thiếu dấu chấm giữa, rồi breadcrumb bài đó hỏng mà không ai để ý.
+  const DAU_NHAN = "Blog · ";
+  /** Giá trị đặc biệt của ô chọn, để mở ô gõ tên mục mới. */
+  const MUC_MOI = "__muc_moi__";
+
+  /** Cắt "Blog · X" thành "X". Bài cũ nào không có tiền tố thì để nguyên. */
+  function bocNhan(nhan: string) {
+    return nhan.startsWith(DAU_NHAN) ? nhan.slice(DAU_NHAN.length).trim() : nhan.trim();
+  }
+
+  function hienONhanMoi(hien: boolean) {
+    const o_moi = o("o-nhan-moi");
+    o_moi.hidden = !hien;
+    if (hien) o_moi.focus();
+    else o_moi.value = "";
+  }
+
+  /** Đổ danh sách chuyên mục vào ô chọn, giữ nguyên mục đang chọn. */
+  function veChuyenMuc(ds: string[], dang_chon = "") {
+    const chon = o("o-nhan") as unknown as HTMLSelectElement;
+    // Mục của bài đang sửa phải có mặt kể cả khi không bài nào khác dùng nó.
+    const tat_ca = [...new Set([...ds, dang_chon].filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, "vi")
+    );
+    // Dựng bằng DOM chứ không ghép chuỗi HTML: tên chuyên mục là chữ người
+    // gõ, có dấu nháy hay dấu < là ghép chuỗi vỡ ngay.
+    chon.replaceChildren(
+      new Option("— Chưa chọn —", ""),
+      ...tat_ca.map((m) => new Option(m, m)),
+      new Option("+ Mục mới…", MUC_MOI)
+    );
+    chon.value = dang_chon;
+  }
+
+  /** Đọc danh sách chuyên mục đang dùng từ chính các bài đã có. */
+  async function napChuyenMuc(dang_chon = "") {
+    const { data } = await supabase.from("bai_viet").select("nhan");
+    const ds = (data ?? [])
+      .map((b: { nhan: string | null }) => bocNhan(b.nhan ?? ""))
+      .filter(Boolean);
+    veChuyenMuc(ds, dang_chon);
+  }
+
+  function dienChuyenMuc(nhan: string) {
+    const muc = bocNhan(nhan);
+    hienONhanMoi(false);
+    veChuyenMuc(
+      [...(o("o-nhan") as unknown as HTMLSelectElement).options]
+        .map((t) => t.value)
+        .filter((v) => v && v !== MUC_MOI),
+      muc
+    );
+  }
+
+  function docChuyenMuc(): string | null {
+    const chon = (o("o-nhan") as unknown as HTMLSelectElement).value;
+    const muc = chon === MUC_MOI ? o("o-nhan-moi").value.trim() : chon;
+    return muc ? DAU_NHAN + muc : null;
+  }
+
+  o("o-nhan").addEventListener("change", () => {
+    hienONhanMoi((o("o-nhan") as unknown as HTMLSelectElement).value === MUC_MOI);
+  });
+
   function docForm() {
     return {
       slug: o("o-slug").value.trim(),
       tieu_de: o("o-tieu-de").value.trim(),
-      nhan: o("o-nhan").value.trim() || null,
+      nhan: docChuyenMuc(),
       lead: o("o-lead").value.trim() || null,
       than_bai: bo_soan ? bo_soan.layHTML() : "",
       // Mỗi dòng một tài liệu. Dòng trống bị bỏ, nên xuống dòng thừa không
@@ -396,8 +452,6 @@ import VetLoi from "../../components/VetLoi.astro";
       ngay_dang: o("o-ngay").value || new Date().toISOString().slice(0, 10),
       noi_bat: o("o-noi-bat").checked,
       an: o("o-an").checked,
-      the_tieu_de: o("o-the-tieu-de").value.trim() || null,
-      the_mo_ta: o("o-the-mo-ta").value.trim() || null,
       seo_tieu_de: o("o-seo-tieu-de").value.trim() || null,
       seo_mo_ta: o("o-seo-mo-ta").value.trim() || null,
     };
@@ -407,7 +461,7 @@ import VetLoi from "../../components/VetLoi.astro";
   function dienForm(d: Record<string, any>) {
     o("o-tieu-de").value = d.tieu_de ?? "";
     o("o-slug").value = d.slug ?? "";
-    o("o-nhan").value = d.nhan ?? "";
+    dienChuyenMuc(d.nhan ?? "");
     o("o-lead").value = d.lead ?? "";
     o("o-anh").value = d.anh ?? "";
     o("o-anh-alt").value = d.anh_alt ?? "";
@@ -417,8 +471,6 @@ import VetLoi from "../../components/VetLoi.astro";
     o("o-noi-bat").checked = !!d.noi_bat;
     o("o-an").checked = !!d.an;
     o("o-tai-lieu").value = (d.tai_lieu ?? []).join("\n");
-    o("o-the-tieu-de").value = d.the_tieu_de ?? "";
-    o("o-the-mo-ta").value = d.the_mo_ta ?? "";
     o("o-seo-tieu-de").value = d.seo_tieu_de ?? "";
     o("o-seo-mo-ta").value = d.seo_mo_ta ?? "";
     if (bo_soan) bo_soan.datHTML(d.than_bai ?? "");
@@ -665,6 +717,10 @@ import VetLoi from "../../components/VetLoi.astro";
       phien.user.user_metadata?.user_name ?? phien.user.email ?? ""
     );
 
+    // Nạp trước danh sách chuyên mục: dienForm() bên dưới cần nó có sẵn để
+    // chọn đúng mục của bài đang mở.
+    await napChuyenMuc();
+
     if (!(window as any).SoanThao) {
       vet("THIẾU window.SoanThao — admin-soan-thao.js không nạp được");
       bao("Không dựng được khung soạn thảo. Tải lại trang thử xem.", true);
@@ -714,16 +770,13 @@ import VetLoi from "../../components/VetLoi.astro";
         // Chữ trên thẻ đã có sẵn trong bài cũ thì coi như người viết đã
         // chọn — đừng để máy điền đè khi sửa lại tiêu đề.
         const nguon = ban_nhap_hien ?? data;
-        if (nguon.the_tieu_de) tay["o-the-tieu-de"] = true;
-        if (nguon.the_mo_ta) tay["o-the-mo-ta"] = true;
       }
     } else {
       o("o-ngay").value = new Date().toISOString().slice(0, 10);
-      // Bài mới: đường dẫn chạy theo tiêu đề cho tới khi người viết sửa tay.
-      let slug_tay = false;
-      o("o-slug").addEventListener("input", () => { slug_tay = true; });
+      // Bài mới: đường dẫn luôn chạy theo tiêu đề. Ô đó đã khoá nên không
+      // còn chuyện người viết sửa tay rồi máy ghi đè lên.
       o("o-tieu-de").addEventListener("input", () => {
-        if (!slug_tay) o("o-slug").value = tenFile(o("o-tieu-de").value);
+        o("o-slug").value = tenFile(o("o-tieu-de").value);
       });
     }
 

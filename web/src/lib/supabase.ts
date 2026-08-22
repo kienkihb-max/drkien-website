@@ -37,8 +37,6 @@ export interface BaiViet {
   anh_alt: string | null;
   anh_rong: number | null;
   anh_cao: number | null;
-  the_tieu_de: string | null;
-  the_mo_ta: string | null;
   seo_tieu_de: string | null;
   seo_mo_ta: string | null;
   ngay_dang: string;

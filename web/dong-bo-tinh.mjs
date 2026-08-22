@@ -12,7 +12,7 @@
 // Chạy tự động qua "predev" và "prebuild" trong package.json.
 
 import { cp, mkdir, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +50,30 @@ const CAN_CHEP = [
 
 await mkdir(DICH, { recursive: true });
 
+/**
+ * Chỉ chép file nào thật sự đổi.
+ *
+ * KHÔNG phải để chạy nhanh hơn — mà vì ghi đè một file y hệt cũng đủ làm gãy
+ * "astro dev" đang chạy: Vite đang theo dõi file đó, ghi đè lên nó thì nó
+ * ném "EBUSY: resource busy or locked, watch ...", rồi từ đó không phục vụ
+ * file ấy nữa. Trình duyệt nhận 404, mà 404 của một file .css thì trang chỉ
+ * mất giao diện chứ chẳng báo lỗi gì — mất cả buổi mới lần ra.
+ *
+ * So bằng cỡ file và giờ sửa, không đọc nội dung: thư mục image/ 31MB, băm
+ * nội dung mỗi lần build là chậm hơn hẳn cái nó tiết kiệm được.
+ */
+function canChep(tu, den) {
+  try {
+    const a = statSync(tu);
+    if (a.isDirectory()) return true;
+    const b = statSync(den);
+    return !(a.size === b.size && Math.abs(a.mtimeMs - b.mtimeMs) < 1000);
+  } catch {
+    // Bên đích chưa có gì thì cứ chép.
+    return true;
+  }
+}
+
 let chep = 0;
 let thieu = [];
 for (const ten of CAN_CHEP) {
@@ -58,7 +82,12 @@ for (const ten of CAN_CHEP) {
     thieu.push(ten);
     continue;
   }
-  await cp(tu, join(DICH, ten), { recursive: true });
+  // preserveTimestamps để lần chạy sau còn so được giờ sửa.
+  await cp(tu, join(DICH, ten), {
+    recursive: true,
+    preserveTimestamps: true,
+    filter: canChep,
+  });
   chep++;
 }
 

@@ -702,9 +702,33 @@ import VetLoi from "../../components/VetLoi.astro";
     vet("nap() xong, form đã hiện");
   }
 
+  /**
+   * Bọc quanh việc Lưu / Đăng để một lần bấm chỉ chạy một lần.
+   *
+   * Hai việc đó đều chờ mạng, mà trong lúc chờ thì nút vẫn bấm được: bấm
+   * hai nhát nhanh là đăng hai lần, và web bị bảo dựng lại hai lần. Khoá
+   * nút cũng là cách nói cho người bấm biết máy đang làm, chứ đứng im nhìn
+   * nút không đổi gì thì ai cũng tưởng hụt và bấm lại.
+   */
+  let dang_chay = false;
+  function mot_lan(viec: () => Promise<void>) {
+    return async () => {
+      if (dang_chay) return;
+      dang_chay = true;
+      const nut = [el("nut-luu"), el("nut-dang")] as HTMLButtonElement[];
+      nut.forEach((n) => { n.disabled = true; });
+      try {
+        await viec();
+      } finally {
+        dang_chay = false;
+        nut.forEach((n) => { n.disabled = false; });
+      }
+    };
+  }
+
   el("nut-quay-lai").addEventListener("click", () => { location.href = "/admin"; });
-  el("nut-luu").addEventListener("click", luu);
-  el("nut-dang").addEventListener("click", dang);
+  el("nut-luu").addEventListener("click", mot_lan(luu));
+  el("nut-dang").addEventListener("click", mot_lan(dang));
   el("nut-bo-nhap").addEventListener("click", boBanNhap);
   el("nut-xem-dang").addEventListener("click", () => doiCheDo("dang"));
   el("nut-xem-nhap").addEventListener("click", () => doiCheDo("nhap"));

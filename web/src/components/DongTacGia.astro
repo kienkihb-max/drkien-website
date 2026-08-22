@@ -1,0 +1,37 @@
+---
+// Dòng tác giả đầu mỗi bài blog. Chuyển từ blog-byline.js.
+//
+// Với nội dung y tế, Google chấm rất nặng chuyện "ai viết bài này, họ có
+// chuyên môn gì". Dòng này vừa trả lời câu đó cho người đọc, vừa gắn tên
+// bác sĩ vào từng bài và trỏ ngược về trang hồ sơ.
+//
+// Bản cũ chèn bằng JS sau khi trang tải xong, nên phần trả lời câu hỏi đó
+// lại là phần Google phải chạy JS mới thấy. Nay in thẳng vào HTML.
+interface Props {
+  /** Ngày đăng dạng NĂM-THÁNG-NGÀY. */
+  ngay: string;
+}
+const { ngay } = Astro.props;
+
+const TEN = "Bác sĩ Lê Trung Kiên";
+const CHUC_DANH = "ThS. Y học cổ truyền · Bệnh viện Đa khoa Y học cổ truyền Hà Nội";
+
+// "2026-08-08" → "08/08/2026". Tự ghép chuỗi thay vì dùng Date, để khỏi
+// lệch ngày do múi giờ.
+const manh = ngay.split("-");
+const ngay_hien = manh.length === 3 ? `${manh[2]}/${manh[1]}/${manh[0]}` : ngay;
+---
+
+<div class="article-byline">
+  <img class="article-byline-avatar" src="/assets/img/portrait.jpg" alt=""
+       width="48" height="48" loading="lazy">
+  <div class="article-byline-text">
+    <p class="article-byline-name">
+      <a href="/bac-si-le-trung-kien" rel="author">{TEN}</a>
+    </p>
+    <p class="article-byline-meta">{CHUC_DANH}</p>
+    <p class="article-byline-meta">
+      Đăng ngày <time datetime={ngay}>{ngay_hien}</time>
+    </p>
+  </div>
+</div>

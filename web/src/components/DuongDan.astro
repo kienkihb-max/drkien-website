@@ -1,0 +1,28 @@
+---
+// Breadcrumb: 🏠 › Blog › Tên bài. Chuyển từ phần cuối site-header.js.
+//
+// Bản cũ đọc dòng <p class="section-label"> rồi thay tại chỗ bằng JS. Nay
+// dựng thẳng, và nhãn được truyền vào chứ không phải bóc ngược từ chữ trên
+// màn hình.
+interface Props {
+  /** Các nấc giữa "Trang chủ" và trang hiện tại, ví dụ ["Blog"]. */
+  giua?: { chu: string; dia_chi?: string }[];
+  /** Tên trang hiện tại — nấc cuối, không phải liên kết. */
+  hien_tai: string;
+}
+const { giua = [], hien_tai } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a class="breadcrumb-home" href="/" aria-label="Trang chủ">
+    <svg class="icon icon-sm"><use href="#ic-home"/></svg>
+  </a>
+  {giua.map((m) => (
+    <>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      {m.dia_chi ? <a href={m.dia_chi}>{m.chu}</a> : <span>{m.chu}</span>}
+    </>
+  ))}
+  <span class="breadcrumb-sep" aria-hidden="true">›</span>
+  <span aria-current="page">{hien_tai}</span>
+</nav>

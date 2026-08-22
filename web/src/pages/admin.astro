@@ -58,7 +58,7 @@ import VetLoi from "../components/VetLoi.astro";
   <main class="qt-than">
     <div class="qt-hang-tieu-de">
       <div>
-        <h2>Bài viết</h2>
+        <h2>Bài đã đăng</h2>
         <p class="qt-phu" id="tom-tat-danh-sach"></p>
       </div>
       <a class="qt-nut qt-nut-chinh" href="/admin/bai">+ Viết bài mới</a>
@@ -75,6 +75,23 @@ import VetLoi from "../components/VetLoi.astro";
 
 <script>
   import { supabase } from "../lib/supabase";
+  import { duongDanAnh } from "../lib/dia-chi-anh.mjs";
+  import { dungLaiWeb } from "../lib/dung-lai-web";
+  import { xoaBaiVaAnh } from "../lib/xoa-bai";
+
+  interface BaiTrongDanhSach {
+    id: string;
+    slug: string;
+    tieu_de: string;
+    ngay_dang: string;
+    da_dang: boolean;
+    an: boolean;
+    noi_bat: boolean;
+    anh: string | null;
+  }
+
+  /** Danh sách đang hiện, giữ lại để mấy nút Ẩn/Xoá tra ngược ra bài. */
+  let ds_bai: BaiTrongDanhSach[] = [];
 
   const o = (id: string) => document.getElementById(id) as HTMLElement;
   const hien = (id: string, co: boolean) => { o(id).hidden = !co; };
@@ -114,7 +131,7 @@ import VetLoi from "../components/VetLoi.astro";
     const [{ data, error }, { data: ds_nhap }] = await Promise.all([
       supabase
         .from("bai_viet")
-        .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat")
+        .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat, anh")
         .order("ngay_dang", { ascending: false }),
       supabase.from("ban_nhap").select("bai_id"),
     ]);
@@ -131,40 +148,120 @@ import VetLoi from "../components/VetLoi.astro";
       return;
     }
 
-    const ds = data ?? [];
-    const dang_hien = ds.filter((b) => b.da_dang && !b.an).length;
-    const nhap = ds.filter((b) => !b.da_dang).length;
-    o("tom-tat-danh-sach").textContent =
-      ds.length ? dang_hien + " bài đang hiện · " + nhap + " bản nháp" : "";
+    ds_bai = data ?? [];
+    const dang_hien = ds_bai.filter((b) => b.da_dang && !b.an).length;
+    o("tom-tat-danh-sach").textContent = ds_bai.length
+      ? ds_bai.length + " bài, trong đó " + dang_hien + " bài đang hiện trên trang blog."
+      : "";
 
-    if (!ds.length) {
+    if (!ds_bai.length) {
       khung.innerHTML =
         '<p class="qt-phu">Chưa có bài nào. Bấm "Viết bài mới" để bắt đầu.</p>';
       return;
     }
 
-    khung.innerHTML = ds.map((b) => {
+    khung.innerHTML = ds_bai.map((b) => {
       const the = !b.da_dang
         ? '<span class="qt-nhan-nho qt-nhan-an">Bản nháp</span>'
         : b.an
-          ? '<span class="qt-nhan-nho qt-nhan-an">Đã gỡ</span>'
+          ? '<span class="qt-nhan-nho qt-nhan-an">Đang ẩn</span>'
           : co_nhap.has(b.id)
             ? '<span class="qt-nhan-nho qt-nhan-an">Có bản sửa chưa đăng</span>'
             : "";
       const noi_bat = b.noi_bat ? '<span class="qt-nhan-nho qt-nhan-noi-bat">Nổi bật</span>' : "";
+      const anh = b.anh
+        ? '<img class="qt-bai-anh" src="' + thoat(duongDanAnh(b.anh)) + '" alt="" loading="lazy">'
+        : "";
+      // Bài chưa đăng thì chưa có trang trên web, mở ra chỉ ra lỗi 404 — nên
+      // nút "Mở" chỉ hiện với bài đã đăng.
+      const nut_mo = b.da_dang
+        ? '<a class="qt-nut qt-nut-nhe" href="/' + thoat(b.slug) +
+          '" target="_blank" rel="noopener">Mở</a>'
+        : "";
+      // Ẩn/hiện chỉ có nghĩa với bài đã lên web.
+      const nut_an = b.da_dang
+        ? '<button class="qt-nut qt-nut-nhe" type="button" data-an="' + thoat(b.id) + '">' +
+          (b.an ? "Hiện lại" : "Ẩn") + "</button>"
+        : "";
       return (
         '<div class="qt-bai">' +
+        anh +
         '  <div class="qt-bai-giua">' +
         '    <p class="qt-bai-tieu-de">' + thoat(b.tieu_de) + the + noi_bat + "</p>" +
-        '    <p class="qt-bai-meta">/' + thoat(b.slug) + " · " + thoat(b.ngay_dang) + "</p>" +
+        '    <p class="qt-bai-meta">' + thoat(b.slug) + " · đăng " + thoat(b.ngay_dang) + "</p>" +
         "  </div>" +
         '  <div class="qt-bai-nut">' +
+        nut_mo +
         '    <a class="qt-nut qt-nut-nhe" href="/admin/bai?id=' + thoat(b.id) + '">Sửa</a>' +
+        nut_an +
+        '    <button class="qt-nut qt-nut-nhe" type="button" data-xoa="' + thoat(b.id) + '">Xoá</button>' +
         "  </div>" +
         "</div>"
       );
     }).join("");
   }
+
+  /** Tìm lại bài theo id, để mấy nút bên dưới biết mình đang đứng ở bài nào. */
+  function timBai(id: string) {
+    return ds_bai.find((b) => b.id === id);
+  }
+
+  /**
+   * Ẩn / hiện lại bài.
+   *
+   * Khác với sửa nội dung: việc này ăn thẳng vào bài trên web chứ không qua
+   * bản nháp — vì đây đúng là thứ người bấm muốn thấy đổi ngay. Ẩn xong phải
+   * dựng lại web, không thì bài vẫn nằm nguyên trên trang blog.
+   */
+  async function anHien(id: string) {
+    const b = timBai(id);
+    if (!b) return;
+    const sap_an = !b.an;
+    if (
+      !confirm(
+        sap_an
+          ? 'Ẩn bài "' + b.slug + '" khỏi trang blog?\n\nĐịa chỉ cũ vẫn sống, nên link đã chia sẻ không chết.'
+          : 'Cho bài "' + b.slug + '" hiện lại trên trang blog?'
+      )
+    )
+      return;
+
+    const { error } = await supabase.from("bai_viet").update({ an: sap_an }).eq("id", id);
+    if (error) {
+      alert("Không đổi được: " + error.message);
+      return;
+    }
+    await dungLaiWeb();
+    await veDanhSach();
+  }
+
+  async function xoa(id: string) {
+    const b = timBai(id);
+    if (!b) return;
+    const canh_bao = b.da_dang
+      ? "\n\nBÀI NÀY ĐANG TRÊN WEB. Xoá hẳn thì mọi link đã chia sẻ ra ngoài sẽ " +
+        'thành trang lỗi.\n\nChỉ muốn nó biến khỏi trang blog thôi thì bấm Cancel rồi dùng nút "Ẩn".'
+      : "";
+    if (!confirm('Xoá hẳn bài "' + b.slug + '"? Không lấy lại được.' + canh_bao)) return;
+
+    const kq = await xoaBaiVaAnh(id, b.slug, b.da_dang);
+    if (!kq.xong) {
+      alert(kq.chu);
+      return;
+    }
+    await veDanhSach();
+  }
+
+  // Bắt sự kiện ở khung ngoài thay vì gắn vào từng nút: danh sách được vẽ
+  // lại sau mỗi thao tác, gắn vào từng nút là lần vẽ sau mất hết.
+  o("bang-bai").addEventListener("click", (e) => {
+    const nut = (e.target as HTMLElement).closest("button");
+    if (!nut) return;
+    const id_an = nut.getAttribute("data-an");
+    const id_xoa = nut.getAttribute("data-xoa");
+    if (id_an) anHien(id_an);
+    if (id_xoa) xoa(id_xoa);
+  });
 
   // ——— Quyết định hiện màn nào ———
   async function dungTrang() {

@@ -30,6 +30,7 @@ import VetLoi from "../../components/VetLoi.astro";
       <span class="qt-kho" id="nhan-tai-khoan"></span>
     </div>
     <div class="qt-dau-phai">
+      <button class="qt-nut qt-nut-nguy" type="button" id="nut-xoa" hidden>Xoá bài</button>
       <button class="qt-nut qt-nut-nhe" type="button" id="nut-quay-lai">Quay lại</button>
       <!-- Hai chế độ xem, chỉ hiện khi bài đã đăng MÀ đang có bản sửa treo:
            lúc đó mới có hai bản khác nhau để so. -->
@@ -178,6 +179,7 @@ import VetLoi from "../../components/VetLoi.astro";
   import { taiAnhLen } from "../../lib/tai-anh";
   import { duongDanAnh } from "../../lib/dia-chi-anh.mjs";
   import { dungLaiWeb } from "../../lib/dung-lai-web";
+  import { xoaBaiVaAnh } from "../../lib/xoa-bai";
 
   const o = (id: string) => document.getElementById(id) as HTMLInputElement;
   const el = (id: string) => document.getElementById(id) as HTMLElement;
@@ -462,6 +464,8 @@ import VetLoi from "../../components/VetLoi.astro";
     el("nut-luu").hidden = !doi;
     el("nut-dang").hidden = doi || !cho_dang || xem_ban_web;
     el("nut-bo-nhap").hidden = !co_ban_nhap || doi;
+    // Bài chưa lưu lần nào thì chưa có gì để xoá — bấm Quay lại là xong.
+    el("nut-xoa").hidden = !id_bai;
 
     // Hai chế độ chỉ có nghĩa khi thật sự tồn tại hai bản khác nhau.
     el("chon-che-do").hidden = !(bai_da_dang && co_ban_nhap);
@@ -597,6 +601,42 @@ import VetLoi from "../../components/VetLoi.astro";
     bao("Đã đăng bài. " + kq.chu, !kq.xong);
   }
 
+  /**
+   * Xoá hẳn bài khỏi database, kèm ảnh của nó trên kho.
+   *
+   * Đây là việc KHÔNG lấy lại được, nên hộp hỏi có nhắc tên bài — để người
+   * bấm nhìn ra ngay mình đang đứng ở bài nào.
+   *
+   * Với bài đang chạy trên web, xoá hẳn hầu như luôn là lựa chọn sai: mọi
+   * link đã chia sẻ ra ngoài sẽ thành trang lỗi, và Google mất luôn thứ hạng
+   * của địa chỉ đó. Cái cần dùng là "Gỡ khỏi danh sách" — nên chỗ này nói
+   * thẳng điều đó trước khi hỏi.
+   */
+  async function xoaBai() {
+    if (!id_bai) return;
+    const slug = o("o-slug").value.trim();
+
+    const canh_bao = bai_da_dang
+      ? "\n\nBÀI NÀY ĐANG TRÊN WEB. Xoá hẳn thì mọi link đã chia sẻ ra ngoài " +
+        "sẽ thành trang lỗi.\n\nChỉ muốn nó biến khỏi trang blog thôi thì bấm " +
+        'Cancel, rồi tích "Gỡ khỏi danh sách" và Đăng lại — địa chỉ cũ vẫn sống.'
+      : "";
+
+    if (!confirm('Xoá hẳn bài "' + slug + '"? Không lấy lại được.' + canh_bao)) return;
+
+    bao("Đang xoá…");
+
+    const kq = await xoaBaiVaAnh(id_bai, slug, bai_da_dang);
+    if (!kq.xong) {
+      bao(kq.chu, true);
+      return;
+    }
+
+    // Rời trang ngay: form đang giữ một bài không còn tồn tại, ở lại chỉ tổ
+    // bấm nhầm Lưu rồi nó mọc lại thành bài mới.
+    location.href = "/admin";
+  }
+
   /** Bỏ bản sửa đang treo, quay về đúng bản đang chạy trên web. */
   async function boBanNhap() {
     if (!id_bai || !co_ban_nhap) return;
@@ -730,6 +770,7 @@ import VetLoi from "../../components/VetLoi.astro";
   el("nut-luu").addEventListener("click", mot_lan(luu));
   el("nut-dang").addEventListener("click", mot_lan(dang));
   el("nut-bo-nhap").addEventListener("click", boBanNhap);
+  el("nut-xoa").addEventListener("click", mot_lan(xoaBai));
   el("nut-xem-dang").addEventListener("click", () => doiCheDo("dang"));
   el("nut-xem-nhap").addEventListener("click", () => doiCheDo("nhap"));
 

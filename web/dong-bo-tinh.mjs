@@ -30,7 +30,9 @@ const CAN_CHEP = [
   "service-cards.js",
   "favicon.ico",
   "robots.txt",
-  "CNAME",
+  // Không còn CNAME: file đó là cách GitHub Pages nhận tên miền riêng. Web
+  // nay chạy trên Cloudflare Pages, tên miền khai trong bảng điều khiển của
+  // Cloudflare chứ không phải bằng file trong kho mã.
   "googlea4e3191517fb9432.html",
   "assets",
   "image",

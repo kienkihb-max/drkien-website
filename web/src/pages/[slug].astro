@@ -37,6 +37,8 @@ const anh_day_du = bai.anh
     : GOC + "/" + bai.anh.replace(/^\//, "")
   : undefined;
 const mo_ta = bai.seo_mo_ta ?? bai.the_mo_ta ?? "";
+/** Ảnh bìa chụp dọc. Bài cũ chưa ghi kích thước thì coi như ảnh ngang. */
+const anh_bia_doc = !!(bai.anh_rong && bai.anh_cao && bai.anh_cao > bai.anh_rong);
 
 // Nhãn dạng "Blog · Y học cổ truyền" — tách lấy phần chuyên mục cho
 // breadcrumb, còn "Blog" là nấc trỏ về trang danh sách.
@@ -106,8 +108,10 @@ const schema = {
 
   <section class="section section-article">
     <div class="container">
+      {/* Ảnh bìa cao hơn rộng thì giữ nguyên tỉ lệ gốc thay vì cắt về khung
+          16/9 — cắt thì ảnh chụp người còn mỗi một dải ngang giữa ảnh. */}
       {bai.anh && (
-        <div class="article-hero-img">
+        <div class:list={["article-hero-img", anh_bia_doc && "article-hero-img-doc"]}>
           <img src={duongDanAnh(bai.anh)} alt={bai.anh_alt ?? ""} loading="lazy"
                width={bai.anh_rong ?? undefined} height={bai.anh_cao ?? undefined}>
         </div>

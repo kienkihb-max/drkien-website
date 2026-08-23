@@ -172,11 +172,19 @@
 }
 /* Ảnh chụp dọc: khung 16/10 ở trên sẽ cắt mất đầu và chân người, chỉ còn
    một dải ngang giữa ảnh. Thêm class này cạnh .article-inline-img để ảnh
-   giữ nguyên tỉ lệ gốc và thu hẹp bề ngang cho khỏi cao quá màn hình.
-   <figure class="article-inline-img article-inline-img-doc"> */
+   giữ nguyên tỉ lệ gốc.
+   <figure class="article-inline-img article-inline-img-doc">
+
+   Chặn bằng CHIỀU CAO chứ không phải bề ngang: ảnh dọc thì mỗi tấm một tỉ
+   lệ, chặn bề ngang là tấm càng dọc càng cao — có tấm chiếm trọn màn hình,
+   người đọc phải cuộn cả trang mới qua được một tấm ảnh. Chặn chiều cao thì
+   tấm nào cũng cao bằng nhau, đọc liền mạch. */
 .article-inline-img-doc img {
   aspect-ratio: auto;
-  max-width: 420px;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--anh-doc-cao-toi-da, 560px);
   margin-inline: auto;
   display: block;
 }

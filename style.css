@@ -873,10 +873,27 @@ main img.zoomable { cursor: zoom-in; }
 .article-hero-img { max-width: 780px; margin: 0 auto 40px; }
 .article-hero-img img {
   width: 100%;
+  /* "height: auto" là bắt buộc. Thẻ <img> của bài mới có sẵn width/height
+     thật của tấm ảnh (để trang khỏi giật lúc ảnh tải xong), mà hai thuộc
+     tính đó được trình duyệt hiểu như CSS — có chiều cao cố định rồi thì
+     aspect-ratio bên dưới bị bỏ qua, ảnh hiện nguyên cỡ gốc. Bài cũ không
+     có hai thuộc tính đó nên không ai thấy lỗi này. */
+  height: auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
+}
+/* Ảnh bìa chụp DỌC: cắt về khung 16/9 thì còn mỗi một dải ngang giữa ảnh,
+   mất cả đầu lẫn chân. Giữ nguyên tỉ lệ gốc và chặn bằng chiều cao, để tấm
+   ảnh không chiếm trọn màn hình của người đọc. */
+.article-hero-img-doc img {
+  aspect-ratio: auto;
+  width: auto;
+  max-width: 100%;
+  max-height: var(--anh-doc-cao-toi-da, 560px);
+  margin-inline: auto;
+  display: block;
 }
 /* Dòng tác giả đầu bài viết — blog-byline.js dựng ra từ data-ngay-dang trên
    thẻ <html>. Bài về y tế thì người đọc cần biết ai viết và họ có chuyên môn

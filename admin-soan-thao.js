@@ -805,6 +805,79 @@ window.SoanThao = (function () {
       batNut("lien_ket", !!timCha("A"));
     }
 
+    // ——— Nút xoá ảnh, hiện khi rê chuột vào ảnh ———
+    // Khối ảnh dựng bằng DOM nên Ctrl+Z không gỡ được (xem chenKhoiAnh).
+    // Không có nút này thì cách duy nhất là bôi đen cả khối rồi Delete — mà
+    // bôi đen trúng một <figure> bằng chuột thì rất khó.
+    //
+    // Nút nằm NGOÀI vùng soạn (gắn vào .st), không nhét vào trong figure:
+    // mọi thứ trong vùng soạn đều là nội dung bài, thêm một cái nút vào đó
+    // là sớm muộn nó chui vào HTML lúc lưu.
+    var nut_xoa_anh = document.createElement("button");
+    nut_xoa_anh.type = "button";
+    nut_xoa_anh.className = "st-xoa-anh";
+    nut_xoa_anh.textContent = "✕";
+    nut_xoa_anh.title = "Xoá ảnh này khỏi bài";
+    nut_xoa_anh.hidden = true;
+    khung.appendChild(nut_xoa_anh);
+
+    /** Khối ảnh mà nút xoá đang trỏ tới. */
+    var anh_dang_tro = null;
+
+    function datNutXoaAnh(khung_anh) {
+      anh_dang_tro = khung_anh;
+      if (!khung_anh) {
+        nut_xoa_anh.hidden = true;
+        return;
+      }
+      var o_anh = khung_anh.getBoundingClientRect();
+      var o_khung = khung.getBoundingClientRect();
+      nut_xoa_anh.hidden = false;
+      // Nằm trong góc phải trên của ảnh, thụt vào 8px.
+      nut_xoa_anh.style.top = o_anh.top - o_khung.top + 8 + "px";
+      nut_xoa_anh.style.left = o_anh.right - o_khung.left - 36 + "px";
+    }
+
+    vung.addEventListener("mousemove", function (e) {
+      var el = e.target;
+      var khung_anh = el && el.closest ? el.closest("figure.article-inline-img") : null;
+      // Chỉ đổi khi thật sự sang một ảnh khác: đặt lại vị trí liên tục theo
+      // từng nhịp chuột làm nút rung.
+      if (khung_anh !== anh_dang_tro) datNutXoaAnh(khung_anh);
+    });
+
+    // Rời hẳn vùng soạn thì cất nút đi — trừ khi con chuột đang ở trên chính
+    // cái nút, vì nút nằm ngoài vùng soạn nên rê tới nó cũng tính là "rời".
+    vung.addEventListener("mouseleave", function (e) {
+      if (e.relatedTarget === nut_xoa_anh) return;
+      datNutXoaAnh(null);
+    });
+    nut_xoa_anh.addEventListener("mouseleave", function () {
+      datNutXoaAnh(null);
+    });
+
+    // Cuộn trong vùng soạn thì ảnh trôi đi, nút phải trôi theo.
+    vung.addEventListener("scroll", function () {
+      if (anh_dang_tro) datNutXoaAnh(anh_dang_tro);
+    });
+
+    nut_xoa_anh.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+    });
+    nut_xoa_anh.addEventListener("click", function () {
+      if (!anh_dang_tro) return;
+      var doan_sau = anh_dang_tro.nextElementSibling;
+      anh_dang_tro.remove();
+      // Đoạn trống dựng kèm lúc chèn ảnh cũng dọn luôn, nếu người viết chưa
+      // gõ gì vào đó — bằng không xoá ảnh xong còn lại một khoảng hở.
+      if (doan_sau && doan_sau.tagName === "P" && !doan_sau.textContent.trim()) {
+        doan_sau.remove();
+      }
+      datNutXoaAnh(null);
+      vung.focus();
+      vung.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
     // Ctrl+K: phím tắt gắn liên kết, giống Word và Google Docs. Ctrl+B và
     // Ctrl+I thì trình duyệt lo sẵn.
     vung.addEventListener("keydown", function (e) {

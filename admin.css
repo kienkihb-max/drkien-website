@@ -252,10 +252,39 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   cursor: pointer;
   white-space: nowrap;
 }
-.st-nut:hover:not(:disabled) { border-color: var(--qt-chinh); color: var(--qt-chinh); }
+/* ":not(.st-nut-bat)" là phần quan trọng: nút ĐANG BẬT có nền xanh chữ
+   trắng, mà luật hover này đổi chữ sang xanh — rê chuột vào là xanh trên
+   xanh, mất hẳn chữ. */
+.st-nut:hover:not(:disabled):not(.st-nut-bat) { border-color: var(--qt-chinh); color: var(--qt-chinh); }
 .st-nut:disabled { opacity: 0.45; cursor: default; }
 .st-nut-bat { background: var(--qt-chinh); color: #fff; border-color: var(--qt-chinh); }
+/* Nút đang bật vẫn phải phản hồi khi rê chuột — đậm thêm một bậc, giữ chữ trắng. */
+.st-nut-bat:hover:not(:disabled) {
+  background: var(--qt-chinh-dam);
+  border-color: var(--qt-chinh-dam);
+  color: #fff;
+}
 .st-vach { width: 1px; background: var(--qt-vien); margin: 2px 4px; }
+
+/* Nút xoá ảnh, hiện ở góc phải trên tấm ảnh khi rê chuột vào. Nằm ngoài
+   vùng soạn (con của .st) nên phải định vị tuyệt đối — .st là gốc toạ độ. */
+.st { position: relative; }
+.st-xoa-anh {
+  position: absolute;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: #fff;
+  background: rgba(20, 30, 45, 0.72);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.st-xoa-anh:hover { background: var(--qt-nguy); }
 
 .st-vung, .st-tho {
   /* Ăn hết chỗ còn lại trong khung và tự cuộn. min-height:0 là bắt buộc:

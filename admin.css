@@ -69,6 +69,19 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 }
 .qt-o-cao { resize: vertical; }
 .qt-o-hep { max-width: 220px; }
+/* Ô chọn (chuyên mục): vừa đủ chứa tên mục dài nhất, chứ kéo hết bề ngang
+   thì mũi tên bị đẩy sang tận mép phải, cách chữ cả gang tay.
+   Tự vẽ mũi tên thay vì dùng mũi tên mặc định của trình duyệt: mặc định nó
+   dán sát mép, không chừa lề nào, và mỗi trình duyệt một kiểu. */
+.qt-o-chon {
+  max-width: 360px;
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%236f8ba4' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+}
 .qt-dem { font-size: 0.8rem; color: var(--qt-chu-mo); text-align: right; margin: 2px 0 0; }
 .qt-dem-qua { color: var(--qt-nguy); font-weight: 600; }
 /* Ô nhập ẩn thì bộ đếm ký tự đi kèm cũng ẩn theo */

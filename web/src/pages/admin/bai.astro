@@ -74,12 +74,12 @@ import VetLoi from "../../components/VetLoi.astro";
         <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là những
              mục các bài đang dùng, gom lại lúc mở trang. Thêm bảng nữa là
              thêm chỗ để lệch — sửa tên mục ở bảng mà bài vẫn giữ tên cũ. -->
-        <select class="qt-o" id="o-nhan">
+        <select class="qt-o qt-o-chon" id="o-nhan">
           <option value="">— Chưa chọn —</option>
         </select>
         <!-- Chỉ hiện khi chọn "Mục mới". Gõ xong thì Lưu là mục đó có mặt
              trong danh sách của những bài sau. -->
-        <input class="qt-o" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
+        <input class="qt-o qt-o-chon" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
 
         <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
         <!-- Chặn cứng 300 ký tự, và ô cao sẵn 4 dòng — đo trong trình duyệt
@@ -147,7 +147,12 @@ import VetLoi from "../../components/VetLoi.astro";
         <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
         <input class="qt-o qt-o-hep" type="date" id="o-ngay">
         <label><input type="checkbox" id="o-noi-bat"> Đưa lên khối nổi bật đầu trang blog</label>
-        <label><input type="checkbox" id="o-an"> Gỡ khỏi danh sách (địa chỉ cũ vẫn sống)</label>
+        <!-- "Gỡ khỏi danh sách" không hiện ở đây nữa: việc đó làm bằng nút
+             Ẩn / Hiện lại ngoài danh sách bài, đúng chỗ nhìn thấy bài nào
+             đang ẩn bài nào đang hiện.
+             Vẫn giữ ô ẩn để LƯU LẠI trạng thái đang có — bỏ hẳn thì mở một
+             bài đang ẩn ra sửa rồi Lưu là nó lặng lẽ hiện lại trên blog. -->
+        <input type="checkbox" id="o-an" hidden>
       </fieldset>
 
       <fieldset class="qt-nhom">

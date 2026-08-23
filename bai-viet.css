@@ -1,0 +1,188 @@
+/* ————— Chữ nghĩa trong thân bài viết ————— */
+/*
+   NGUỒN DUY NHẤT cho dáng chữ của thân bài. File này được nạp ở HAI nơi:
+
+     - trang bài viết ngoài web (khối .article-body)
+     - khung soạn thảo trong trang quản trị (khối .st-vung)
+
+   Vì sao phải chung một file: trước đây mỗi bên tự viết CSS riêng, và chúng
+   trôi khỏi nhau lúc nào không hay — người viết nhìn thấy chữ 16px font
+   Segoe UI, dấu tick là ký tự ✓ màu xanh lá; còn người đọc thấy chữ 17px
+   font Inter, dấu tick là chấm tròn viền xanh. Soạn xong đăng lên mới ngã
+   ngửa. Nay sửa một luật ở đây là hai nơi đổi cùng lúc.
+
+   Quy tắc khi thêm luật mới: LUÔN viết cho cả hai khối
+   (".article-body X, .st-vung X"), đừng viết riêng cho một bên.
+*/
+
+/* Khung soạn thảo không nạp style.css (nạp vào là đè lên giao diện trang
+   quản trị), nên mấy biến màu/font của website chưa tồn tại ở đó. Khai lại
+   đúng bằng giá trị trong style.css — nếu đổi màu chữ bên style.css thì
+   nhớ đổi cả ở đây. */
+.st-vung {
+  --font-heading: "Be Vietnam Pro", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --text-dark: #222222;
+  --text-heading: #444444;
+  --text-body: #3d4c5c;
+  --text-muted: #6f8ba4;
+  --primary-2: #3874ff;
+  --primary-soft: #f3f6ff;
+  --radius: 12px;
+  --shadow-card: 0 0 30px rgba(0, 42, 106, 0.1);
+  --fs-xs: 0.75rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.25rem;
+
+  font-family: var(--font-body);
+}
+
+/* Bề ngang cột chữ: cùng 720px với trang bài, để dòng ngắt đúng chỗ và
+   người viết ước lượng được độ dài đoạn văn. */
+.article-body,
+.st-vung {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Chữ thân bài 17px và dùng --text-body đậm hơn: đây là phần người đọc nhìn
+   liên tục vài phút, nên ưu tiên dễ đọc hơn là nhẹ nhàng. */
+.article-body p,
+.st-vung p {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--text-body);
+  margin-bottom: 22px;
+}
+.article-body p.lead,
+.st-vung p.lead {
+  font-size: var(--fs-lg);
+  color: var(--text-heading);
+}
+.article-body strong,
+.st-vung strong {
+  color: var(--text-heading);
+  font-weight: 600;
+}
+
+/* Mục trong bài là h2 (dưới h1 tiêu đề bài), mục con là h3. Cỡ to hơn và
+   màu đậm hơn để phân mục nổi rõ khi đọc lướt tìm phần cần xem. */
+.article-body h2,
+.st-vung h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin: 44px 0 16px;
+  font-size: 1.375rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+.article-body h3,
+.st-vung h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin: 32px 0 12px;
+  font-size: 1.0625rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+
+/* ——— Danh sách ———
+   style.css có luật chung "ul { list-style: none }" cho menu và mấy lưới
+   thẻ. Trong bài viết thì phải trả lại dấu đầu dòng, nếu không danh sách
+   thành mấy dòng chữ trôi nổi không đầu không cuối — web thật đã chạy như
+   vậy một thời gian mà không ai để ý, vì trong khung soạn thảo vẫn thấy có
+   dấu. Danh sách đánh số cũng cần lề trái, không thì số nằm tràn ra ngoài
+   cột chữ. */
+.article-body ul,
+.article-body ol,
+.st-vung ul,
+.st-vung ol {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--text-body);
+  margin-bottom: 22px;
+  padding-left: 24px;
+}
+.article-body ul:not(.list-check),
+.st-vung ul:not(.list-check) {
+  list-style: disc;
+}
+.article-body ol,
+.st-vung ol {
+  list-style: decimal;
+}
+.article-body li,
+.st-vung li {
+  margin-bottom: 6px;
+}
+
+/* Danh sách dấu tick — kiểu riêng của site, cũng dùng ở trang dịch vụ. Dấu
+   là chấm tròn viền xanh chứ không phải ký tự ✓. */
+.list-check {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding-left: 0;
+}
+.list-check li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 0;
+  /* Hai dòng này là để trang dịch vụ và trang chủ giữ nguyên như cũ —
+     danh sách tick ở đó không thuộc thân bài nên không đi theo cỡ chữ 17px
+     của bài viết. */
+  font-size: var(--fs-base);
+  color: var(--text-heading);
+}
+.list-check li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  border: 2px solid var(--primary-2);
+}
+
+/* Số chú thích trỏ xuống mục Tài liệu tham khảo ở cuối bài. */
+.article-body sup,
+.st-vung sup {
+  font-size: var(--fs-xs);
+  color: var(--primary-2);
+}
+
+.article-body a,
+.st-vung a {
+  color: var(--primary-2);
+}
+
+/* ——— Ảnh minh họa trong bài ——— */
+.article-inline-img {
+  margin: 36px 0;
+}
+.article-inline-img img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+/* Ảnh chụp dọc: khung 16/10 ở trên sẽ cắt mất đầu và chân người, chỉ còn
+   một dải ngang giữa ảnh. Thêm class này cạnh .article-inline-img để ảnh
+   giữ nguyên tỉ lệ gốc và thu hẹp bề ngang cho khỏi cao quá màn hình.
+   <figure class="article-inline-img article-inline-img-doc"> */
+.article-inline-img-doc img {
+  aspect-ratio: auto;
+  max-width: 420px;
+  margin-inline: auto;
+  display: block;
+}
+.article-inline-img figcaption {
+  margin-top: 10px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}

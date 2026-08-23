@@ -24,6 +24,8 @@ const DICH = join(THU_MUC_WEB, "public");
 const CAN_CHEP = [
   "style.css",
   "admin.css",
+  // Dáng chữ thân bài — trang bài viết và khung soạn thảo dùng chung.
+  "bai-viet.css",
   // Hai file này còn chạy phía trình duyệt và cần window.THONG_TIN, do
   // thong-tin.js sinh ra bên dưới cấp cho.
   "seo-schema.js",

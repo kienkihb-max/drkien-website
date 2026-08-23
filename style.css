@@ -628,22 +628,8 @@ h4 { font-size: var(--fs-base); }
 .info-card h3 .icon { vertical-align: -0.15em; margin-right: 6px; }
 .cv-photo { max-width: 640px; margin: 0 auto 40px; text-align: center; }
 .cv-photo img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-card); }
-.list-check { display: flex; flex-direction: column; gap: 12px; }
-.list-check li {
-  position: relative;
-  padding-left: 26px;
-  font-size: var(--fs-base);
-  color: var(--text-heading);
-}
-.list-check li::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 7px;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--primary-soft);
-  border: 2px solid var(--primary-2);
-}
+/* .list-check (danh sách chấm tròn) đã chuyển sang bai-viet.css, vì khung
+   soạn thảo cũng phải vẽ được đúng kiểu đó. */
 
 /* Runner */
 .runner-grid {
@@ -922,51 +908,10 @@ main img.zoomable { cursor: zoom-in; }
   color: var(--text-muted);
   line-height: 1.6;
 }
-.article-body { max-width: 720px; margin: 0 auto; }
-/* Chữ thân bài 17px thay vì 16px và dùng --text-body đậm hơn: đây là phần
-   người đọc nhìn liên tục vài phút, nên ưu tiên dễ đọc hơn là nhẹ nhàng.
-   Đổi ở đây áp cho mọi bài blog, không phải sửa từng trang. */
-.article-body p { font-size: 1.0625rem; line-height: 1.8; color: var(--text-body); margin-bottom: 22px; }
-.article-body p.lead { font-size: var(--fs-lg); color: var(--text-heading); }
-.article-body ul, .article-body ol { font-size: 1.0625rem; line-height: 1.8; color: var(--text-body); }
-.article-body strong { color: var(--text-heading); font-weight: 600; }
-/* Mục trong bài là h2 (dưới h1 tiêu đề bài), mục con là h3. Cỡ to hơn và
-   màu đậm hơn để phân mục nổi rõ khi đọc lướt tìm phần cần xem. */
-.article-body h2 {
-  margin: 44px 0 16px;
-  font-size: 1.375rem;
-  color: var(--text-dark);
-  line-height: 1.4;
-}
-.article-body h3 { margin: 32px 0 12px; font-size: 1.0625rem; color: var(--text-dark); }
-/* Danh sách trong bài viết cần khoảng cách dưới bằng đoạn văn, nếu không
-   đoạn văn kế tiếp sẽ dính sát vào mục cuối cùng của danh sách. */
-.article-body ul, .article-body ol { margin-bottom: 22px; }
-.article-body sup { font-size: var(--fs-xs); color: var(--primary-2); }
-.article-inline-img { margin: 36px 0; }
-.article-inline-img img {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-}
-/* Ảnh chụp dọc: khung 16/10 ở trên sẽ cắt mất đầu và chân người, chỉ còn
-   một dải ngang giữa ảnh. Thêm class này cạnh .article-inline-img để ảnh
-   giữ nguyên tỉ lệ gốc và thu hẹp bề ngang cho khỏi cao quá màn hình.
-   <figure class="article-inline-img article-inline-img-doc"> */
-.article-inline-img-doc img {
-  aspect-ratio: auto;
-  max-width: 420px;
-  margin-inline: auto;
-  display: block;
-}
-.article-inline-img figcaption {
-  margin-top: 10px;
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-  text-align: center;
-}
+/* Dáng chữ trong thân bài (.article-body) đã chuyển sang bai-viet.css —
+   đừng khai lại ở đây. File đó được nạp ở CẢ trang bài lẫn khung soạn thảo
+   của trang quản trị, nên sửa một chỗ là hai nơi đổi cùng lúc. Khai lại ở
+   đây là hai bản lại trôi khỏi nhau như trước. */
 .article-refs { max-width: 720px; margin: 44px auto 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
 .article-refs h2 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }

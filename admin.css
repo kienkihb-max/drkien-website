@@ -253,24 +253,13 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   display: block;
 }
 
-/* Trong khung soạn, mô phỏng gần đúng chữ trên site để đỡ bất ngờ */
-.st-vung h2 { font-size: 1.35rem; margin: 1.2em 0 0.4em; }
-.st-vung h3 { font-size: 1.1rem; margin: 1em 0 0.3em; }
-.st-vung p { margin: 0.6em 0; }
-.st-vung ul.list-check { list-style: none; padding-left: 4px; }
-.st-vung ul.list-check li { padding-left: 26px; position: relative; margin: 6px 0; }
-.st-vung ul.list-check li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: var(--qt-tot);
-  font-weight: 700;
-}
-.st-vung figure.article-inline-img { margin: 16px 0; text-align: center; }
-.st-vung figure.article-inline-img img { max-width: 100%; border-radius: 8px; }
-.st-vung figcaption { font-size: 0.85rem; color: var(--qt-chu-mo); margin-top: 6px; }
-.st-vung sup { color: var(--qt-chinh); font-weight: 600; }
-.st-vung a { color: var(--qt-chinh); }
+/* Dáng chữ bên trong khung soạn (.st-vung) KHÔNG khai ở đây — nó nằm ở
+   bai-viet.css, chung một bản với thân bài ngoài web, và trang soạn bài nạp
+   file đó cùng với admin.css.
+   Trước đây chỗ này là một bản "mô phỏng gần đúng" chữ trên site, và nó trôi
+   khỏi bản thật: chữ 16px Segoe UI thay vì 17px Inter, dấu tick là ký tự ✓
+   màu xanh lá thay vì chấm tròn viền xanh, ảnh bo 8px thay vì khung 16/10 có
+   đổ bóng. Soạn một đằng đăng ra một nẻo. */
 
 /* ————— Thẻ xem trước trên trang blog ————— */
 /* Thẻ nay là thẻ THẬT, dựng trong một iframe chạy style.css của website

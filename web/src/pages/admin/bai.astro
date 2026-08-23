@@ -62,7 +62,10 @@ import VetLoi from "../../components/VetLoi.astro";
         <legend>Nội dung bài viết</legend>
 
         <label class="qt-nhan" for="o-tieu-de">Tiêu đề bài viết</label>
-        <input class="qt-o" type="text" id="o-tieu-de" required>
+        <!-- Chặn cứng 70 ký tự. Bài cũ nào đang dài hơn thì vẫn mở và sửa
+             được bình thường; maxlength chỉ chặn gõ thêm chứ không cắt chữ
+             có sẵn — cắt là mất chữ mà người viết không kịp thấy. -->
+        <input class="qt-o" type="text" id="o-tieu-de" maxlength="70" data-dem="70" required>
 
         <label class="qt-nhan" for="o-nhan">Chuyên mục</label>
         <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là những
@@ -76,7 +79,12 @@ import VetLoi from "../../components/VetLoi.astro";
         <input class="qt-o" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
 
         <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
-        <textarea class="qt-o qt-o-cao" id="o-lead" rows="3"></textarea>
+        <!-- Chặn cứng 300 ký tự, và ô cao sẵn 4 dòng — đo trong trình duyệt
+             thì 300 ký tự ở bề ngang này chiếm khoảng 3 dòng, nên 4 dòng là
+             chứa hết mà vẫn còn dư. Không phải cuộn để đọc lại đoạn mình vừa
+             gõ. Kéo cao thêm được nếu muốn (resize: vertical). -->
+        <textarea class="qt-o qt-o-cao" id="o-lead" rows="4"
+                  maxlength="300" data-dem="300"></textarea>
 
         <label class="qt-nhan">Thân bài</label>
         <div id="khung-soan"></div>

@@ -422,6 +422,11 @@ import VetLoi from "../../components/VetLoi.astro";
   const KHUNG_XEM =
     '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">' +
     '<link rel="stylesheet" href="/style.css">' +
+    // Font chữ nằm ở <head> của trang website chứ không nằm trong style.css.
+    // Thiếu dòng này thì thẻ vẫn đúng bố cục nhưng chữ là font hệ thống —
+    // nhìn "gần giống" mà không giống, đúng kiểu sai khó chỉ ra nhất.
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?' +
+    "family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap\">" +
     '<script src="/icons.js"><\/script>' +
     // Không lề, không nền: khung chỉ để đựng đúng một tấm thẻ, phần thừa
     // nào cũng thành viền xám thừa trong trang quản trị.
@@ -441,8 +446,16 @@ import VetLoi from "../../components/VetLoi.astro";
     veXemThe();
   });
   khung_xem.srcdoc = KHUNG_XEM;
-  // Cửa sổ đổi bề ngang thì cột cũng đổi, tỉ lệ thu nhỏ phải tính lại.
-  window.addEventListener("resize", caoBangNoiDung);
+
+  // Đo lại mỗi khi cột đổi bề ngang.
+  //
+  // Không dùng sự kiện "resize" của cửa sổ: lúc nạp bài xong và vẽ thẻ lần
+  // đầu thì cả form VẪN CÒN ẨN, nên cột đo ra 0px, tỉ lệ thu nhỏ thành 0 và
+  // thẻ biến mất — mà không có lỗi nào trong nhật ký, chỉ là một khoảng
+  // trắng. Form hiện ra sau đó không sinh sự kiện resize nào cả.
+  //
+  // ResizeObserver bắt đúng khoảnh khắc cột có bề ngang thật.
+  new ResizeObserver(() => caoBangNoiDung()).observe(el("xem-khung"));
 
   function veXemThe() {
     if (!khung_san_sang) return;
@@ -470,17 +483,17 @@ import VetLoi from "../../components/VetLoi.astro";
     const doc = khung_xem.contentDocument;
     const than = doc?.body;
     const boc = el("xem-khung");
-    if (!than || !boc) return;
+    // Cột chưa có bề ngang (form còn ẩn) thì đo bây giờ chỉ ra số 0 rồi thu
+    // thẻ về không thấy gì. Để nguyên, ResizeObserver sẽ gọi lại khi có.
+    if (!than || !boc || !boc.clientWidth) return;
     const dat = () => {
+      // Iframe rộng 1200px (để style.css áp bộ desktop) nhưng thẻ chỉ chiếm
+      // 368px bên trái; lớp bọc rộng đúng 368px và cắt phần thừa. Không thu
+      // nhỏ bằng transform nữa: thu là chữ và ảnh bị nội suy, nhìn nhoè hơn
+      // thẻ thật một chút — mà "gần giống" chính là thứ vô dụng ở đây.
       const cao = Math.ceil(than.scrollHeight);
-      // Thu cả tấm thẻ 368px xuống vừa bề ngang cột. Không bao giờ phóng to:
-      // cột rộng hơn thẻ thì để thẻ đúng cỡ thật của nó.
-      const ti_le = Math.min(1, boc.clientWidth / THE_RONG);
       khung_xem.style.height = cao + "px";
-      khung_xem.style.transform = "scale(" + ti_le + ")";
-      // Iframe đã bị thu nhỏ nhưng ô chứa nó thì không tự co theo — phải đặt
-      // tay, không thì dưới thẻ hở ra một mảng trắng bằng phần đã thu.
-      boc.style.height = Math.ceil(cao * ti_le) + "px";
+      boc.style.height = cao + "px";
     };
     dat();
     doc!.querySelectorAll("img").forEach((anh) => {

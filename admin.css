@@ -278,20 +278,21 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
    của trang quản trị đời trước, giữ lại chưa dùng tới. */
 .qt-hai-cot { display: flex; gap: 24px; align-items: flex-start; }
 .qt-cot-nhap { flex: 1; min-width: 0; }
-.qt-cot-xem { width: 300px; flex-shrink: 0; position: sticky; top: 130px; }
+/* 368px = bề ngang thật của một thẻ trên trang blog desktop (lưới 3 cột
+   trong container 1200px). Đúng cỡ thật thì mới soi được độ dài chữ. */
+.qt-cot-xem { width: 368px; flex-shrink: 0; position: sticky; top: 130px; }
 /* Khung chứa thẻ thật.
    Iframe rộng hẳn 1200px để style.css áp bộ quy tắc DESKTOP — khung hẹp thì
-   nó tưởng đang trên điện thoại và thu nhỏ cỡ chữ, xem trước ra một đằng mà
-   trang thật một nẻo. Rồi thu cả khung lại bằng transform cho vừa cột 300px,
-   và cắt phần thừa bằng lớp bọc overflow:hidden. Tỉ lệ và chiều cao do JS
-   tính, vì chỉ nó mới biết thẻ cao bao nhiêu sau khi ảnh tải xong. */
+   nó tưởng đang ở điện thoại và đổi cỡ chữ, xem trước một đằng mà trang thật
+   một nẻo. Thẻ nằm sát mép trái và chỉ chiếm 368px, phần 1200px còn lại bị
+   lớp bọc cắt đi. Nhờ vậy thẻ hiện đúng tỉ lệ 1:1, không thu phóng gì cả.
+   Chiều cao do JS đặt, vì chỉ nó biết thẻ cao bao nhiêu sau khi ảnh tải. */
 .qt-xem-khung { width: 100%; overflow: hidden; }
 .qt-xem-the {
   width: 1200px;
   border: 0;
   background: transparent;
   display: block;
-  transform-origin: 0 0;
 }
 @media (max-width: 720px) {
   .qt-hai-cot { flex-direction: column; }

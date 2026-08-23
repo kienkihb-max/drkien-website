@@ -143,19 +143,6 @@ import VetLoi from "../../components/VetLoi.astro";
       </fieldset>
 
       <fieldset class="qt-nhom">
-        <legend>Hiển thị</legend>
-        <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
-        <input class="qt-o qt-o-hep" type="date" id="o-ngay">
-        <label><input type="checkbox" id="o-noi-bat"> Đưa lên khối nổi bật đầu trang blog</label>
-        <!-- "Gỡ khỏi danh sách" không hiện ở đây nữa: việc đó làm bằng nút
-             Ẩn / Hiện lại ngoài danh sách bài, đúng chỗ nhìn thấy bài nào
-             đang ẩn bài nào đang hiện.
-             Vẫn giữ ô ẩn để LƯU LẠI trạng thái đang có — bỏ hẳn thì mở một
-             bài đang ẩn ra sửa rồi Lưu là nó lặng lẽ hiện lại trên blog. -->
-        <input type="checkbox" id="o-an" hidden>
-      </fieldset>
-
-      <fieldset class="qt-nhom">
         <legend>Chữ hiện trên thẻ blog</legend>
         <p class="qt-goi-y">
           Đây là chữ người đọc thấy trên thẻ ngoài trang blog. Máy điền sẵn
@@ -211,6 +198,19 @@ import VetLoi from "../../components/VetLoi.astro";
         </label>
         <input class="qt-o" type="text" id="o-slug" disabled>
       </fieldset>
+      <fieldset class="qt-nhom">
+        <legend>Hiển thị</legend>
+        <label class="qt-nhan" for="o-ngay">Ngày đăng</label>
+        <input class="qt-o qt-o-hep" type="date" id="o-ngay">
+        <label><input type="checkbox" id="o-noi-bat"> Đưa lên khối nổi bật đầu trang blog</label>
+        <!-- "Gỡ khỏi danh sách" không hiện ở đây nữa: việc đó làm bằng nút
+             Ẩn / Hiện lại ngoài danh sách bài, đúng chỗ nhìn thấy bài nào
+             đang ẩn bài nào đang hiện.
+             Vẫn giữ ô ẩn để LƯU LẠI trạng thái đang có — bỏ hẳn thì mở một
+             bài đang ẩn ra sửa rồi Lưu là nó lặng lẽ hiện lại trên blog. -->
+        <input type="checkbox" id="o-an" hidden>
+      </fieldset>
+
     </form>
   </main>
 </div>
@@ -290,7 +290,7 @@ import VetLoi from "../../components/VetLoi.astro";
    * soạn là ảnh tạm trong máy, mà bài lưu dở hay đóng tab là ảnh bốc hơi
    * còn bài thì trỏ vào một địa chỉ không tồn tại.
    */
-  function chenAnhVaoBai(xong: (anh: { anh: string; alt: string } | null) => void) {
+  function chenAnhVaoBai(xong: (anh: { anh: string; alt: string; rong?: number; cao?: number } | null) => void) {
     const o_tep = o("o-tep-anh-bai");
     o_tep.value = "";
     o_tep.onchange = () => {
@@ -311,18 +311,24 @@ import VetLoi from "../../components/VetLoi.astro";
    * thẳng từ clipboard. Hai đường chỉ khác nhau ở chỗ lấy được cái File, từ
    * đó trở đi là một việc.
    */
+  /** Số ảnh đang tải lên dở. Nút Lưu/Đăng phải đợi chúng xong. */
+  let so_anh_dang_tai = 0;
+
   async function taiAnhChoThanBai(
     tep: File,
-    xong: (anh: { anh: string; alt: string } | null) => void
+    xong: (anh: { anh: string; alt: string; rong?: number; cao?: number } | null) => void
   ) {
     bao("Đang thu nhỏ và tải ảnh lên…");
+    so_anh_dang_tai++;
     try {
       // Xếp cùng thư mục với ảnh bìa của bài, để xoá bài là ảnh đi theo.
       const kq = await taiAnhLen(tep, o("o-slug").value.trim() || "chung");
       // Không hỏi mô tả ảnh ở đây: đang viết dở mà bị chặn bằng một hộp
       // thoại là đứt mạch. Chú thích gõ thẳng dưới ảnh trong khung soạn,
       // và chính nó thành mô tả ảnh lúc lưu. Quên thì lúc Đăng sẽ nhắc.
-      xong({ anh: kq.dia_chi, alt: "" });
+      // Kèm kích thước: trình soạn thảo dựa vào đó để nhận ra ảnh dọc và
+      // giữ nguyên tỉ lệ gốc thay vì cắt về khung ngang.
+      xong({ anh: kq.dia_chi, alt: "", rong: kq.rong, cao: kq.cao });
       bao(
         `Đã chèn ảnh — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
           " Gõ chú thích ngay dưới ảnh."
@@ -330,6 +336,8 @@ import VetLoi from "../../components/VetLoi.astro";
     } catch (e) {
       bao((e as Error).message, true);
       xong(null);
+    } finally {
+      so_anh_dang_tai--;
     }
   }
 
@@ -939,17 +947,30 @@ import VetLoi from "../../components/VetLoi.astro";
    * @returns true nếu được phép đăng tiếp
    */
   function hoiVeAnhThieuChuThich(than_bai: string) {
+    const thieu: string[] = [];
+
+    // Ảnh bìa: quan trọng nhất trong bài — nó là ảnh lên Facebook, lên Zalo
+    // và lên thẻ ngoài trang blog. Trước đây chỉ nhắc ảnh trong thân bài,
+    // còn đúng tấm này thì không.
+    if (o("o-anh").value.trim() && !o("o-anh-alt").value.trim()) {
+      thieu.push("• Ảnh bìa chưa có mô tả (ô ngay dưới khung chọn ảnh)");
+    }
+
     const hop = document.createElement("div");
     hop.innerHTML = than_bai;
-    const thieu = [...hop.querySelectorAll("img")].filter(
+    const so_anh_bai = [...hop.querySelectorAll("img")].filter(
       (a) => !(a.getAttribute("alt") || "").trim()
     ).length;
-    if (!thieu) return true;
+    if (so_anh_bai) {
+      thieu.push("• " + so_anh_bai + " ảnh trong bài chưa có chú thích");
+    }
+
+    if (!thieu.length) return true;
     return confirm(
-      thieu +
-        " ảnh trong bài chưa có chú thích, nên người khiếm thị và Google không " +
-        "biết trong ảnh có gì.\n\nBấm Cancel để quay lại gõ chú thích ngay dưới " +
-        "ảnh, hoặc OK để đăng luôn."
+      "Còn thiếu chữ mô tả ảnh:\n\n" +
+        thieu.join("\n") +
+        "\n\nThiếu thì người khiếm thị và Google không biết trong ảnh có gì.\n" +
+        "Bấm Cancel để quay lại điền, hoặc OK để đăng luôn."
     );
   }
 
@@ -1077,6 +1098,10 @@ import VetLoi from "../../components/VetLoi.astro";
       khiTaiAnh: taiAnhChoThanBai,
     });
     vet("đã dựng trình soạn thảo");
+    // Dán dòng đếm chữ vào ĐÁY khung soạn. Khung giờ cao bằng màn hình, nên
+    // để dòng này nằm ngoài khung là nó bị đẩy khuất — muốn biết bài dài bao
+    // nhiêu lại phải cuộn xuống tìm.
+    el("khung-soan").appendChild(el("dem-chu"));
     // Ghi rõ "từ" và "ký tự" thành hai số riêng. Nhãn cũ ghi "Khoảng N chữ"
     // mà đếm theo TỪ — gõ liền sáu ký tự không dấu cách thì nó đứng ở 1, ai
     // nhìn cũng tưởng ô soạn thảo hỏng.
@@ -1160,14 +1185,30 @@ import VetLoi from "../../components/VetLoi.astro";
   function mot_lan(viec: () => Promise<void>) {
     return async () => {
       if (dang_chay) return;
+      // Còn ảnh đang tải lên mà lưu ngay thì bài cất đi CHƯA có tấm ảnh đó,
+      // xong ảnh chèn vào sau nên bài lại "có thay đổi chưa lưu" — không ai
+      // hiểu vì sao vừa lưu xong đã lại thấy nút Lưu.
+      if (so_anh_dang_tai > 0) {
+        bao("Đợi ảnh tải lên xong đã, rồi hãy lưu.", true);
+        return;
+      }
       dang_chay = true;
       const nut = [el("nut-luu"), el("nut-dang")] as HTMLButtonElement[];
-      nut.forEach((n) => { n.disabled = true; });
+      const chu_cu = nut.map((n) => n.textContent);
+      nut.forEach((n) => {
+        n.disabled = true;
+        // Đổi cả chữ chứ không chỉ làm mờ nút: mạng chậm thì nút mờ đứng im
+        // trông y như trang bị treo.
+        if (!n.hidden) n.textContent = "Đang lưu…";
+      });
       try {
         await viec();
       } finally {
         dang_chay = false;
-        nut.forEach((n) => { n.disabled = false; });
+        nut.forEach((n, i) => {
+          n.disabled = false;
+          n.textContent = chu_cu[i];
+        });
       }
     };
   }

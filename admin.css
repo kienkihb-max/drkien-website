@@ -278,26 +278,46 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
   color: #fff;
 }
 .st-vach { width: 1px; background: var(--qt-vien); margin: 2px 4px; }
+/* Đẩy mấy nút phụ (Chuẩn hóa, Xóa định dạng, HTML) dạt sang phải. */
+.st-day-phai { flex: 1 1 auto; }
 
-/* Nút xoá ảnh, hiện ở góc phải trên tấm ảnh khi rê chuột vào. Nằm ngoài
-   vùng soạn (con của .st) nên phải định vị tuyệt đối — .st là gốc toạ độ. */
+/* Dòng đếm chữ, dán ở đáy khung soạn. Trước đây nó nằm dưới khung, mà khung
+   giờ cao bằng màn hình nên nó bị đẩy khuất — muốn biết bài dài bao nhiêu
+   phải cuộn xuống tìm. */
+.st .qt-phu {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 6px 18px;
+  border-top: 1px solid var(--qt-vien);
+  background: #fafbfd;
+}
+
+/* Cụm nút trên tấm ảnh (giữ ảnh dọc / xoá ảnh), hiện ở góc phải trên khi rê
+   chuột vào ảnh hoặc khi con trỏ đang trong khối ảnh. Nằm ngoài vùng soạn
+   (con của .st) nên phải định vị tuyệt đối — .st là gốc toạ độ. */
 .st { position: relative; }
-.st-xoa-anh {
+.st-nut-anh {
   position: absolute;
   z-index: 5;
-  width: 28px;
+  display: flex;
+  gap: 6px;
+}
+.st-nut-tren-anh {
   height: 28px;
-  padding: 0;
+  padding: 0 10px;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   line-height: 1;
   color: #fff;
-  background: rgba(20, 30, 45, 0.72);
+  background: rgba(20, 30, 45, 0.78);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap;
 }
-.st-xoa-anh:hover { background: var(--qt-nguy); }
+.st-nut-tren-anh:hover { background: rgba(20, 30, 45, 0.95); }
+.st-nut-tren-anh-nguy { width: 28px; padding: 0; font-size: 0.9rem; }
+.st-nut-tren-anh-nguy:hover { background: var(--qt-nguy); }
 
 .st-vung, .st-tho {
   /* Ăn hết chỗ còn lại trong khung và tự cuộn. min-height:0 là bắt buộc:

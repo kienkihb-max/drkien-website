@@ -39,7 +39,15 @@ window.SoanThao = (function () {
   };
 
   // Class được giữ lại — mọi class khác (nhất là class Word tự sinh) đều bỏ.
-  var CLASS_GIU = { lead: 1, "list-check": 1, "article-inline-img": 1 };
+  var CLASS_GIU = {
+    lead: 1,
+    "list-check": 1,
+    "article-inline-img": 1,
+    // Ảnh dọc: giữ nguyên tỉ lệ gốc thay vì bị ép khung ngang 16/10. Thiếu
+    // dòng này thì class bị lọc mất lúc lưu, và ảnh chân dung trong bài lại
+    // bị cắt mất đầu với chân — đúng lỗi mà nó sinh ra để chữa.
+    "article-inline-img-doc": 1,
+  };
 
   // Thẻ cũ đổi sang thẻ chuẩn: trình duyệt hay sinh <b>/<i>, còn Word thì
   // rắc <div> khắp nơi.
@@ -452,11 +460,12 @@ window.SoanThao = (function () {
       { ma: "gach", chu: "• Danh sách", chu_thich: "Danh sách gạch đầu dòng", lam: function () { bo.danhSach(false); } },
       { ma: "so", chu: "1. Đánh số", chu_thich: "Danh sách đánh số", lam: function () { bo.lenh("insertOrderedList"); } },
       { ma: "tick", chu: "✓ Dấu tick", chu_thich: "Danh sách có dấu tick — kiểu riêng của site", lam: function () { bo.danhSach(true); } },
+      { ma: "trich", chu: "❝ Trích dẫn", chu_thich: "Khối trích dẫn — lời bệnh nhân, câu trích từ nghiên cứu", lam: function () { bo.khoi("blockquote"); } },
       { nhom: true },
       { ma: "lien_ket", chu: "Liên kết", chu_thich: "Gắn liên kết vào chữ đang bôi đen, hoặc sửa liên kết đang đứng (Ctrl+K)", lam: function () { bo.lienKet(); } },
       { chu: "Ảnh", chu_thich: "Chèn ảnh minh họa kèm chú thích", lam: function () { bo.chenAnh(); } },
       { chu: "Chú thích¹", chu_thich: "Chèn số chú thích, tự đánh số tiếp", lam: function () { bo.chuThich(); } },
-      { nhom: true },
+      { day_phai: true },
       { chu: "✨ Chuẩn hóa", chu_thich: "Đoán và sửa lại dáng cả bài: đoạn ngắn đứng riêng thành tiêu đề, các dòng gạch đầu dòng gom thành danh sách. Đoán sai thì Ctrl+Z.", lam: function () { bo.chuanHoaCaBai(); } },
       { chu: "Xóa định dạng", chu_thich: "Trả chữ đang bôi đen về chữ thường", lam: function () { bo.lenh("removeFormat"); } },
       { ma: "ma_html", chu: "</> HTML", chu_thich: "Xem và sửa thẳng mã HTML của bài", lam: function () { bo.doiCheDo(); } },
@@ -635,7 +644,25 @@ window.SoanThao = (function () {
       // sử hoàn tác, để đoán sai thì Ctrl+Z là quay lại nguyên trạng.
       chuanHoaCaBai: function () {
         var moi = nanDang(vung.innerHTML);
-        if (!moi || moi === vung.innerHTML) return;
+        if (!moi || moi === vung.innerHTML) {
+          alert("Bài đang gọn rồi, không có gì để nắn.");
+          return;
+        }
+        // Nói trước sẽ đụng vào bao nhiêu khối. Nút này sửa CẢ BÀI một phát,
+        // mà lối lùi duy nhất là Ctrl+Z — bấm nhầm rồi mới biết thì muộn.
+        var truoc = document.createElement("div");
+        truoc.innerHTML = vung.innerHTML;
+        var sau = document.createElement("div");
+        sau.innerHTML = moi;
+        if (
+          !confirm(
+            "Nắn lại dáng cả bài: đoạn ngắn đứng riêng thành tiêu đề, các " +
+              "dòng gạch đầu dòng gom thành danh sách.\n\n" +
+              "Bài đang có " + truoc.children.length + " khối, sau khi nắn còn " +
+              sau.children.length + ".\n\nLàm tiếp không? (đoán sai thì Ctrl+Z)"
+          )
+        )
+          return;
         vung.focus();
         document.execCommand("selectAll", false, null);
         document.execCommand("insertHTML", false, moi);
@@ -698,6 +725,12 @@ window.SoanThao = (function () {
 
       var khung_anh = document.createElement("figure");
       khung_anh.className = "article-inline-img";
+      // Ảnh cao hơn rộng thì đánh dấu là ảnh dọc ngay từ đầu: khung ngang
+      // 16/10 sẽ cắt mất đầu và chân người, chỉ còn một dải ngang giữa ảnh.
+      // Máy biết kích thước sẵn rồi, không việc gì bắt người viết tự nhận ra.
+      if (anh.cao && anh.rong && anh.cao > anh.rong) {
+        khung_anh.classList.add("article-inline-img-doc");
+      }
       khung_anh.appendChild(hinh);
       khung_anh.appendChild(cap);
 
@@ -740,6 +773,15 @@ window.SoanThao = (function () {
           var vach = document.createElement("span");
           vach.className = "st-vach";
           thanh.appendChild(vach);
+          return;
+        }
+        // Khoảng đẩy: mấy nút sau nó dạt hẳn sang phải. Chuẩn hóa, Xóa định
+        // dạng và HTML là công cụ phụ, đứng lẫn giữa nút định dạng thì vừa
+        // chiếm chỗ vừa dễ bấm nhầm.
+        if (n.day_phai) {
+          var day = document.createElement("span");
+          day.className = "st-day-phai";
+          thanh.appendChild(day);
           return;
         }
         var nut = document.createElement("button");
@@ -810,68 +852,111 @@ window.SoanThao = (function () {
       batNut("tick", co_tick);
       batNut("so", !!ol);
 
+      batNut("trich", !!timCha("BLOCKQUOTE"));
       batNut("lien_ket", !!timCha("A"));
     }
 
-    // ——— Nút xoá ảnh, hiện khi rê chuột vào ảnh ———
-    // Khối ảnh dựng bằng DOM nên Ctrl+Z không gỡ được (xem chenKhoiAnh).
-    // Không có nút này thì cách duy nhất là bôi đen cả khối rồi Delete — mà
-    // bôi đen trúng một <figure> bằng chuột thì rất khó.
+    // ——— Cụm nút trên tấm ảnh ———
+    // Hiện khi rê chuột vào ảnh, hoặc khi con trỏ đang đứng trong khối ảnh
+    // (để người dùng bàn phím cũng tới được, không chỉ người dùng chuột).
     //
-    // Nút nằm NGOÀI vùng soạn (gắn vào .st), không nhét vào trong figure:
-    // mọi thứ trong vùng soạn đều là nội dung bài, thêm một cái nút vào đó
-    // là sớm muộn nó chui vào HTML lúc lưu.
+    // Cụm nút nằm NGOÀI vùng soạn (gắn vào .st), không nhét vào trong
+    // figure: mọi thứ trong vùng soạn đều là nội dung bài, thêm một cái nút
+    // vào đó là sớm muộn nó chui vào HTML lúc lưu.
+    var cum_nut_anh = document.createElement("div");
+    cum_nut_anh.className = "st-nut-anh";
+    cum_nut_anh.hidden = true;
+
+    var nut_doc_ngang = document.createElement("button");
+    nut_doc_ngang.type = "button";
+    nut_doc_ngang.className = "st-nut-tren-anh";
+
     var nut_xoa_anh = document.createElement("button");
     nut_xoa_anh.type = "button";
-    nut_xoa_anh.className = "st-xoa-anh";
+    nut_xoa_anh.className = "st-nut-tren-anh st-nut-tren-anh-nguy";
     nut_xoa_anh.textContent = "✕";
     nut_xoa_anh.title = "Xoá ảnh này khỏi bài";
-    nut_xoa_anh.hidden = true;
-    khung.appendChild(nut_xoa_anh);
 
-    /** Khối ảnh mà nút xoá đang trỏ tới. */
+    cum_nut_anh.appendChild(nut_doc_ngang);
+    cum_nut_anh.appendChild(nut_xoa_anh);
+    khung.appendChild(cum_nut_anh);
+
+    /** Khối ảnh mà cụm nút đang trỏ tới. */
     var anh_dang_tro = null;
 
-    function datNutXoaAnh(khung_anh) {
+    function datCumNutAnh(khung_anh) {
       anh_dang_tro = khung_anh;
       if (!khung_anh) {
-        nut_xoa_anh.hidden = true;
+        cum_nut_anh.hidden = true;
         return;
       }
+      var la_doc = khung_anh.classList.contains("article-inline-img-doc");
+      // Nhãn nói việc SẼ làm khi bấm, không nói trạng thái đang có — "Ảnh
+      // dọc" mà bấm vào lại thành ngang thì ai cũng hiểu nhầm một lần.
+      nut_doc_ngang.textContent = la_doc ? "Cắt khung ngang" : "Giữ ảnh dọc";
+      nut_doc_ngang.title = la_doc
+        ? "Ảnh đang giữ nguyên tỉ lệ gốc. Bấm để cắt về khung ngang 16/10 như ảnh thường."
+        : "Ảnh đang bị cắt về khung ngang 16/10. Bấm để giữ nguyên tỉ lệ gốc — dùng cho ảnh chụp dọc.";
+
       var o_anh = khung_anh.getBoundingClientRect();
       var o_khung = khung.getBoundingClientRect();
-      nut_xoa_anh.hidden = false;
-      // Nằm trong góc phải trên của ảnh, thụt vào 8px.
-      nut_xoa_anh.style.top = o_anh.top - o_khung.top + 8 + "px";
-      nut_xoa_anh.style.left = o_anh.right - o_khung.left - 36 + "px";
+      cum_nut_anh.hidden = false;
+      var rong_cum = cum_nut_anh.offsetWidth || 160;
+      // Góc phải trên của ảnh, thụt vào 8px.
+      cum_nut_anh.style.top = o_anh.top - o_khung.top + 8 + "px";
+      cum_nut_anh.style.left = o_anh.right - o_khung.left - rong_cum - 8 + "px";
     }
 
     vung.addEventListener("mousemove", function (e) {
       var el = e.target;
       var khung_anh = el && el.closest ? el.closest("figure.article-inline-img") : null;
       // Chỉ đổi khi thật sự sang một ảnh khác: đặt lại vị trí liên tục theo
-      // từng nhịp chuột làm nút rung.
-      if (khung_anh !== anh_dang_tro) datNutXoaAnh(khung_anh);
+      // từng nhịp chuột làm cụm nút rung.
+      if (khung_anh && khung_anh !== anh_dang_tro) datCumNutAnh(khung_anh);
     });
 
-    // Rời hẳn vùng soạn thì cất nút đi — trừ khi con chuột đang ở trên chính
-    // cái nút, vì nút nằm ngoài vùng soạn nên rê tới nó cũng tính là "rời".
+    // Rời hẳn vùng soạn thì cất đi — trừ khi con chuột đang đi sang chính
+    // cụm nút, vì nó nằm ngoài vùng soạn nên rê tới cũng tính là "rời".
     vung.addEventListener("mouseleave", function (e) {
-      if (e.relatedTarget === nut_xoa_anh) return;
-      datNutXoaAnh(null);
+      if (cum_nut_anh.contains(e.relatedTarget)) return;
+      if (!khoiAnhDangGo()) datCumNutAnh(null);
     });
-    nut_xoa_anh.addEventListener("mouseleave", function () {
-      datNutXoaAnh(null);
+    cum_nut_anh.addEventListener("mouseleave", function () {
+      if (!khoiAnhDangGo()) datCumNutAnh(null);
     });
 
-    // Cuộn trong vùng soạn thì ảnh trôi đi, nút phải trôi theo.
+    /** Khối ảnh đang chứa con trỏ, nếu có — dùng cho đường bàn phím. */
+    function khoiAnhDangGo() {
+      var khoi = khoiDangDung();
+      return khoi && khoi.matches && khoi.matches("figure.article-inline-img") ? khoi : null;
+    }
+
+    // Gõ chú thích trong một tấm ảnh thì cụm nút hiện lên ở đúng ảnh đó.
+    ["keyup", "mouseup", "focus"].forEach(function (ten) {
+      vung.addEventListener(ten, function () {
+        var khoi = khoiAnhDangGo();
+        if (khoi && khoi !== anh_dang_tro) datCumNutAnh(khoi);
+      });
+    });
+
+    // Cuộn trong vùng soạn thì ảnh trôi đi, cụm nút phải trôi theo.
     vung.addEventListener("scroll", function () {
-      if (anh_dang_tro) datNutXoaAnh(anh_dang_tro);
+      if (anh_dang_tro) datCumNutAnh(anh_dang_tro);
     });
 
-    nut_xoa_anh.addEventListener("mousedown", function (e) {
-      e.preventDefault();
+    [nut_doc_ngang, nut_xoa_anh].forEach(function (n) {
+      n.addEventListener("mousedown", function (e) {
+        e.preventDefault(); // giữ nguyên chỗ con trỏ đang đứng
+      });
     });
+
+    nut_doc_ngang.addEventListener("click", function () {
+      if (!anh_dang_tro) return;
+      anh_dang_tro.classList.toggle("article-inline-img-doc");
+      datCumNutAnh(anh_dang_tro);
+      vung.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
     nut_xoa_anh.addEventListener("click", function () {
       if (!anh_dang_tro) return;
       var doan_sau = anh_dang_tro.nextElementSibling;
@@ -881,7 +966,7 @@ window.SoanThao = (function () {
       if (doan_sau && doan_sau.tagName === "P" && !doan_sau.textContent.trim()) {
         doan_sau.remove();
       }
-      datNutXoaAnh(null);
+      datCumNutAnh(null);
       vung.focus();
       vung.dispatchEvent(new Event("input", { bubbles: true }));
     });

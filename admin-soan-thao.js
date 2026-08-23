@@ -11,6 +11,11 @@
 // — để lọt vào bài viết là chữ trong bài lệch hẳn phần còn lại của site. Vì
 // vậy mọi thứ đều đi qua donDep() trước khi trả về.
 window.SoanThao = (function () {
+  // Chữ mờ trong ô chú thích của ảnh vừa chèn. Người viết gõ đè lên; còn để
+  // nguyên thì lúc lấy HTML ra nó bị bỏ đi, chứ không lên web thành một dòng
+  // "Nhập chú thích cho ảnh…" nằm dưới tấm ảnh.
+  var CHU_THICH_MAU = "Nhập chú thích cho ảnh…";
+
   // ——— Những thẻ và thuộc tính được phép có mặt trong bài viết ———
   // Thêm kiểu nội dung mới thì khai báo ở đây, nếu không nó sẽ bị gỡ.
   var CHO_PHEP = {
@@ -340,9 +345,33 @@ window.SoanThao = (function () {
     return ra.join("");
   }
 
+  /**
+   * Ảnh trong bài: bỏ chú thích còn để nguyên chữ mờ, và lấy chú thích làm
+   * mô tả ảnh khi ảnh chưa có mô tả.
+   *
+   * Chú thích là chữ người đọc nhìn thấy dưới ảnh; mô tả ảnh (alt) là chữ
+   * dành cho người khiếm thị và cho Google. Hai chỗ này gần như luôn nói
+   * cùng một điều, nên bắt người viết gõ hai lần là thừa — gõ chú thích một
+   * lần, máy lấy làm mô tả.
+   */
+  function donDepAnh(hop) {
+    Array.prototype.forEach.call(hop.querySelectorAll("figure"), function (fig) {
+      var cap = fig.querySelector("figcaption");
+      if (cap && cap.textContent.trim() === CHU_THICH_MAU) {
+        cap.remove();
+        cap = null;
+      }
+      var anh = fig.querySelector("img");
+      if (!anh) return;
+      var chu = cap ? cap.textContent.trim() : "";
+      if (chu && !(anh.getAttribute("alt") || "").trim()) anh.setAttribute("alt", chu);
+    });
+  }
+
   function donDep(html) {
     var hop = document.createElement("div");
     hop.innerHTML = html;
+    donDepAnh(hop);
     donDepNut(hop);
 
     // Chữ nằm trần ngoài mọi khối thì gói vào <p>, nếu không lúc dàn trang
@@ -430,6 +459,45 @@ window.SoanThao = (function () {
 
     var dang_xem_ma = false;
 
+    // Chỗ con trỏ đang đứng, cất lại trước khi mở hộp thoại.
+    //
+    // Chèn ảnh phải chờ tải file lên xong mới chèn được, mà trong lúc chờ thì
+    // con trỏ đã rời khỏi vùng soạn (bấm nút chọn file, gõ mô tả ảnh...).
+    // Không cất lại thì ảnh rơi về đầu bài chứ không nằm chỗ đang viết.
+    var vung_chon_cu = null;
+
+    function catVungChon() {
+      var chon = window.getSelection();
+      if (!chon || !chon.rangeCount) return;
+      var vung_chon = chon.getRangeAt(0);
+      if (vung.contains(vung_chon.commonAncestorContainer)) {
+        vung_chon_cu = vung_chon.cloneRange();
+      }
+    }
+
+    function traVungChon() {
+      vung.focus();
+      if (!vung_chon_cu) return;
+      var chon = window.getSelection();
+      if (!chon) return;
+      chon.removeAllRanges();
+      chon.addRange(vung_chon_cu);
+    }
+
+    /**
+     * Khối cấp trên cùng (đoạn văn, tiêu đề, danh sách…) đang chứa con trỏ.
+     * Trả về null nếu con trỏ không ở trong vùng soạn.
+     */
+    function khoiDangDung() {
+      var chon = window.getSelection();
+      if (!chon || !chon.rangeCount) return null;
+      var nut = chon.getRangeAt(0).commonAncestorContainer;
+      if (!vung.contains(nut)) return null;
+      var khoi = nut.nodeType === 1 ? nut : nut.parentNode;
+      while (khoi && khoi.parentNode !== vung) khoi = khoi.parentNode;
+      return khoi || null;
+    }
+
     var bo = {
       lenh: function (ten, gia_tri) {
         vung.focus();
@@ -465,23 +533,68 @@ window.SoanThao = (function () {
         document.execCommand("createLink", false, dich);
       },
 
+      /**
+       * Chèn khối ảnh vào bài.
+       *
+       * Dựng bằng DOM chứ không qua execCommand("insertHTML"): <figure>
+       * không được phép nằm trong <p>, nên trình duyệt "chữa" bằng cách hất
+       * tấm ảnh ra khỏi figure và nhét vào đoạn văn — figure còn trơ mỗi cái
+       * chú thích rỗng. Đã dựng lại đúng cảnh đó trong trình duyệt hai lần
+       * mới tin: nó xảy ra cả khi con trỏ ở giữa đoạn lẫn ở cuối đoạn.
+       *
+       * Đổi lại, bước này không vào được lịch sử hoàn tác của trình duyệt
+       * nên Ctrl+Z không gỡ được ảnh — xóa bằng tay, hoặc dùng nút Hoàn tác
+       * khi nào làm tới.
+       */
       chenAnh: function () {
         if (!tuy_chon.khiChonAnh) return;
+        catVungChon();
         tuy_chon.khiChonAnh(function (anh) {
           if (!anh) return;
-          vung.focus();
+          traVungChon();
+
           // Ảnh mới chưa lên site: hiện tạm bằng dữ liệu trong máy
           // (anh.xem_thu), còn đường dẫn thật gửi kèm để lúc lưu đổi lại.
-          var src = anh.xem_thu || anh.anh;
-          var kem = anh.xem_thu ? ' data-duong-dan="' + anh.anh + '"' : "";
-          document.execCommand(
-            "insertHTML",
-            false,
-            '<figure class="article-inline-img">' +
-              '<img src="' + src + '"' + kem + ' alt="' + String(anh.alt || "").replace(/"/g, "&quot;") + '" loading="lazy">' +
-              "<figcaption>Nhập chú thích cho ảnh…</figcaption>" +
-              "</figure><p><br></p>"
-          );
+          var hinh = document.createElement("img");
+          hinh.setAttribute("src", anh.xem_thu || anh.anh);
+          if (anh.xem_thu) hinh.setAttribute("data-duong-dan", anh.anh);
+          hinh.setAttribute("alt", String(anh.alt || ""));
+          hinh.setAttribute("loading", "lazy");
+
+          var cap = document.createElement("figcaption");
+          cap.textContent = CHU_THICH_MAU;
+
+          var khung_anh = document.createElement("figure");
+          khung_anh.className = "article-inline-img";
+          khung_anh.appendChild(hinh);
+          khung_anh.appendChild(cap);
+
+          // Đoạn trống nối sau, để còn chỗ viết tiếp dưới ảnh.
+          var doan = document.createElement("p");
+          doan.appendChild(document.createElement("br"));
+
+          var khoi = khoiDangDung();
+          if (khoi) {
+            khoi.parentNode.insertBefore(khung_anh, khoi.nextSibling);
+          } else {
+            vung.appendChild(khung_anh);
+          }
+          khung_anh.parentNode.insertBefore(doan, khung_anh.nextSibling);
+
+          // Con trỏ nhảy thẳng vào ô chú thích: vừa chèn xong là gõ được
+          // luôn, khỏi phải nhớ quay lại điền.
+          var chon = window.getSelection();
+          if (chon) {
+            var khe = document.createRange();
+            khe.selectNodeContents(cap);
+            chon.removeAllRanges();
+            chon.addRange(khe);
+          }
+          vung.focus();
+
+          // Sửa DOM thẳng tay thì trình duyệt không bắn "input", mà bộ đếm
+          // chữ và nút Lưu đều dựa vào sự kiện đó.
+          vung.dispatchEvent(new Event("input", { bubbles: true }));
         });
       },
 

@@ -88,6 +88,10 @@ import VetLoi from "../../components/VetLoi.astro";
 
         <label class="qt-nhan">Thân bài</label>
         <div id="khung-soan"></div>
+        <!-- Ô chọn file riêng cho ảnh CHÈN VÀO BÀI. Không dùng chung với ô
+             của ảnh bìa: hai việc khác nhau, chung một ô thì chọn ảnh bìa
+             xong lại nhảy vào thân bài. -->
+        <input type="file" id="o-tep-anh-bai" accept="image/*" hidden>
         <p class="qt-phu" id="dem-chu"></p>
 
         <label class="qt-nhan" for="o-tai-lieu">Tài liệu tham khảo</label>
@@ -270,6 +274,43 @@ import VetLoi from "../../components/VetLoi.astro";
   }
 
   // ——— Ảnh bìa ———
+  /**
+   * Chèn ảnh vào THÂN BÀI: chọn file → nén và tải lên kho → trả địa chỉ thật
+   * cho trình soạn thảo dựng khối <figure>.
+   *
+   * Tải lên ngay lúc chọn chứ không đợi tới lúc Lưu: đợi thì trong khung
+   * soạn là ảnh tạm trong máy, mà bài lưu dở hay đóng tab là ảnh bốc hơi
+   * còn bài thì trỏ vào một địa chỉ không tồn tại.
+   */
+  function chenAnhVaoBai(xong: (anh: { anh: string; alt: string } | null) => void) {
+    const o_tep = o("o-tep-anh-bai");
+    o_tep.value = "";
+    o_tep.onchange = async () => {
+      const tep = o_tep.files?.[0];
+      if (!tep) {
+        xong(null);
+        return;
+      }
+      bao("Đang thu nhỏ và tải ảnh lên…");
+      try {
+        // Xếp cùng thư mục với ảnh bìa của bài, để xoá bài là ảnh đi theo.
+        const kq = await taiAnhLen(tep, o("o-slug").value.trim() || "chung");
+        // Không hỏi mô tả ảnh ở đây: đang viết dở mà bị chặn bằng một hộp
+        // thoại là đứt mạch. Chú thích gõ thẳng dưới ảnh trong khung soạn,
+        // và chính nó thành mô tả ảnh lúc lưu. Quên thì lúc Đăng sẽ nhắc.
+        xong({ anh: kq.dia_chi, alt: "" });
+        bao(
+          `Đã chèn ảnh — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
+            " Gõ chú thích ngay dưới ảnh."
+        );
+      } catch (e) {
+        bao((e as Error).message, true);
+        xong(null);
+      }
+    };
+    o_tep.click();
+  }
+
   function veXemAnh() {
     const dia_chi = o("o-anh").value.trim();
     const xem = o("xem-anh") as unknown as HTMLImageElement;
@@ -787,6 +828,30 @@ import VetLoi from "../../components/VetLoi.astro";
    * qua dateModified; đăng bản sửa mà không dời mốc thì Google vẫn tưởng
    * bài y như cũ.
    */
+  /**
+   * Nhắc trước khi đăng nếu có ảnh trong bài chưa được gõ chú thích.
+   *
+   * Chú thích lúc lưu cũng thành mô tả ảnh (alt), nên ảnh không chú thích là
+   * ảnh câm với người khiếm thị và với Google. Chỉ NHẮC chứ không chặn —
+   * đây là bài của chủ site, có lúc ảnh thật sự không cần nói gì thêm.
+   *
+   * @returns true nếu được phép đăng tiếp
+   */
+  function hoiVeAnhThieuChuThich(than_bai: string) {
+    const hop = document.createElement("div");
+    hop.innerHTML = than_bai;
+    const thieu = [...hop.querySelectorAll("img")].filter(
+      (a) => !(a.getAttribute("alt") || "").trim()
+    ).length;
+    if (!thieu) return true;
+    return confirm(
+      thieu +
+        " ảnh trong bài chưa có chú thích, nên người khiếm thị và Google không " +
+        "biết trong ảnh có gì.\n\nBấm Cancel để quay lại gõ chú thích ngay dưới " +
+        "ảnh, hoặc OK để đăng luôn."
+    );
+  }
+
   async function dang() {
     const d = docForm();
     if (!d.tieu_de || !d.slug) {
@@ -797,6 +862,7 @@ import VetLoi from "../../components/VetLoi.astro";
       bao("Lưu bài trước đã.", true);
       return;
     }
+    if (!hoiVeAnhThieuChuThich(d.than_bai)) return;
 
     const ban_ghi: Record<string, unknown> = { ...d, da_dang: true };
     // Bài đăng lần đầu thì chưa có gì để "sửa", để trống cho đúng.
@@ -903,7 +969,7 @@ import VetLoi from "../../components/VetLoi.astro";
     }
     bo_soan = (window as any).SoanThao.tao({
       khung: el("khung-soan"),
-      khiChonAnh: () => alert("Kho ảnh sẽ làm ở bước sau."),
+      khiChonAnh: chenAnhVaoBai,
     });
     vet("đã dựng trình soạn thảo");
     // Ghi rõ "từ" và "ký tự" thành hai số riêng. Nhãn cũ ghi "Khoảng N chữ"

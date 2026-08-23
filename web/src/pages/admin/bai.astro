@@ -288,30 +288,44 @@ import VetLoi from "../../components/VetLoi.astro";
   function chenAnhVaoBai(xong: (anh: { anh: string; alt: string } | null) => void) {
     const o_tep = o("o-tep-anh-bai");
     o_tep.value = "";
-    o_tep.onchange = async () => {
+    o_tep.onchange = () => {
       const tep = o_tep.files?.[0];
       if (!tep) {
         xong(null);
         return;
       }
-      bao("Đang thu nhỏ và tải ảnh lên…");
-      try {
-        // Xếp cùng thư mục với ảnh bìa của bài, để xoá bài là ảnh đi theo.
-        const kq = await taiAnhLen(tep, o("o-slug").value.trim() || "chung");
-        // Không hỏi mô tả ảnh ở đây: đang viết dở mà bị chặn bằng một hộp
-        // thoại là đứt mạch. Chú thích gõ thẳng dưới ảnh trong khung soạn,
-        // và chính nó thành mô tả ảnh lúc lưu. Quên thì lúc Đăng sẽ nhắc.
-        xong({ anh: kq.dia_chi, alt: "" });
-        bao(
-          `Đã chèn ảnh — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
-            " Gõ chú thích ngay dưới ảnh."
-        );
-      } catch (e) {
-        bao((e as Error).message, true);
-        xong(null);
-      }
+      taiAnhChoThanBai(tep, xong);
     };
     o_tep.click();
+  }
+
+  /**
+   * Nén và tải một tấm ảnh lên kho, rồi trả địa chỉ thật cho trình soạn thảo.
+   *
+   * Dùng chung cho hai đường vào: bấm nút Ảnh (chọn file từ máy) và dán ảnh
+   * thẳng từ clipboard. Hai đường chỉ khác nhau ở chỗ lấy được cái File, từ
+   * đó trở đi là một việc.
+   */
+  async function taiAnhChoThanBai(
+    tep: File,
+    xong: (anh: { anh: string; alt: string } | null) => void
+  ) {
+    bao("Đang thu nhỏ và tải ảnh lên…");
+    try {
+      // Xếp cùng thư mục với ảnh bìa của bài, để xoá bài là ảnh đi theo.
+      const kq = await taiAnhLen(tep, o("o-slug").value.trim() || "chung");
+      // Không hỏi mô tả ảnh ở đây: đang viết dở mà bị chặn bằng một hộp
+      // thoại là đứt mạch. Chú thích gõ thẳng dưới ảnh trong khung soạn,
+      // và chính nó thành mô tả ảnh lúc lưu. Quên thì lúc Đăng sẽ nhắc.
+      xong({ anh: kq.dia_chi, alt: "" });
+      bao(
+        `Đã chèn ảnh — ${kq.rong}×${kq.cao}px, ${Math.round(kq.co_file / 1024)} KB.` +
+          " Gõ chú thích ngay dưới ảnh."
+      );
+    } catch (e) {
+      bao((e as Error).message, true);
+      xong(null);
+    }
   }
 
   function veXemAnh() {
@@ -973,6 +987,9 @@ import VetLoi from "../../components/VetLoi.astro";
     bo_soan = (window as any).SoanThao.tao({
       khung: el("khung-soan"),
       khiChonAnh: chenAnhVaoBai,
+      // Dán ảnh thẳng vào bài: chụp màn hình rồi Ctrl+V là xong, khỏi lưu
+      // ra file rồi đi tìm lại.
+      khiTaiAnh: taiAnhChoThanBai,
     });
     vet("đã dựng trình soạn thảo");
     // Ghi rõ "từ" và "ký tự" thành hai số riêng. Nhãn cũ ghi "Khoảng N chữ"

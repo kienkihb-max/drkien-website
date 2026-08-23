@@ -242,12 +242,15 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 }
 .st-nut {
   font: inherit;
-  font-size: 0.85rem;
-  padding: 5px 10px;
+  /* Nhỏ và sát nhau hơn bản đầu: 16 nút phủ hai hàng, mà thanh nút nằm ngay
+     trên vùng gõ nên mỗi hàng thừa là một hàng chữ bị đẩy khuất. */
+  font-size: 0.8rem;
+  padding: 4px 9px;
   background: #fff;
   border: 1px solid var(--qt-vien);
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .st-nut:hover:not(:disabled) { border-color: var(--qt-chinh); color: var(--qt-chinh); }
 .st-nut:disabled { opacity: 0.45; cursor: default; }

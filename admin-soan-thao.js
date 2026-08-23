@@ -404,29 +404,54 @@ window.SoanThao = (function () {
     return chuanHoa(hop).innerHTML;
   }
 
+  /**
+   * Tấm ảnh trong clipboard, nếu có. Trả về null nếu người dùng đang dán chữ.
+   *
+   * Chữ copy từ Word cũng kèm ảnh xem trước trong clipboard, nên chỉ nhận
+   * khi KHÔNG có chữ đi kèm — bằng không dán một đoạn văn lại ra một tấm
+   * ảnh chụp đoạn văn đó.
+   */
+  function anhTrongClipboard(bang) {
+    if (!bang) return null;
+    var chu = (bang.getData("text/plain") || "").trim();
+    if (chu) return null;
+    var tep = bang.files && bang.files.length ? bang.files[0] : null;
+    if (!tep && bang.items) {
+      for (var i = 0; i < bang.items.length; i++) {
+        if (bang.items[i].kind === "file") {
+          tep = bang.items[i].getAsFile();
+          break;
+        }
+      }
+    }
+    return tep && /^image\//.test(tep.type) ? tep : null;
+  }
+
   // ——— Thanh công cụ ———
   // Mỗi nút: nhãn hiện trên màn hình, chú thích khi rê chuột, và việc phải làm.
   function dungThanhCongCu(bo) {
     return [
+      { ma: "hoan_tac", chu: "↶", chu_thich: "Hoàn tác (Ctrl+Z)", lam: function () { bo.lenh("undo"); } },
+      { ma: "lam_lai", chu: "↷", chu_thich: "Làm lại (Ctrl+Y)", lam: function () { bo.lenh("redo"); } },
       { nhom: true },
-      { chu: "B", chu_thich: "Chữ đậm (Ctrl+B)", dam: true, lam: function () { bo.lenh("bold"); } },
-      { chu: "I", chu_thich: "Chữ nghiêng (Ctrl+I)", nghieng: true, lam: function () { bo.lenh("italic"); } },
+      { ma: "dam", chu: "B", chu_thich: "Chữ đậm (Ctrl+B)", dam: true, lam: function () { bo.lenh("bold"); } },
+      { ma: "nghieng", chu: "I", chu_thich: "Chữ nghiêng (Ctrl+I)", nghieng: true, lam: function () { bo.lenh("italic"); } },
       { nhom: true },
-      { chu: "Đoạn", chu_thich: "Đoạn văn thường", lam: function () { bo.khoi("p"); } },
-      { chu: "Tiêu đề lớn", chu_thich: "Tiêu đề mục lớn trong bài", lam: function () { bo.khoi("h2"); } },
-      { chu: "Tiêu đề nhỏ", chu_thich: "Tiêu đề phụ nằm trong một mục", lam: function () { bo.khoi("h3"); } },
+      { ma: "doan", chu: "Đoạn", chu_thich: "Đoạn văn thường", lam: function () { bo.khoi("p"); } },
+      { ma: "h2", chu: "Tiêu đề lớn", chu_thich: "Tiêu đề mục lớn trong bài", lam: function () { bo.khoi("h2"); } },
+      { ma: "h3", chu: "Tiêu đề nhỏ", chu_thich: "Tiêu đề phụ nằm trong một mục", lam: function () { bo.khoi("h3"); } },
       { nhom: true },
-      { chu: "• Danh sách", chu_thich: "Danh sách gạch đầu dòng", lam: function () { bo.danhSach(false); } },
-      { chu: "1. Đánh số", chu_thich: "Danh sách đánh số", lam: function () { bo.lenh("insertOrderedList"); } },
-      { chu: "✓ Dấu tick", chu_thich: "Danh sách có dấu tick — kiểu riêng của site", lam: function () { bo.danhSach(true); } },
+      { ma: "gach", chu: "• Danh sách", chu_thich: "Danh sách gạch đầu dòng", lam: function () { bo.danhSach(false); } },
+      { ma: "so", chu: "1. Đánh số", chu_thich: "Danh sách đánh số", lam: function () { bo.lenh("insertOrderedList"); } },
+      { ma: "tick", chu: "✓ Dấu tick", chu_thich: "Danh sách có dấu tick — kiểu riêng của site", lam: function () { bo.danhSach(true); } },
       { nhom: true },
-      { chu: "Liên kết", chu_thich: "Chèn liên kết vào chữ đang bôi đen", lam: function () { bo.lienKet(); } },
+      { ma: "lien_ket", chu: "Liên kết", chu_thich: "Gắn liên kết vào chữ đang bôi đen, hoặc sửa liên kết đang đứng (Ctrl+K)", lam: function () { bo.lienKet(); } },
       { chu: "Ảnh", chu_thich: "Chèn ảnh minh họa kèm chú thích", lam: function () { bo.chenAnh(); } },
       { chu: "Chú thích¹", chu_thich: "Chèn số chú thích, tự đánh số tiếp", lam: function () { bo.chuThich(); } },
       { nhom: true },
       { chu: "✨ Chuẩn hóa", chu_thich: "Đoán và sửa lại dáng cả bài: đoạn ngắn đứng riêng thành tiêu đề, các dòng gạch đầu dòng gom thành danh sách. Đoán sai thì Ctrl+Z.", lam: function () { bo.chuanHoaCaBai(); } },
       { chu: "Xóa định dạng", chu_thich: "Trả chữ đang bôi đen về chữ thường", lam: function () { bo.lenh("removeFormat"); } },
-      { chu: "</> HTML", chu_thich: "Xem và sửa thẳng mã HTML của bài", lam: function () { bo.doiCheDo(); } },
+      { ma: "ma_html", chu: "</> HTML", chu_thich: "Xem và sửa thẳng mã HTML của bài", lam: function () { bo.doiCheDo(); } },
     ];
   }
 
@@ -521,15 +546,47 @@ window.SoanThao = (function () {
         if (ul) ul.classList.toggle("list-check", !!co_tick);
       },
 
+      /**
+       * Gắn liên kết mới, hoặc sửa / bỏ liên kết đang đứng.
+       *
+       * Trước đây chỉ gắn được liên kết mới: bấm vào một liên kết có sẵn rồi
+       * bấm nút này thì hoặc bị mắng "bôi đen chữ trước đã", hoặc chèn chồng
+       * một liên kết nữa lên trên. Sửa một địa chỉ gõ nhầm phải mở chế độ
+       * HTML ra vá tay.
+       */
       lienKet: function () {
         vung.focus();
+        var lk = timCha("A");
         var chon = window.getSelection();
-        if (!chon || chon.isCollapsed) {
+
+        if (!lk && (!chon || chon.isCollapsed)) {
           alert("Bôi đen đoạn chữ muốn gắn liên kết trước đã.");
           return;
         }
-        var dich = window.prompt("Dán địa chỉ liên kết vào đây:", "https://");
-        if (!dich) return;
+
+        var dich = window.prompt(
+          lk
+            ? "Sửa địa chỉ liên kết. Xoá trắng rồi bấm OK là bỏ liên kết, chữ vẫn còn."
+            : "Dán địa chỉ liên kết vào đây:",
+          lk ? lk.getAttribute("href") || "" : "https://"
+        );
+        if (dich === null) return; // bấm Cancel
+        dich = dich.trim();
+
+        if (lk) {
+          // Bôi đen trọn liên kết cũ rồi mới sửa, để lệnh của trình duyệt
+          // biết phải tác động lên đúng nó chứ không phải chỗ con trỏ.
+          var vet = document.createRange();
+          vet.selectNodeContents(lk);
+          chon.removeAllRanges();
+          chon.addRange(vet);
+          if (!dich) {
+            document.execCommand("unlink");
+            return;
+          }
+        } else if (!dich) {
+          return;
+        }
         document.execCommand("createLink", false, dich);
       },
 
@@ -552,49 +609,7 @@ window.SoanThao = (function () {
         tuy_chon.khiChonAnh(function (anh) {
           if (!anh) return;
           traVungChon();
-
-          // Ảnh mới chưa lên site: hiện tạm bằng dữ liệu trong máy
-          // (anh.xem_thu), còn đường dẫn thật gửi kèm để lúc lưu đổi lại.
-          var hinh = document.createElement("img");
-          hinh.setAttribute("src", anh.xem_thu || anh.anh);
-          if (anh.xem_thu) hinh.setAttribute("data-duong-dan", anh.anh);
-          hinh.setAttribute("alt", String(anh.alt || ""));
-          hinh.setAttribute("loading", "lazy");
-
-          var cap = document.createElement("figcaption");
-          cap.textContent = CHU_THICH_MAU;
-
-          var khung_anh = document.createElement("figure");
-          khung_anh.className = "article-inline-img";
-          khung_anh.appendChild(hinh);
-          khung_anh.appendChild(cap);
-
-          // Đoạn trống nối sau, để còn chỗ viết tiếp dưới ảnh.
-          var doan = document.createElement("p");
-          doan.appendChild(document.createElement("br"));
-
-          var khoi = khoiDangDung();
-          if (khoi) {
-            khoi.parentNode.insertBefore(khung_anh, khoi.nextSibling);
-          } else {
-            vung.appendChild(khung_anh);
-          }
-          khung_anh.parentNode.insertBefore(doan, khung_anh.nextSibling);
-
-          // Con trỏ nhảy thẳng vào ô chú thích: vừa chèn xong là gõ được
-          // luôn, khỏi phải nhớ quay lại điền.
-          var chon = window.getSelection();
-          if (chon) {
-            var khe = document.createRange();
-            khe.selectNodeContents(cap);
-            chon.removeAllRanges();
-            chon.addRange(khe);
-          }
-          vung.focus();
-
-          // Sửa DOM thẳng tay thì trình duyệt không bắn "input", mà bộ đếm
-          // chữ và nút Lưu đều dựa vào sự kiện đó.
-          vung.dispatchEvent(new Event("input", { bubbles: true }));
+          chenKhoiAnh(anh);
         });
       },
 
@@ -649,8 +664,69 @@ window.SoanThao = (function () {
       return html.replace(/></g, ">\n<").replace(/<\/(p|h2|h3|h4|ul|ol|figure|blockquote)>/g, "</$1>\n");
     }
 
+    /**
+     * Dựng khối ảnh và đặt vào chỗ con trỏ đang đứng.
+     *
+     * Dựng bằng DOM chứ không qua execCommand("insertHTML"): <figure> không
+     * được phép nằm trong <p>, nên trình duyệt "chữa" bằng cách hất tấm ảnh
+     * ra khỏi figure và nhét vào đoạn văn — figure còn trơ mỗi cái chú thích
+     * rỗng. Đã dựng lại đúng cảnh đó trong trình duyệt hai lần mới tin: nó
+     * xảy ra cả khi con trỏ ở giữa đoạn lẫn ở cuối đoạn.
+     *
+     * Đổi lại, bước này không vào được lịch sử hoàn tác của trình duyệt nên
+     * Ctrl+Z và nút Hoàn tác không gỡ được ảnh — phải xóa bằng tay.
+     */
+    function chenKhoiAnh(anh) {
+      // Ảnh mới chưa lên site: hiện tạm bằng dữ liệu trong máy (anh.xem_thu),
+      // còn đường dẫn thật gửi kèm để lúc lưu đổi lại.
+      var hinh = document.createElement("img");
+      hinh.setAttribute("src", anh.xem_thu || anh.anh);
+      if (anh.xem_thu) hinh.setAttribute("data-duong-dan", anh.anh);
+      hinh.setAttribute("alt", String(anh.alt || ""));
+      hinh.setAttribute("loading", "lazy");
+
+      var cap = document.createElement("figcaption");
+      cap.textContent = CHU_THICH_MAU;
+
+      var khung_anh = document.createElement("figure");
+      khung_anh.className = "article-inline-img";
+      khung_anh.appendChild(hinh);
+      khung_anh.appendChild(cap);
+
+      // Đoạn trống nối sau, để còn chỗ viết tiếp dưới ảnh.
+      var doan = document.createElement("p");
+      doan.appendChild(document.createElement("br"));
+
+      var khoi = khoiDangDung();
+      if (khoi) {
+        khoi.parentNode.insertBefore(khung_anh, khoi.nextSibling);
+      } else {
+        vung.appendChild(khung_anh);
+      }
+      khung_anh.parentNode.insertBefore(doan, khung_anh.nextSibling);
+
+      // Con trỏ nhảy thẳng vào ô chú thích: vừa chèn xong là gõ được luôn,
+      // khỏi phải nhớ quay lại điền.
+      var chon = window.getSelection();
+      if (chon) {
+        var khe = document.createRange();
+        khe.selectNodeContents(cap);
+        chon.removeAllRanges();
+        chon.addRange(khe);
+      }
+      vung.focus();
+
+      // Sửa DOM thẳng tay thì trình duyệt không bắn "input", mà bộ đếm chữ
+      // và nút Lưu đều dựa vào sự kiện đó.
+      vung.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    /** Nút theo mã, để còn bật/tắt trạng thái sáng. */
+    var nut_theo_ma = {};
+
     function ve() {
       thanh.innerHTML = "";
+      nut_theo_ma = {};
       dungThanhCongCu(bo).forEach(function (n) {
         if (n.nhom) {
           var vach = document.createElement("span");
@@ -663,6 +739,9 @@ window.SoanThao = (function () {
         nut.className = "st-nut";
         nut.textContent = n.chu;
         nut.title = n.chu_thich;
+        // Nút bật/tắt (đậm, nghiêng, kiểu khối, danh sách) thì báo cho trình
+        // đọc màn hình biết đang bật hay tắt, chứ không chỉ đổi màu.
+        if (n.ma) nut.setAttribute("aria-pressed", "false");
         if (n.dam) nut.style.fontWeight = "700";
         if (n.nghieng) nut.style.fontStyle = "italic";
         // Ở chế độ xem mã thì mọi nút định dạng đều vô nghĩa, chỉ chừa nút đổi
@@ -672,10 +751,75 @@ window.SoanThao = (function () {
         nut.addEventListener("mousedown", function (e) {
           e.preventDefault(); // giữ nguyên chỗ đang bôi đen khi bấm nút
         });
-        nut.addEventListener("click", n.lam);
+        nut.addEventListener("click", function () {
+          n.lam();
+          capNhatTrangThai();
+        });
+        if (n.ma) nut_theo_ma[n.ma] = nut;
         thanh.appendChild(nut);
       });
+      capNhatTrangThai();
     }
+
+    function batNut(ma, bat) {
+      var nut = nut_theo_ma[ma];
+      if (!nut) return;
+      nut.classList.toggle("st-nut-bat", !!bat);
+      nut.setAttribute("aria-pressed", bat ? "true" : "false");
+    }
+
+    /**
+     * Sáng những nút ứng với định dạng con trỏ đang đứng.
+     *
+     * Trước đây thanh nút trơ như nhau ở mọi chỗ: con trỏ đang trong một
+     * tiêu đề mục mà nút "Tiêu đề lớn" vẫn tắt, nên cách duy nhất để biết
+     * đang gõ vào cái gì là nhìn cỡ chữ mà đoán.
+     */
+    function capNhatTrangThai() {
+      if (dang_xem_ma) return;
+      var trong_vung =
+        document.activeElement === vung ||
+        (window.getSelection() &&
+          window.getSelection().anchorNode &&
+          vung.contains(window.getSelection().anchorNode));
+      if (!trong_vung) return;
+
+      batNut("dam", document.queryCommandState("bold"));
+      batNut("nghieng", document.queryCommandState("italic"));
+
+      var khoi = khoiDangDung();
+      var ten = khoi ? khoi.tagName : "";
+      batNut("h2", ten === "H2");
+      batNut("h3", ten === "H3");
+      // "Đoạn" sáng khi đang ở đoạn văn thường — kể cả đoạn nằm trong danh
+      // sách thì vẫn tính là đang ở danh sách, nên xét sau.
+      batNut("doan", ten === "P");
+
+      var ul = timCha("UL");
+      var ol = timCha("OL");
+      var co_tick = !!(ul && ul.classList.contains("list-check"));
+      batNut("gach", !!ul && !co_tick);
+      batNut("tick", co_tick);
+      batNut("so", !!ol);
+
+      batNut("lien_ket", !!timCha("A"));
+    }
+
+    // Ctrl+K: phím tắt gắn liên kết, giống Word và Google Docs. Ctrl+B và
+    // Ctrl+I thì trình duyệt lo sẵn.
+    vung.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        bo.lienKet();
+        capNhatTrangThai();
+      }
+    });
+
+    // Con trỏ nhảy chỗ nào thì thanh nút phải theo kịp chỗ đó.
+    ["keyup", "mouseup", "input", "focus"].forEach(function (ten) {
+      vung.addEventListener(ten, capNhatTrangThai);
+    });
+    document.addEventListener("selectionchange", capNhatTrangThai);
 
     // ——— Dán chữ ———
     // Ba đường vào, xét theo thứ tự:
@@ -695,6 +839,23 @@ window.SoanThao = (function () {
     vung.addEventListener("paste", function (e) {
       e.preventDefault();
       var bang = e.clipboardData || window.clipboardData;
+
+      // ——— Dán ẢNH ———
+      // Chụp màn hình rồi Ctrl+V, hay copy ảnh từ một trang khác. Xét TRƯỚC
+      // chữ: clipboard chứa ảnh thường kèm theo một mẩu HTML <img> trỏ vào
+      // file trên máy hoặc vào trang nguồn — đi đường chữ thì bài dính một
+      // tấm ảnh mà chỉ mình anh xem được, người đọc thấy ô vỡ.
+      var tep_anh = anhTrongClipboard(bang);
+      if (tep_anh && tuy_chon.khiTaiAnh) {
+        catVungChon();
+        tuy_chon.khiTaiAnh(tep_anh, function (anh) {
+          if (!anh) return;
+          traVungChon();
+          chenKhoiAnh(anh);
+        });
+        return;
+      }
+
       var html = (bang.getData("text/html") || "").trim();
       var chu = bang.getData("text/plain") || "";
       if (!html && !chu.trim()) return;

@@ -102,7 +102,15 @@ window.SoanThao = (function () {
           el.setAttribute("rel", "noopener");
         }
       }
-      if (el.tagName === "IMG") el.setAttribute("loading", "lazy");
+      if (el.tagName === "IMG") {
+        el.setAttribute("loading", "lazy");
+        // Đường dẫn ảnh phải bắt đầu bằng "/". Bài cũ ghi "assets/img/x.jpg"
+        // (không có gạch đầu) — trên trang bài ở địa chỉ /ten-bai thì nó vẫn
+        // ra đúng /assets/img/x.jpg, nhưng trong trang soạn ở /admin/bai thì
+        // trình duyệt hiểu là /admin/assets/img/x.jpg và ảnh thành ô vỡ.
+        var duong = el.getAttribute("src") || "";
+        if (/^(assets|image)\//i.test(duong)) el.setAttribute("src", "/" + duong);
+      }
 
       donDepNut(el);
 

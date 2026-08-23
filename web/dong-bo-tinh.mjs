@@ -11,7 +11,7 @@
 //
 // Chạy tự động qua "predev" và "prebuild" trong package.json.
 
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, rename, writeFile } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -74,6 +74,32 @@ function canChep(tu, den) {
   }
 }
 
+/**
+ * Chép một file bằng cách ghi ra file tạm rồi ĐỔI TÊN đè lên.
+ *
+ * Ghi thẳng đè lên file cũ là ghi từng phần vào đúng cái file mà Vite đang
+ * theo dõi — nó ném EBUSY rồi bỏ luôn không phục vụ file đó nữa. Đổi tên là
+ * một thao tác duy nhất, không đụng vào file cũ trong lúc ghi, nên Vite chỉ
+ * thấy "file này vừa thay" và theo dõi tiếp bình thường.
+ */
+async function chepMotFile(tu, den) {
+  const tam = den + ".dang-chep";
+  await cp(tu, tam, { preserveTimestamps: true });
+  await rename(tam, den);
+}
+
+/** Chép cả cây thư mục, mỗi file đi qua chepMotFile. */
+async function chepCay(tu, den) {
+  if (!statSync(tu).isDirectory()) {
+    if (canChep(tu, den)) await chepMotFile(tu, den);
+    return;
+  }
+  await mkdir(den, { recursive: true });
+  for (const muc of await readdir(tu, { withFileTypes: true })) {
+    await chepCay(join(tu, muc.name), join(den, muc.name));
+  }
+}
+
 let chep = 0;
 let thieu = [];
 for (const ten of CAN_CHEP) {
@@ -82,12 +108,7 @@ for (const ten of CAN_CHEP) {
     thieu.push(ten);
     continue;
   }
-  // preserveTimestamps để lần chạy sau còn so được giờ sửa.
-  await cp(tu, join(DICH, ten), {
-    recursive: true,
-    preserveTimestamps: true,
-    filter: canChep,
-  });
+  await chepCay(tu, join(DICH, ten));
   chep++;
 }
 

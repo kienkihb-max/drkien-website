@@ -726,6 +726,83 @@ import VetLoi from "../../components/VetLoi.astro";
     return JSON.stringify(docForm()) !== moc_sach;
   }
 
+  // ——— Bản nháp cất trong trình duyệt ———
+  // Cứu lấy công gõ khi máy tắt, tab đóng nhầm, trình duyệt sập — những lúc
+  // mà hộp "rời trang?" không kịp hiện hoặc chẳng hiện. Đây KHÔNG phải bản
+  // nháp trên máy chủ (bảng ban_nhap): nó nằm trong chính trình duyệt này,
+  // và biến mất ngay khi bài được Lưu hay Đăng thành công.
+
+  const KHOA_NHAP = "drkien:nhap:" + (id_bai || "bai-moi");
+  /** Cứ chừng này giây lại cất một lần, nếu có gì đổi. */
+  const NHIP_CAT = 10000;
+
+  function xoaNhapCucBo() {
+    try {
+      localStorage.removeItem(KHOA_NHAP);
+    } catch {
+      // Trình duyệt chặn localStorage (chế độ ẩn danh chẳng hạn) — không sao,
+      // chỉ là mất lưới an toàn chứ không hỏng việc gì.
+    }
+  }
+
+  function catNhapCucBo() {
+    if (che_do !== "nhap" || !moc_sach || !coThayDoi()) return;
+    try {
+      localStorage.setItem(
+        KHOA_NHAP,
+        JSON.stringify({ luc: new Date().toISOString(), du_lieu: docForm() })
+      );
+    } catch {
+      // Hết chỗ chứa hoặc bị chặn. Bỏ qua, đừng làm phiền giữa lúc đang viết.
+    }
+  }
+
+  /**
+   * Có bản nháp treo trong trình duyệt thì hỏi người viết có lấy lại không.
+   *
+   * Chỉ hỏi khi nó THẬT SỰ khác bản vừa nạp từ máy chủ — bằng không cứ mở
+   * bài là bị hỏi, dù chẳng có gì để lấy lại.
+   */
+  function hoiKhoiPhucNhap() {
+    let treo = null;
+    try {
+      treo = JSON.parse(localStorage.getItem(KHOA_NHAP) || "null");
+    } catch {
+      treo = null;
+    }
+    if (!treo || !treo.du_lieu) return;
+    if (JSON.stringify(treo.du_lieu) === moc_sach) {
+      xoaNhapCucBo();
+      return;
+    }
+
+    const luc = new Date(treo.luc);
+    const gio = luc.toLocaleString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+    });
+    if (
+      confirm(
+        "Máy còn giữ một bản bài này chưa kịp lưu, lúc " + gio + ".\n\n" +
+          "OK để lấy lại bản đó. Cancel để bỏ nó đi và giữ bản đang có."
+      )
+    ) {
+      dienForm(treo.du_lieu);
+      veLaiSEO();
+      veXemAnh();
+      veLaiDauTrang();
+      bao("Đã lấy lại bản chưa lưu lúc " + gio + ". Kiểm lại rồi bấm Lưu.");
+    } else {
+      xoaNhapCucBo();
+    }
+  }
+
+  setInterval(catNhapCucBo, NHIP_CAT);
+  // Đóng tab hay tải lại trang: cất ngay, đừng đợi hết nhịp 10 giây.
+  window.addEventListener("beforeunload", catNhapCucBo);
+
   /**
    * Bật/tắt gõ cho cả form. Dùng khi xem "Bản đã đăng": đó là ảnh chụp bản
    * trên web, gõ vào đó thì gõ vào hư không — mà không có gì báo cho biết.
@@ -840,6 +917,8 @@ import VetLoi from "../../components/VetLoi.astro";
 
     bao(bai_da_dang ? "Đã lưu bản sửa. Bài trên web vẫn là bản cũ." : "Đã lưu.");
     datMocSach();
+    // Bài đã nằm trên máy chủ thì bản nháp trong trình duyệt hết việc.
+    xoaNhapCucBo();
   }
 
   /**
@@ -908,6 +987,7 @@ import VetLoi from "../../components/VetLoi.astro";
     ban_nhap_hien = null;
     bao("Đã đăng bài. Đang bảo web dựng lại…");
     datMocSach();
+    xoaNhapCucBo();
 
     // Bài nằm trong database thì chưa thành trang: web là HTML dựng sẵn,
     // phải build lại mới có file .html cho bài này. Gọi sau khi đã báo "đã
@@ -1062,6 +1142,10 @@ import VetLoi from "../../components/VetLoi.astro";
     el("man-cho").hidden = true;
     el("man-chinh").hidden = false;
     vet("nap() xong, form đã hiện");
+
+    // Hỏi sau khi form đã hiện: hộp xác nhận bật lên trước một màn hình
+    // trắng thì người viết không thấy được mình đang chọn giữa những gì.
+    hoiKhoiPhucNhap();
   }
 
   /**

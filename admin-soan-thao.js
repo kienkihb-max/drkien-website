@@ -15,6 +15,7 @@ window.SoanThao = (function () {
   // nguyên thì lúc lấy HTML ra nó bị bỏ đi, chứ không lên web thành một dòng
   // "Nhập chú thích cho ảnh…" nằm dưới tấm ảnh.
   var CHU_THICH_MAU = "Nhập chú thích cho ảnh…";
+  var CHU_THICH_MAU_VIDEO = "Nhập chú thích cho video…";
 
   // ——— Những thẻ và thuộc tính được phép có mặt trong bài viết ———
   // Thêm kiểu nội dung mới thì khai báo ở đây, nếu không nó sẽ bị gỡ.
@@ -34,6 +35,9 @@ window.SoanThao = (function () {
     FIGURE: ["class"],
     FIGCAPTION: [],
     IMG: ["src", "alt", "loading"],
+    // Chỉ dùng cho video YouTube nhúng. Địa chỉ còn bị soi lại lần nữa ở
+    // donDepNut: iframe trỏ đi chỗ khác sẽ bị gỡ, kể cả khi dán từ ngoài vào.
+    IFRAME: ["src", "title", "loading", "referrerpolicy", "allow", "allowfullscreen"],
     BLOCKQUOTE: [],
     BR: [],
   };
@@ -47,6 +51,8 @@ window.SoanThao = (function () {
     // dòng này thì class bị lọc mất lúc lưu, và ảnh chân dung trong bài lại
     // bị cắt mất đầu với chân — đúng lỗi mà nó sinh ra để chữa.
     "article-inline-img-doc": 1,
+    // Khối video YouTube nhúng trong bài.
+    "article-video": 1,
   };
 
   // Thẻ cũ đổi sang thẻ chuẩn: trình duyệt hay sinh <b>/<i>, còn Word thì
@@ -78,6 +84,17 @@ window.SoanThao = (function () {
         donDepNut(el);
         boVo(el);
         return;
+      }
+
+      // iframe chỉ được phép là video YouTube nhúng. Dán một khối nhúng nào
+      // khác từ web vào thì gỡ luôn cả thẻ, chứ không bóc vỏ giữ ruột như
+      // các thẻ lạ khác — ruột của iframe vốn chẳng có gì.
+      if (el.tagName === "IFRAME") {
+        var nguon = el.getAttribute("src") || "";
+        if (!/^https:\/\/www\.youtube-nocookie\.com\/embed\//.test(nguon)) {
+          el.parentNode.removeChild(el);
+          return;
+        }
       }
 
       // Ảnh vừa tải lên được hiển thị bằng dữ liệu trong máy (data:) cho khỏi
@@ -123,13 +140,14 @@ window.SoanThao = (function () {
       donDepNut(el);
 
       // Bỏ khối rỗng — hay sinh ra khi xóa chữ nhưng còn trơ cái thẻ.
-      // Trừ chính thẻ ảnh/xuống dòng: chúng không có chữ bên trong là
-      // chuyện bình thường, xóa là mất ảnh.
+      // Trừ chính thẻ ảnh/video/xuống dòng: chúng không có chữ bên trong là
+      // chuyện bình thường, xóa là mất ảnh, mất video.
       if (
         el.tagName !== "IMG" &&
         el.tagName !== "BR" &&
+        el.tagName !== "IFRAME" &&
         !el.textContent.trim() &&
-        !el.querySelector("img, br")
+        !el.querySelector("img, br, iframe")
       )
         el.remove();
     });
@@ -373,7 +391,8 @@ window.SoanThao = (function () {
   function donDepAnh(hop) {
     Array.prototype.forEach.call(hop.querySelectorAll("figure"), function (fig) {
       var cap = fig.querySelector("figcaption");
-      if (cap && cap.textContent.trim() === CHU_THICH_MAU) {
+      var chu_mau = cap ? cap.textContent.trim() : "";
+      if (chu_mau === CHU_THICH_MAU || chu_mau === CHU_THICH_MAU_VIDEO) {
         cap.remove();
         cap = null;
       }
@@ -464,6 +483,7 @@ window.SoanThao = (function () {
       { nhom: true },
       { ma: "lien_ket", chu: "Liên kết", chu_thich: "Gắn liên kết vào chữ đang bôi đen, hoặc sửa liên kết đang đứng (Ctrl+K)", lam: function () { bo.lienKet(); } },
       { chu: "Ảnh", chu_thich: "Chèn ảnh minh họa kèm chú thích", lam: function () { bo.chenAnh(); } },
+      { chu: "Video", chu_thich: "Nhúng video YouTube xem ngay trong bài — dán địa chỉ video là xong", lam: function () { bo.chenVideo(); } },
       { chu: "Chú thích¹", chu_thich: "Chèn số chú thích, tự đánh số tiếp", lam: function () { bo.chuThich(); } },
       { day_phai: true },
       { chu: "✨ Chuẩn hóa", chu_thich: "Đoán và sửa lại dáng cả bài: đoạn ngắn đứng riêng thành tiêu đề, các dòng gạch đầu dòng gom thành danh sách. Đoán sai thì Ctrl+Z.", lam: function () { bo.chuanHoaCaBai(); } },
@@ -630,6 +650,24 @@ window.SoanThao = (function () {
         });
       },
 
+      // Nhúng video YouTube xem thẳng trong bài, thay vì bắt người đọc bấm
+      // link rồi rời khỏi trang.
+      chenVideo: function () {
+        vung.focus();
+        var dia_chi = window.prompt("Dán địa chỉ video YouTube vào đây:", "https://");
+        if (dia_chi === null) return; // bấm Cancel
+        var ma = maVideoYouTube(dia_chi);
+        if (!ma) {
+          alert(
+            "Không đọc được mã video từ địa chỉ này.\n\n" +
+            "Dán nguyên địa chỉ trên thanh địa chỉ YouTube, dạng\n" +
+            "https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
+          );
+          return;
+        }
+        chenKhoiVideo(ma);
+      },
+
       // Số chú thích trỏ xuống mục Tài liệu tham khảo ở cuối bài. Tự đếm để
       // đánh số tiếp, khỏi phải nhớ đang tới số mấy.
       chuThich: function () {
@@ -748,6 +786,94 @@ window.SoanThao = (function () {
 
       // Con trỏ nhảy thẳng vào ô chú thích: vừa chèn xong là gõ được luôn,
       // khỏi phải nhớ quay lại điền.
+      var chon = window.getSelection();
+      if (chon) {
+        var khe = document.createRange();
+        khe.selectNodeContents(cap);
+        chon.removeAllRanges();
+        chon.addRange(khe);
+      }
+      vung.focus();
+
+      // Sửa DOM thẳng tay thì trình duyệt không bắn "input", mà bộ đếm chữ
+      // và nút Lưu đều dựa vào sự kiện đó.
+      vung.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    /**
+     * Tách mã video từ địa chỉ YouTube. Nhận mọi kiểu link người ta hay
+     * copy được từ thanh địa chỉ hay nút Chia sẻ:
+     *   youtube.com/watch?v=MA   youtu.be/MA   /embed/MA   /live/MA   /shorts/MA
+     * Trả về null nếu không phải link YouTube, để còn báo cho người dùng
+     * biết thay vì nhúng ra một khung đen trống.
+     */
+    function maVideoYouTube(dia_chi) {
+      var t = String(dia_chi || "").trim();
+      if (!t) return null;
+      if (!/^https?:\/\//i.test(t)) t = "https://" + t;
+      var u;
+      try { u = new URL(t); } catch (e) { return null; }
+      var host = u.hostname.replace(/^www\./, "");
+      var ma = null;
+      if (host === "youtu.be") {
+        ma = u.pathname.slice(1);
+      } else if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+        if (u.pathname === "/watch") {
+          ma = u.searchParams.get("v");
+        } else {
+          var khop = u.pathname.match(/^\/(?:embed|live|shorts|v)\/([^/?#]+)/);
+          if (khop) ma = khop[1];
+        }
+      }
+      if (!ma) return null;
+      ma = ma.split(/[?&#]/)[0];
+      // Mã video YouTube luôn là 11 ký tự chữ, số, gạch ngang, gạch dưới.
+      return /^[A-Za-z0-9_-]{11}$/.test(ma) ? ma : null;
+    }
+
+    /**
+     * Dựng khối video và đặt vào chỗ con trỏ đang đứng.
+     *
+     * Dựng bằng DOM chứ không qua execCommand("insertHTML"), cùng lý do với
+     * khối ảnh: <figure> không được phép nằm trong <p> nên trình duyệt sẽ
+     * "chữa" bằng cách xé khối ra. Kéo theo hệ quả giống hệt: bước này
+     * không vào lịch sử hoàn tác nên Ctrl+Z không gỡ được video, phải xóa
+     * bằng tay.
+     *
+     * Dùng youtube-nocookie.com để YouTube chưa đặt cookie theo dõi người
+     * đọc chừng nào họ chưa bấm nút phát.
+     */
+    function chenKhoiVideo(ma) {
+      var khung = document.createElement("iframe");
+      khung.setAttribute("src", "https://www.youtube-nocookie.com/embed/" + ma);
+      khung.setAttribute("title", "Video YouTube");
+      khung.setAttribute("loading", "lazy");
+      khung.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+      khung.setAttribute("allow", "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+      khung.setAttribute("allowfullscreen", "");
+
+
+      var cap = document.createElement("figcaption");
+      cap.textContent = CHU_THICH_MAU_VIDEO;
+
+      var khoi_video = document.createElement("figure");
+      khoi_video.className = "article-video";
+      khoi_video.appendChild(khung);
+      khoi_video.appendChild(cap);
+
+      // Đoạn trống nối sau, để còn chỗ viết tiếp dưới video.
+      var doan = document.createElement("p");
+      doan.appendChild(document.createElement("br"));
+
+      var khoi = khoiDangDung();
+      if (khoi) {
+        khoi.parentNode.insertBefore(khoi_video, khoi.nextSibling);
+      } else {
+        vung.appendChild(khoi_video);
+      }
+      khoi_video.parentNode.insertBefore(doan, khoi_video.nextSibling);
+
+      // Con trỏ nhảy thẳng vào ô chú thích, giống hệt lúc chèn ảnh.
       var chon = window.getSelection();
       if (chon) {
         var khe = document.createRange();

@@ -194,3 +194,26 @@
   color: var(--text-muted);
   text-align: center;
 }
+
+/* ——— Video YouTube nhúng trong bài ——— */
+/* Khung 16/9 đặt thẳng lên iframe, không cần thẻ bọc: bộ lọc HTML của trình
+   soạn thảo đổi mọi <div> thành <p>, nên lớp bọc sẽ không sống qua lần lưu.
+   Khung co theo bề ngang bài nên trên điện thoại video tự nhỏ lại. */
+.article-video {
+  margin: 36px 0;
+}
+.article-video iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  background: #000;
+}
+.article-video figcaption {
+  margin-top: 10px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}

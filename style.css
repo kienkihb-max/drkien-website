@@ -504,6 +504,9 @@ h4 { font-size: var(--fs-base); }
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
+/* Biến thể 2 cột: dùng khi lưới có 4 thẻ, để không bị lẻ một thẻ ở hàng cuối.
+   Đặt trước các @media bên dưới nên mobile vẫn tự rút về 1 cột. */
+.events-grid-2col { grid-template-columns: repeat(2, 1fr); }
 .event-card {
   background: #fff;
   border-radius: var(--radius);

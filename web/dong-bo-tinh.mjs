@@ -45,6 +45,8 @@ const CAN_CHEP = [
   "doc-them.js",
   "sticky-cta.js",
   "blog-byline.js",
+  // Đổi chuyên mục blog không dựng lại cả trang.
+  "blog-loc-muc.js",
   // Trình soạn thảo của trang quản trị, dùng lại nguyên xi.
   "admin-soan-thao.js",
   "admin-bai-viet.js",
@@ -120,12 +122,17 @@ for (const ten of CAN_CHEP) {
 // lệch mà không ai biết. Thay vào đó sinh nó ra từ src/data/thong-tin.mjs —
 // nguồn duy nhất mà header, footer và các trang Astro cũng đang dùng.
 const TT = await import("./src/data/thong-tin.mjs");
+// Tên và mô tả ba dịch vụ. service-cards.js dựng thẻ dịch vụ phía trình
+// duyệt nên cũng cần đúng dữ liệu này — cấp qua window.DICH_VU thay vì để
+// nó giữ một bản chép tay thứ hai.
+const DV = await import("./src/data/dich-vu.mjs");
 
 const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
 // Sửa nội dung tại web/src/data/thong-tin.mjs rồi chạy lại build.
 //
 // Có mặt là để mấy script còn chạy phía trình duyệt (seo-schema.js,
-// service-cards.js) đọc được thông tin phòng khám qua window.THONG_TIN.
+// service-cards.js) đọc được thông tin phòng khám qua window.THONG_TIN
+// và danh sách dịch vụ qua window.DICH_VU.
 (function () {
   var TT = ${JSON.stringify(
     {
@@ -141,6 +148,9 @@ const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
   ).replace(/\n/g, "\n  ")};
 
   window.THONG_TIN = TT;
+
+  window.DICH_VU = ${JSON.stringify(DV.DICH_VU, null, 2).replace(/\n/g, "\n  ")};
+  window.DICH_VU_CHU = ${JSON.stringify({ CHU_NUT_XEM: DV.CHU_NUT_XEM, XEM_THEM_NHAN: DV.XEM_THEM_NHAN, XEM_THEM_TIEU_DE: DV.XEM_THEM_TIEU_DE }, null, 2).replace(/\n/g, "\n  ")};
 
   TT.htmlBanDo = function () {
     return '<div class="footer-map"><iframe src="' + TT.BAN_DO +
@@ -177,7 +187,7 @@ const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
 
 await writeFile(join(DICH, "thong-tin.js"), js_thong_tin, "utf8");
 
-console.log(`[đồng bộ tĩnh] đã chép ${chep} mục sang web/public, và sinh thong-tin.js`);
+console.log(`[đồng bộ tĩnh] đã chép ${chep} mục sang web/public, và sinh thong-tin.js (kèm window.DICH_VU)`);
 if (thieu.length) {
   // Không dừng build: thiếu một file lẻ thì trang vẫn chạy, chỉ hỏng đúng
   // chỗ dùng nó. Nhưng phải kêu lên, kẻo lỗi 404 âm thầm.

@@ -10,7 +10,7 @@
 // Google — cái giá quá đắt cho một chuyện sắp xếp.
 import Trang from "../../layouts/Trang.astro";
 import TheBai from "../../components/TheBai.astro";
-import DuongDan from "../../components/DuongDan.astro";
+import BlogDau from "../../components/BlogDau.astro";
 import { layBaiHienLen, type BaiViet } from "../../lib/supabase";
 import { gomChuyenMuc, diaChiChuyenMuc } from "../../lib/chuyen-muc";
 import { GOC } from "../../data/thong-tin.mjs";
@@ -30,6 +30,11 @@ interface Props {
   muc: { ten: string; slug: string; bai: BaiViet[] }[];
 }
 const { ten, bai_cua_muc, muc } = Astro.props;
+
+// Tổng số bài của cả blog — con số trong nhãn "Tất cả". Cộng từ các mục
+// chứ không gọi lại database: bài chưa chọn mục thì không có trang mục
+// riêng, nhưng cũng không hiện trong hàng nhãn nên không đếm ở đây.
+const tong_bai = muc.reduce((cong, m) => cong + m.bai.length, 0);
 
 
 // Mô tả cho Google: nói rõ đây là mục gì và có bao nhiêu bài, thay vì chép
@@ -70,41 +75,13 @@ const schema = {
   loai_trang="article"
   lop_body="subpage"
   schema={schema}
+  scripts={["blog-loc-muc.js"]}
 >
-  <section class="section cv-hero">
-    <div class="container">
-      <DuongDan giua={[{ chu: "Blog", dia_chi: "/blog" }]} hien_tai={ten} />
-      <h1>{ten}</h1>
-      <p class="lead">
-        {bai_cua_muc.length} bài trong chuyên mục này. Xem tất cả bài viết ở
-        <a href="/blog">trang blog</a>.
-      </p>
-    </div>
-  </section>
-
-  <section class="section section-alt">
-    <div class="container">
-      <nav class="blog-muc" aria-label="Chuyên mục blog">
-        <a class="blog-muc-nhan" href="/blog">Tất cả</a>
-        {muc.map((m) =>
-          m.ten === ten ? (
-            <span class="blog-muc-nhan blog-muc-dang-xem">{m.ten} ({m.bai.length})</span>
-          ) : (
-            <a class="blog-muc-nhan" href={diaChiChuyenMuc(m.ten)}>
-              {m.ten} ({m.bai.length})
-            </a>
-          )
-        )}
-      </nav>
-
-      {/* Không tách khối "nổi bật" ở đây. Nổi bật là để chỉ đường giữa 17
-          bài đủ chủ đề ngoài trang blog tổng; vào tới chuyên mục thì người
-          đọc đã chọn xong chủ đề, việc còn lại chỉ là xem có bài nào. */}
+  <BlogDau muc={muc} tong={tong_bai} dang_xem={ten}>
       <div class="blog-list">
         <div class="events-grid">
           {bai_cua_muc.map((b) => <TheBai bai={b} />)}
         </div>
       </div>
-    </div>
-  </section>
+  </BlogDau>
 </Trang>

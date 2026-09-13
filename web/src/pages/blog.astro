@@ -7,9 +7,9 @@
 // được toàn bộ danh sách bài, và trang không chậm đi vì phải chờ mạng.
 import Trang from "../layouts/Trang.astro";
 import TheBai from "../components/TheBai.astro";
-import DuongDan from "../components/DuongDan.astro";
+import BlogDau from "../components/BlogDau.astro";
 import { layBaiHienLen } from "../lib/supabase";
-import { gomChuyenMuc, diaChiChuyenMuc } from "../lib/chuyen-muc";
+import { gomChuyenMuc } from "../lib/chuyen-muc";
 
 const bai = await layBaiHienLen();
 const noi_bat = bai.filter((b) => b.noi_bat);
@@ -50,42 +50,9 @@ const BAO_CHI = [
       trang này. Đây cũng đúng giá trị blog.html cũ đang dùng. */}
   loai_trang="article"
   lop_body="subpage"
+  scripts={["blog-loc-muc.js"]}
 >
-  <section class="section cv-hero">
-    <div class="container">
-      <DuongDan hien_tai="Blog" />
-      <h1>Y học Thể thao &amp; Y học cổ truyền</h1>
-      <p class="lead">
-        Nơi chia sẻ các kiến thức và cập nhật mới về chấn thương thể thao, đau cơ xương khớp và
-        phục hồi chức năng dựa trên bằng chứng khoa học. Các bài viết tập trung vào vai trò của
-        vận động trị liệu, phục hồi chức năng và Y học cổ truyền trong điều trị và tối ưu hóa
-        khả năng vận động cho người bệnh.
-      </p>
-    </div>
-  </section>
-
-  <section class="section section-alt">
-    <div class="container">
-      <div class="section-title text-center">
-        <p class="section-label">Bài viết cá nhân</p>
-        <h2>Ghi chép &amp; chia sẻ chuyên môn</h2>
-        <div class="divider mx-auto"></div>
-      </div>
-
-      {/* Hàng chuyên mục: 17 bài xếp thành một dãy dài thì người đọc muốn
-          tìm đúng chủ đề mình quan tâm phải lướt hết. Mỗi mục có trang
-          riêng, và đây là đường vào. */}
-      {muc.length > 1 && (
-        <nav class="blog-muc" aria-label="Chuyên mục blog">
-          <span class="blog-muc-nhan blog-muc-dang-xem">Tất cả ({bai.length})</span>
-          {muc.map((m) => (
-            <a class="blog-muc-nhan" href={diaChiChuyenMuc(m.ten)}>
-              {m.ten} ({m.bai.length})
-            </a>
-          ))}
-        </nav>
-      )}
-
+  <BlogDau muc={muc} tong={bai.length}>
       <div class="blog-list">
         {noi_bat.length > 0 && (
           <div class="events-featured-grid">
@@ -101,8 +68,7 @@ const BAO_CHI = [
           <p class="text-center">Chưa có bài viết nào.</p>
         )}
       </div>
-    </div>
-  </section>
+  </BlogDau>
 
   <section class="section">
     <div class="container">

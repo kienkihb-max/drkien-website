@@ -1,0 +1,81 @@
+---
+// Phần đầu trang blog: hero, tựa mục và hàng nhãn chuyên mục.
+//
+// Dùng chung cho /blog và /blog/<chuyên mục>. Gom vào một chỗ vì hai trang
+// đó phải giống hệt nhau từ đầu trang xuống tới hàng nhãn — bấm một nhãn
+// chỉ được đổi danh sách bài bên dưới, mọi thứ phía trên phải đứng yên.
+// Chép tay sang hai file là chắc chắn có ngày lệch một chữ, và lúc đó
+// blog-loc-muc.js thay danh sách xong sẽ thấy trang nhảy.
+//
+// Danh sách bài nằm ở <slot />, vì đó là thứ DUY NHẤT khác nhau giữa hai
+// trang (kèm nhãn nào đang sáng).
+import DuongDan from "./DuongDan.astro";
+import { diaChiChuyenMuc, type ChuyenMuc } from "../lib/chuyen-muc";
+
+interface Props {
+  /** Mọi chuyên mục, để dựng hàng nhãn. */
+  muc: ChuyenMuc[];
+  /** Tổng số bài — con số trong nhãn "Tất cả". */
+  tong: number;
+  /** Tên mục đang mở. Bỏ trống nghĩa là đang ở trang blog tổng. */
+  dang_xem?: string;
+}
+const { muc, tong, dang_xem } = Astro.props;
+---
+
+<section class="section cv-hero">
+  <div class="container">
+    {dang_xem ? (
+      <DuongDan giua={[{ chu: "Blog", dia_chi: "/blog" }]} hien_tai={dang_xem} />
+    ) : (
+      <DuongDan hien_tai="Blog" />
+    )}
+    <h1>Y học Thể thao &amp; Y học cổ truyền</h1>
+    <p class="lead">
+      Nơi chia sẻ các kiến thức và cập nhật mới về chấn thương thể thao, đau cơ xương khớp và
+      phục hồi chức năng dựa trên bằng chứng khoa học. Các bài viết tập trung vào vai trò của
+      vận động trị liệu, phục hồi chức năng và Y học cổ truyền trong điều trị và tối ưu hóa
+      khả năng vận động cho người bệnh.
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-title text-center">
+      <p class="section-label">Bài viết cá nhân</p>
+      <h2>Ghi chép &amp; chia sẻ chuyên môn</h2>
+      <div class="divider mx-auto"></div>
+    </div>
+
+    {/* Hàng chuyên mục: 17 bài xếp thành một dãy dài thì người đọc muốn tìm
+        đúng chủ đề mình quan tâm phải lướt hết.
+
+        Mỗi nhãn là một thẻ <a> trỏ tới trang mục thật, không phải nút giả.
+        Nhờ vậy Google vào được từng mục, link chia sẻ được, và không có JS
+        thì bấm vẫn sang đúng trang. blog-loc-muc.js chỉ chặn cú bấm lại để
+        thay danh sách tại chỗ cho đỡ chớp. */}
+    {muc.length > 1 && (
+      <nav class="blog-muc" aria-label="Chuyên mục blog">
+        {dang_xem ? (
+          <a class="blog-muc-nhan" href="/blog">Tất cả ({tong})</a>
+        ) : (
+          <span class="blog-muc-nhan blog-muc-dang-xem" aria-current="page">Tất cả ({tong})</span>
+        )}
+        {muc.map((m) =>
+          m.ten === dang_xem ? (
+            <span class="blog-muc-nhan blog-muc-dang-xem" aria-current="page">
+              {m.ten} ({m.bai.length})
+            </span>
+          ) : (
+            <a class="blog-muc-nhan" href={diaChiChuyenMuc(m.ten)}>
+              {m.ten} ({m.bai.length})
+            </a>
+          )
+        )}
+      </nav>
+    )}
+
+    <slot />
+  </div>
+</section>

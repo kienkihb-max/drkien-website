@@ -1,0 +1,62 @@
+---
+// Ô dịch vụ ở đầu sidebar bài viết.
+//
+// Người đọc đang đọc một bài về đau cơ xương khớp thì ô này mời họ tới đúng
+// trang dịch vụ liên quan, ngay trong lúc còn đang quan tâm — thay vì phải
+// đọc hết bài rồi tự tìm.
+//
+// Dịch vụ nào thì lấy từ trường dich_vu của chính bài đó, chọn trong trang
+// soạn bài. Bài chưa gắn dịch vụ thì ô này không hiện — không đoán bừa một
+// dịch vụ nào đó, vì đoán sai còn tệ hơn là để trống.
+//
+// Tên, mô tả, icon, chữ trên nút đều lấy từ data/dich-vu.mjs — nguồn duy
+// nhất cho toàn site, đừng viết lại ở đây.
+import type { BaiViet } from "../lib/supabase";
+import { DICH_VU, CHU_NUT_XEM } from "../data/dich-vu.mjs";
+import { ZALO } from "../data/thong-tin.mjs";
+import { HeartPulse, Presentation, Stethoscope } from "@lucide/astro";
+
+// Khai báo từng icon một chứ không nhập cả bộ Lucide: nhập cả bộ là kéo
+// theo hơn 1800 icon vào lúc dựng. Thêm dịch vụ mới thì thêm một dòng ở
+// đây cho khớp trường icon trong dich-vu.mjs.
+const ICON = { HeartPulse, Presentation, Stethoscope };
+
+interface Props {
+  bai: BaiViet;
+}
+const { bai } = Astro.props;
+
+const dv = bai.dich_vu ? DICH_VU.find((d) => d.duong_dan === bai.dich_vu) : undefined;
+
+// Tên icon sai chính tả thì chỉ mất cái icon, phần còn lại của ô vẫn chạy.
+const Icon = dv ? ICON[dv.icon] : undefined;
+if (dv && !Icon) {
+  console.warn(
+    '[ô dịch vụ] "' + dv.ten + '" khai icon "' + dv.icon +
+      '" nhưng DichVuBenCanh.astro chưa nhập icon đó từ @lucide/astro.'
+  );
+}
+---
+
+{dv && (
+  <div class="aside-hop aside-dich-vu">
+    <a class="aside-dv-ten" href={dv.duong_dan}>
+      <span class="aside-dv-icon" aria-hidden="true">
+        {Icon && <Icon size={22} stroke-width={1.8} />}
+      </span>
+      {dv.ten}
+    </a>
+
+    <p class="aside-dv-mo-ta">{dv.mo_ta}</p>
+
+    {/* Hai lối đi, hai mức cam kết: nút đặc là nhắn Zalo ngay, còn dòng
+        chữ bên cạnh dành cho người mới chỉ muốn đọc thêm đã. Để mỗi nút
+        Zalo thì người chưa sẵn sàng nhắn tin sẽ bỏ qua cả ô. */}
+    <div class="aside-dv-cta">
+      <a class="btn btn-main btn-sm" href={ZALO} target="_blank" rel="noopener">
+        {dv.chu_nut}
+      </a>
+      <a class="aside-dv-them" href={dv.duong_dan}>{CHU_NUT_XEM}</a>
+    </div>
+  </div>
+)}

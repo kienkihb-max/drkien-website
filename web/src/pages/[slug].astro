@@ -9,6 +9,9 @@ import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
 import DongTacGia from "../components/DongTacGia.astro";
 import BaiKhac from "../components/BaiKhac.astro";
+import BaiCungMuc from "../components/BaiCungMuc.astro";
+import DichVuBenCanh from "../components/DichVuBenCanh.astro";
+import CtaNoiBai from "../components/CtaNoiBai.astro";
 import { layBaiCanSinhFile, layBaiHienLen, type BaiViet } from "../lib/supabase";
 import { GOC, TEN_SITE } from "../data/thong-tin.mjs";
 import { duongDanAnh, laAnhNgoai } from "../lib/co-anh.mjs";
@@ -101,10 +104,10 @@ const schema = {
 >
   <section class="section cv-hero">
     <div class="container">
-      <DuongDan
-        giua={[{ chu: "Blog", dia_chi: "/blog" }, ...chuyen_muc]}
-        hien_tai={bai.tieu_de}
-      />
+      {/* Không đưa tên bài vào breadcrumb: nó đã nằm ngay dưới ở thẻ <h1>
+          cỡ lớn. Nhắc lại lần nữa chỉ tốn một dòng, mà bài tên dài thì
+          breadcrumb xuống hai dòng và đẩy tiêu đề tụt xuống. */}
+      <DuongDan giua={[{ chu: "Blog", dia_chi: "/blog" }, ...chuyen_muc]} />
       <h1>{bai.tieu_de}</h1>
       <DongTacGia ngay={bai.ngay_dang} />
     </div>
@@ -112,6 +115,8 @@ const schema = {
 
   <section class="section section-article">
     <div class="container">
+      <div class="article-layout">
+        <div class="article-chinh">
       {/* Ảnh bìa cao hơn rộng thì giữ nguyên tỉ lệ gốc thay vì cắt về khung
           16/9 — cắt thì ảnh chụp người còn mỗi một dải ngang giữa ảnh. */}
       {bai.anh && (
@@ -129,16 +134,25 @@ const schema = {
         <Fragment set:html={(bai.lead ? `<p class="lead">${bai.lead}</p>\n` : "") + bai.than_bai} />
       </div>
 
-      {bai.tai_lieu?.length > 0 && (
-        <div class="article-refs">
-          <h2>Tài liệu tham khảo</h2>
-          <ol>
-            {bai.tai_lieu.map((m) => <li set:html={m} />)}
-          </ol>
+        {bai.tai_lieu?.length > 0 && (
+          <div class="article-refs">
+            <h2>Tài liệu tham khảo</h2>
+            <ol>
+              {bai.tai_lieu.map((m) => <li set:html={m} />)}
+            </ol>
+          </div>
+        )}
         </div>
-      )}
+
+        <aside class="article-aside">
+          <DichVuBenCanh bai={bai} />
+          <BaiCungMuc danh_sach={hien_len} bai={bai} />
+        </aside>
+      </div>
     </div>
   </section>
 
   <BaiKhac danh_sach={hien_len} tru_slug={bai.slug} tren_la_alt={false} />
+
+  <CtaNoiBai bai={bai} />
 </Trang>

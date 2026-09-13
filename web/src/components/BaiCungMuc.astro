@@ -1,0 +1,63 @@
+---
+// Sidebar bên phải mỗi bài viết: những bài khác cùng chuyên mục.
+//
+// Chỉ tên bài và một ô ảnh bìa vuông — đây là chỗ liếc mắt tìm bài kế tiếp
+// trong lúc đang đọc, không phải chỗ đọc mô tả. Muốn xem đủ cả mô tả thì đã
+// có khối "Bài viết khác" dàn thẻ lớn ở cuối bài.
+//
+// Khác khối cuối bài ở chỗ: khối kia lấy bài mới nhất toàn blog, khối này
+// bám đúng chuyên mục của bài đang đọc.
+import type { BaiViet } from "../lib/supabase";
+import { duongDanAnh } from "../lib/co-anh.mjs";
+import { tenChuyenMuc, diaChiChuyenMuc } from "../lib/chuyen-muc";
+
+/** Năm bài, mỗi tên cắt còn tối đa hai dòng nên khối vẫn đứng gọn trong
+    một màn. Còn lại thì đã có nút "Xem tất cả" bên dưới. */
+const SO_BAI = 5;
+
+interface Props {
+  /** Mọi bài đang hiện — đã xếp ngày đăng mới nhất lên đầu. */
+  danh_sach: BaiViet[];
+  /** Bài đang đọc: lấy chuyên mục từ đây, và loại chính nó khỏi danh sách. */
+  bai: BaiViet;
+}
+const { danh_sach, bai } = Astro.props;
+
+const ten_muc = tenChuyenMuc(bai.nhan);
+const cung_muc = ten_muc
+  ? danh_sach.filter((b) => b.slug !== bai.slug && tenChuyenMuc(b.nhan) === ten_muc)
+  : [];
+const hien = cung_muc.slice(0, SO_BAI);
+---
+
+{hien.length > 0 && (
+  <section class="aside-hop" aria-labelledby="aside-tua">
+    {/* Không nhắc lại tên chuyên mục ở đây: nó vừa xuất hiện ở breadcrumb
+        ngay đầu trang, và dòng nhãn bên dưới đã nói rõ đây là gì. Id gắn
+        vào chính dòng nhãn để aria-labelledby của <aside> còn chỗ trỏ. */}
+    <p class="section-label" id="aside-tua">Cùng chuyên mục</p>
+
+    <ul class="aside-ds">
+      {hien.map((b) => (
+        <li>
+          <a href={"/" + b.slug}>
+            {b.anh ? (
+              <img class="aside-anh" src={duongDanAnh(b.anh)} alt="" loading="lazy" />
+            ) : (
+              <span class="aside-anh aside-anh-trong" aria-hidden="true"></span>
+            )}
+            <span class="aside-ten" title={b.the_tieu_de || b.tieu_de}>{b.the_tieu_de || b.tieu_de}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {/* Chỉ mời sang trang mục khi còn bài chưa liệt kê ở trên. */}
+    {cung_muc.length > hien.length && (
+      <a class="aside-xem-tat-ca" href={diaChiChuyenMuc(ten_muc)}>
+        Xem tất cả {cung_muc.length + 1} bài
+        <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+      </a>
+    )}
+  </section>
+)}

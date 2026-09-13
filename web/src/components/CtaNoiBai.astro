@@ -1,0 +1,82 @@
+---
+// Nút nổi giữa đáy màn hình khi đọc bài trên điện thoại, dẫn về trang dịch
+// vụ mà bài được gắn.
+//
+// Chỉ mobile. Trên desktop đã có ô dịch vụ nằm sẵn ở cột phải, thêm một nút
+// nổi nữa là hai lời mời giống nhau cùng lúc trên một màn hình.
+//
+// Ẩn/hiện theo nhịp đọc: đang cuộn thì ẩn để không che chữ, dừng lại thì
+// hiện. Cuộn hết thân bài sang phần khác thì ẩn hẳn — lúc đó người đọc đã
+// rời bài, mời tiếp là phiền.
+//
+// Bài chưa gắn dịch vụ thì không hiện gì, giống ô dịch vụ ở cột phải.
+import type { BaiViet } from "../lib/supabase";
+import { DICH_VU } from "../data/dich-vu.mjs";
+import { HeartPulse, Presentation, Stethoscope } from "@lucide/astro";
+
+const ICON = { HeartPulse, Presentation, Stethoscope };
+
+interface Props {
+  bai: BaiViet;
+}
+const { bai } = Astro.props;
+
+const dv = bai.dich_vu ? DICH_VU.find((d) => d.duong_dan === bai.dich_vu) : undefined;
+const Icon = dv ? ICON[dv.icon] : undefined;
+---
+
+{dv && (
+  <a class="cta-noi an" href={dv.duong_dan} data-cta-noi>
+    {Icon && <Icon size={18} stroke-width={2} />}
+    {dv.chu_cta_bai}
+  </a>
+)}
+
+<script>
+  const nut = document.querySelector<HTMLElement>("[data-cta-noi]");
+  const than = document.querySelector(".section-article");
+
+  if (nut && than) {
+    let hen: number | undefined;
+
+    /**
+     * Còn đang đọc bài hay đã cuộn sang phần khác?
+     *
+     * Đo bằng vị trí đáy thân bài chứ KHÔNG dùng IntersectionObserver: thân
+     * bài dài hơn màn hình rất nhiều, nên kể cả khi người đọc đã xuống tới
+     * khối "Bài viết khác" thì phần trên của thân bài vẫn còn giao với màn
+     * hình — observer báo "vẫn trong bài" suốt, nút không bao giờ ẩn. Đã đo
+     * đúng cảnh đó trên trang bài dài nhất.
+     *
+     * Mốc 0.4: coi là đã rời bài khi đáy thân bài dâng lên quá 40% màn hình
+     * tính từ dưới, tức nửa dưới màn hình đã là nội dung của phần khác.
+     */
+    const trongBai = () => {
+      const o = than.getBoundingClientRect();
+      const cao = window.innerHeight || document.documentElement.clientHeight;
+      return o.bottom > cao * 0.4 && o.top < cao;
+    };
+
+    const an = () => nut.classList.add("an");
+    const hien = () => {
+      if (trongBai()) nut.classList.remove("an");
+    };
+
+    /**
+     * Đang cuộn thì ẩn, ngưng khoảng một phần tư giây thì hiện lại.
+     *
+     * Dùng hẹn giờ chứ không dùng sự kiện "scrollend": Safari trên iOS chưa
+     * hỗ trợ sự kiện đó, mà đó lại đúng là nơi cái nút này sống.
+     */
+    const dangDong = () => {
+      an();
+      window.clearTimeout(hen);
+      hen = window.setTimeout(hien, 240);
+    };
+
+    window.addEventListener("scroll", dangDong, { passive: true });
+    window.addEventListener("resize", dangDong, { passive: true });
+
+    hien();
+  }
+</script>

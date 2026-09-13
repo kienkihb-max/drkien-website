@@ -1,0 +1,79 @@
+---
+// Khối "Bài viết liên quan" ở cuối mỗi trang dịch vụ: ba bài mới nhất được
+// gắn vào đúng dịch vụ đó.
+//
+// Một component cho cả ba trang dịch vụ. Chép tay sang từng trang thì mỗi
+// lần đổi cách xếp thẻ hay đổi chữ trên nút là phải sửa ba chỗ, và sót một
+// chỗ thì ba trang lệch nhau mà không có lỗi nào hiện ra.
+//
+// Bài lấy LÚC DỰNG, không phải lúc người đọc mở trang — giống trang blog.
+// Nhờ vậy Google đọc được danh sách, và trang không chậm đi vì chờ mạng.
+//
+// TRƯỚC ĐÂY khối này lấy bài theo CHUYÊN MỤC blog, qua một bảng gắn cứng
+// "dịch vụ nào ↔ chuyên mục nào". Cách đó có hai chỗ hỏng: một bài chỉ nằm
+// được ở đúng một chuyên mục nên không thể vừa là bài Y học cổ truyền vừa
+// dẫn tới trang Y tế sự kiện; và đổi tên chuyên mục trong CMS là cả ba khối
+// bài lặng lẽ biến mất. Nay mỗi bài tự khai nó dẫn tới dịch vụ nào, chọn
+// ngay trong trang soạn bài.
+import TheBai from "./TheBai.astro";
+import { layBaiHienLen } from "../lib/supabase";
+import { DICH_VU } from "../data/dich-vu.mjs";
+
+/** Ba thẻ vừa đúng một hàng của .events-grid. Đổi số này thì lưới sẽ lẻ. */
+const SO_BAI = 3;
+
+interface Props {
+  /** Đuôi địa chỉ trang dịch vụ, ví dụ "dieu-tri". */
+  dich_vu: string;
+  /**
+   * Nền xám để xen kẽ với section ngay phía trên. Phải truyền tay vì mỗi
+   * trang dịch vụ có số section khác nhau — xem section cuối trước khối này
+   * là nền gì rồi chọn ngược lại. Khối "Các dịch vụ khác" bên dưới do
+   * service-cards.js tự lật nền theo khối này nên không phải lo.
+   */
+  nen_xam?: boolean;
+}
+const { dich_vu, nen_xam = false } = Astro.props;
+
+// Trong database, dịch vụ lưu bằng đường dẫn có gạch chéo đầu: "/dieu-tri".
+const khoa = "/" + dich_vu.replace(/^\//, "");
+const ten_dich_vu = DICH_VU.find((d) => d.duong_dan === khoa)?.ten ?? "";
+
+const tat_ca = await layBaiHienLen();
+const cua_dich_vu = tat_ca.filter((b) => b.dich_vu === khoa);
+
+// layBaiHienLen() đã xếp ngày đăng mới nhất lên đầu, nên cắt ba bài đầu là
+// đúng ba bài mới nhất — không phải tự sắp lại ở đây.
+const bai = cua_dich_vu.slice(0, SO_BAI);
+---
+
+{bai.length > 0 && (
+  <section class:list={["section", nen_xam && "section-alt"]}>
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">Đọc thêm</p>
+        <h2>Bài viết liên quan</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+
+      {/* Chưa đủ ba bài thì căn giữa lưới. Lưới 3 cột mà chỉ có một hai
+          thẻ sẽ dồn hết về trái và bỏ trống nửa phải, nhìn như thiếu mất
+          phần còn lại chứ không phải là chủ ý. */}
+      <div class:list={["events-grid", bai.length < 3 && "events-grid-giua"]}>
+        {bai.map((b) => <TheBai bai={b} />)}
+      </div>
+
+      {/* Chỉ mời xem thêm khi còn bài chưa hiện ở trên. Dẫn về trang blog
+          chứ không về một chuyên mục: bài gắn vào dịch vụ này có thể nằm ở
+          nhiều chuyên mục khác nhau, không có một trang mục nào gom đủ. */}
+      {cua_dich_vu.length > bai.length && (
+        <div class="xem-tat-ca">
+          <a class="btn btn-outline btn-icon" href="/blog">
+            Xem tất cả bài viết
+            <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+)}

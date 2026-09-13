@@ -38,11 +38,15 @@
 }
 
 /* Bề ngang cột chữ: cùng 720px với trang bài, để dòng ngắt đúng chỗ và
-   người viết ước lượng được độ dài đoạn văn. */
+   người viết ước lượng được độ dài đoạn văn.
+
+   Căn sát lề TRÁI, không căn giữa: trang bài nay chia hai cột, chữ bên
+   trái và danh sách bài cùng mục bên phải. Còn căn giữa thì cột chữ bị
+   đẩy lệch vào trong và hở một khoảng trắng vô nghĩa sát lề trái. */
 .article-body,
 .st-vung {
   max-width: 720px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 /* Chữ thân bài 17px và dùng --text-body đậm hơn: đây là phần người đọc nhìn

@@ -7,8 +7,15 @@
 interface Props {
   /** Các nấc giữa "Trang chủ" và trang hiện tại, ví dụ ["Blog"]. */
   giua?: { chu: string; dia_chi?: string }[];
-  /** Tên trang hiện tại — nấc cuối, không phải liên kết. */
-  hien_tai: string;
+  /**
+   * Tên trang hiện tại — nấc cuối, không phải liên kết.
+   *
+   * Bỏ trống thì breadcrumb dừng lại ở nấc cuối của `giua`. Dùng cho trang
+   * bài viết: tên bài đã nằm ngay bên dưới ở thẻ <h1> cỡ lớn, nhắc lại lần
+   * nữa ở đây chỉ tốn một dòng mà không nói thêm gì — nhất là bài tên dài
+   * thì breadcrumb xuống hai dòng và đẩy tiêu đề tụt xuống.
+   */
+  hien_tai?: string;
 }
 const { giua = [], hien_tai } = Astro.props;
 ---
@@ -23,6 +30,10 @@ const { giua = [], hien_tai } = Astro.props;
       {m.dia_chi ? <a href={m.dia_chi}>{m.chu}</a> : <span>{m.chu}</span>}
     </>
   ))}
-  <span class="breadcrumb-sep" aria-hidden="true">›</span>
-  <span aria-current="page">{hien_tai}</span>
+  {hien_tai && (
+    <>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">{hien_tai}</span>
+    </>
+  )}
 </nav>

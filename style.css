@@ -89,6 +89,8 @@ html[data-page="article"]::view-transition-new(root) {
 
 /* Người bật giảm chuyển động trong hệ điều hành thì bỏ hết hiệu ứng. */
 @media (prefers-reduced-motion: reduce) {
+  .cta-noi { transition: opacity .25s ease; }
+  .cta-noi.an { transform: translate(-50%, 0); }
   html { scroll-behavior: auto; }
   ::view-transition-old(root),
   ::view-transition-new(root) { animation: none; }
@@ -507,6 +509,15 @@ h4 { font-size: var(--fs-base); }
 /* Biến thể 2 cột: dùng khi lưới có 4 thẻ, để không bị lẻ một thẻ ở hàng cuối.
    Đặt trước các @media bên dưới nên mobile vẫn tự rút về 1 cột. */
 .events-grid-2col { grid-template-columns: repeat(2, 1fr); }
+/* Lưới chưa đủ 3 thẻ: căn giữa thay vì dồn hết về trái rồi bỏ trống nửa
+   phải. 355px là đúng bề rộng một thẻ khi lưới đủ 3 cột ((1112 − 48)/3),
+   nên thẻ không phình to gấp rưỡi chỉ vì bài ít.
+
+   Đặt TRƯỚC các @media bên dưới, để màn hẹp vẫn tự rút về 2 rồi 1 cột. */
+.events-grid-giua {
+  grid-template-columns: repeat(auto-fit, minmax(0, 355px));
+  justify-content: center;
+}
 .event-card {
   background: #fff;
   border-radius: var(--radius);
@@ -616,6 +627,15 @@ a.blog-muc-nhan:hover { border-color: var(--primary-2); color: var(--primary-2);
   background: var(--primary-2);
   border-color: var(--primary-2);
   color: var(--white);
+}
+
+/* Nút "Xem tất cả" dưới một lưới thẻ rút gọn (khối bài viết ở trang dịch
+   vụ). Căn giữa và cách lưới một quãng bằng khoảng cách giữa các thẻ, để
+   nó đọc ra là phần kết của lưới chứ không phải một khối mới. */
+.xem-tat-ca {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
 }
 
 .events-featured-grid {
@@ -904,7 +924,7 @@ main img.zoomable { cursor: zoom-in; }
 }
 
 /* Blog article */
-.article-hero-img { max-width: 780px; margin: 0 auto 40px; }
+.article-hero-img { max-width: 780px; margin: 0 0 40px; }
 .article-hero-img img {
   width: 100%;
   /* "height: auto" là bắt buộc. Thẻ <img> của bài mới có sẵn width/height
@@ -963,10 +983,194 @@ main img.zoomable { cursor: zoom-in; }
    đừng khai lại ở đây. File đó được nạp ở CẢ trang bài lẫn khung soạn thảo
    của trang quản trị, nên sửa một chỗ là hai nơi đổi cùng lúc. Khai lại ở
    đây là hai bản lại trôi khỏi nhau như trước. */
-.article-refs { max-width: 720px; margin: 44px auto 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
+.article-refs { max-width: 720px; margin: 44px 0 0; padding-top: 24px; border-top: 1px solid #e3ebf3; }
 .article-refs h2 { font-size: var(--fs-sm); color: var(--text-heading); margin-bottom: 12px; }
 .article-refs ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 .article-refs li { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
+
+/* ————— Bố cục hai cột của trang bài viết —————
+   Chữ bên trái, danh sách bài cùng chuyên mục bên phải. Cột phải hẹp và
+   dính theo màn hình, để trong lúc đọc vẫn liếc sang bài kế tiếp được.
+
+   minmax(0, 1fr) chứ không phải 1fr: ô lưới mặc định không co nhỏ hơn nội
+   dung bên trong, nên một khối rộng trong thân bài (bảng, khối mã) sẽ đẩy
+   cả cột phình ra và làm trang trượt ngang. */
+.article-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Header cố định cao 84px, nên 88px chỉ chừa 4px — sidebar dính lên gần như
+   chạm gáy header, nhìn tức mắt. 108px là 84 cộng 24, đúng bằng lề ngang của
+   .container nên khoảng hở trên và hở cạnh bằng nhau. */
+/* Cột phải xếp dọc: ô dịch vụ trên, danh sách bài cùng chuyên mục dưới. */
+.article-aside {
+  position: sticky;
+  top: 108px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Ô dịch vụ. Nền trắng như hộp bài cùng chuyên mục, sắc xanh dồn hết vào
+   ô icon để mắt bắt ngay vào đó thay vì vào cả mảng nền.
+
+   Đổ bóng để nổi lên trên hộp danh sách bài ngay dưới: hai hộp cùng nền
+   trắng, cùng viền mảnh thì đọc ra ngang hàng nhau, trong khi đây mới là
+   khối mời người đọc hành động. */
+/* Viết .aside-hop.aside-dich-vu chứ không chỉ .aside-dich-vu: .aside-hop
+   nằm SAU trong file này và đặt `background: var(--white)` dạng viết tắt,
+   mà viết tắt thì xoá luôn background-image. Cùng độ ưu tiên thì luật
+   đứng sau thắng, nên phải nâng độ ưu tiên lên bằng hai lớp.
+
+   Mấy vệt màu là radial-gradient chứ không phải hình thật kèm filter:
+   blur() — gradient vốn đã tắt dần ra mép nên tự có viền mềm, mà không
+   phải dựng thêm lớp phủ và không tốn công vẽ lại mỗi khi cuộn trang.
+
+   Chỉ hai vệt, đặt ở hai góc đối nhau và để khoảng giữa gần như trắng:
+   rải đều nhiều vệt thì cả thẻ ngả xanh một màu và chữ đọc trên đó bị
+   bết. Dồn vào góc thì màu vẫn thấy rõ mà vùng có chữ vẫn sạch.
+
+   Hai góc hai sắc lệch nhau một chút (góc trên xanh sáng, góc dưới xanh
+   trầm) cho có chiều sâu. Sửa % trong `circle at X% Y%` là dời vệt, sửa
+   số alpha là đổi đậm nhạt, sửa % ở `transparent` là đổi độ loang. */
+.aside-hop.aside-dich-vu {
+  border-color: #dbe5fb;
+  box-shadow: var(--shadow-card);
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(86, 160, 255, 0.30) 0, transparent 58%),
+    radial-gradient(circle at 100% 100%, rgba(40, 130, 215, 0.22) 0, transparent 42%),
+    linear-gradient(150deg, #fdfeff 0%, #fbfcff 100%);
+}
+
+/* Ô icon về nền trắng: nền xanh nhạt cũ nay chìm vào chính nền card. */
+.aside-dich-vu .aside-dv-icon { background: var(--white); }
+/* Icon nằm TRÊN tiêu đề, không nằm cạnh: tên dịch vụ dài tới hai dòng
+   thì kiểu nằm cạnh làm icon lơ lửng giữa hai dòng chữ. */
+.aside-dv-ten {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+  color: var(--text-dark);
+  transition: color .2s ease;
+}
+.aside-dv-ten:hover { color: var(--primary-2); }
+/* Ô icon tròn nền xanh nhạt — điểm màu duy nhất của hộp. */
+.aside-dv-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary-2);
+}
+.aside-dv-mo-ta {
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--text-body);
+}
+/* Nút co lại bằng bề ngang chữ, không kéo hết chiều rộng hộp: cạnh nó
+   còn một lối đi thứ hai nhẹ hơn, nút chiếm trọn dòng thì lối kia bị
+   đẩy xuống và đọc ra như một khối rời. */
+.aside-dv-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 16px;
+}
+.aside-dv-them {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--primary-2);
+  transition: color .2s ease;
+}
+.aside-dv-them:hover { color: var(--primary); }
+.aside-hop {
+  background: var(--white);
+  border: 1px solid #e3ebf3;
+  border-radius: var(--radius);
+  padding: 20px;
+}
+/* Nhãn trong sidebar nhỏ và xám hơn nhãn của một section ngoài trang: ở đây
+   nó chỉ là chú thích cho tên chuyên mục ngay bên dưới, không phải tiêu đề
+   dẫn dắt cả một khối. Để nguyên cỡ và màu xanh như .section-label thường
+   thì nó tranh phần nổi với chính tên chuyên mục. */
+.aside-hop .section-label {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+.aside-ds {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+.aside-ds a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+/* Ô ảnh vuông. aspect-ratio 1 và object-fit cover: ảnh bìa nào cũng về
+   đúng một khuôn, dãy bên phải mới thẳng hàng. */
+.aside-anh {
+  flex: none;
+  width: 56px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--gray-bg);
+}
+.aside-anh-trong { display: block; }
+/* Tên bài cắt còn tối đa hai dòng. Danh sách này để liếc mắt tìm bài kế
+   tiếp, một tên dài ba bốn dòng vừa đẩy khối cao lên vừa làm cả cột mất
+   nhịp — các dòng không còn thẳng hàng nhau.
+
+   Không in đậm: năm dòng đậm liền nhau đọc nặng hơn hẳn thân bài bên trái,
+   mà đây chỉ là danh sách phụ. */
+.aside-ten {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-heading);
+  transition: color .2s ease;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.aside-ds a:hover .aside-ten { color: var(--primary-2); }
+.aside-xem-tat-ca {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e3ebf3;
+  width: 100%;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--primary-2);
+}
+.aside-xem-tat-ca:hover { color: var(--primary); }
+
+/* Dưới 1000px thì hai cột không còn đủ chỗ: sidebar xuống dưới thân bài
+   và thôi dính theo màn hình. */
+@media (max-width: 1000px) {
+  .article-layout { grid-template-columns: 1fr; gap: 40px; }
+  .article-aside { position: static; }
+}
 
 /* "Bài viết khác" cuối mỗi bài. Desktop dàn lưới 3 cột cho thấy hết;
    mobile (@media 720px cuối file) chuyển thành dải lướt ngang.
@@ -1128,6 +1332,10 @@ main img.zoomable { cursor: zoom-in; }
 
 /* Sticky CTA (trang dịch vụ) — chỉ dùng trên mobile, xem @media bên dưới */
 .sticky-cta { display: none; }
+
+/* Nút nổi khi đọc bài (trang bài viết) — cũng chỉ mobile.
+   Trên desktop đã có ô dịch vụ ở cột phải nên ẩn hẳn ở đây. */
+.cta-noi { display: none; }
 
 /* Floating action stack: Zalo / Facebook / back-to-top */
 /* The whole stack fades in together once the page has scrolled. */
@@ -1346,6 +1554,41 @@ main img.zoomable { cursor: zoom-in; }
   /* Footer */
   .site-footer { padding-top: 44px; }
   .footer-grid { gap: 28px; padding-bottom: 28px; }
+
+  /* Nút nổi giữa đáy màn hình khi đọc bài.
+
+     z-index 94: nằm dưới .sticky-cta (95) và dưới header (100). Hai thứ
+     đó không bao giờ cùng xuất hiện với nút này, nhưng xếp sẵn cho khỏi
+     phải đoán nếu sau này có trang dùng cả hai.
+
+     Ẩn bằng opacity + dời xuống chứ không bằng display: none, để còn có
+     đường trượt ra trượt vào thay vì nhấp nháy. pointer-events: none lúc
+     ẩn để ngón tay không bấm trúng cái nút đang trong suốt. */
+  .cta-noi {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    z-index: 94;
+    max-width: calc(100vw - 32px);
+    padding: 12px 22px;
+    border-radius: 50px;
+    background: var(--primary);
+    color: #fff;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 42, 106, 0.28);
+    transform: translate(-50%, 0);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .cta-noi.an {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+    pointer-events: none;
+  }
 
   /* Thanh CTA dính đáy màn hình */
   .sticky-cta {

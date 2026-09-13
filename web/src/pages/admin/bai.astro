@@ -465,7 +465,15 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
   // là chữ người đọc thấy — bài có tiêu đề dài thì thẻ cần câu ngắn hơn. Gõ
   // tay rồi thì máy thôi không điền đè.
 
-  const DUOI_TIEU_DE = " — Bác sĩ Lê Trung Kiên";
+  // Tên bác sĩ đứng TRƯỚC trong cả hai dòng gửi Google. Google cắt tiêu đề
+  // ở khoảng 60 ký tự và cắt từ đuôi, nên tên để cuối là thứ bị cắt mất
+  // trước tiên — đúng cái từ khóa mà site đang đẩy.
+  const DAU_TIEU_DE = "Bác sĩ Kiên - ";
+  const DAU_MO_TA = "Bác sĩ Lê Trung Kiên: ";
+  /** Mức Google hay cắt mô tả. Phần tên ở đầu cũng tính vào đây. */
+  const MUC_MO_TA = 160;
+  /** Mức Google hay cắt tiêu đề. Phần tên ở đầu cũng tính vào đây. */
+  const MUC_TIEU_DE = 60;
 
   // Ô nào người viết đã tự gõ thì đánh dấu, để không bị máy ghi đè.
   const tay: Record<string, boolean> = {};
@@ -614,13 +622,47 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
     });
   }
 
+  /**
+   * Rút tiêu đề bài cho vừa dòng tiêu đề Google.
+   *
+   * Ưu tiên cắt ở ranh giới ý (hai chấm, gạch ngang, phẩy) — đó là chỗ tiêu
+   * đề tiếng Việt tự ngắt, cắt ở đó thì phần giữ lại vẫn đọc trọn một ý.
+   * Cùng lắm mới cắt giữa câu rồi thêm "…".
+   */
+  function catTieuDe(chu: string, muc: number) {
+    chu = (chu || "").replace(/\s+/g, " ").trim();
+    // Nhỉnh hơn mức một hai ký tự thì để nguyên — cắt cụt cả một tiêu đề
+    // chỉ để bớt đúng một chữ thì lợi bất cập hại.
+    if (chu.length <= muc + 2) return chu;
+
+    // Chỉ cắt ở ranh giới ý khi phần giữ lại còn đủ dài. Bằng không
+    // "Thoát vị đĩa đệm: 6 sự thật…" rút thành mỗi "Thoát vị đĩa đệm",
+    // bỏ phí nửa dòng Google cho không.
+    const san = muc * 0.6;
+    let tot = "";
+    for (const dau of [": ", " – ", " — ", ", "]) {
+      const i = chu.indexOf(dau);
+      if (i >= san && i <= muc && i > tot.length) tot = chu.slice(0, i);
+    }
+    if (tot) return tot.replace(/[:,]$/, "");
+
+    const cat = chu.slice(0, muc);
+    const khe = cat.lastIndexOf(" ");
+    return (khe > muc * 0.5 ? cat.slice(0, khe) : cat).replace(/[,:;-]$/, "") + "…";
+  }
+
   function veLaiSEO() {
     const tieu_de = o("o-tieu-de").value.trim();
-    o("o-seo-tieu-de").value = tieu_de ? tieu_de + DUOI_TIEU_DE : "";
+    o("o-seo-tieu-de").value = tieu_de
+      ? DAU_TIEU_DE + catTieuDe(tieu_de, MUC_TIEU_DE - DAU_TIEU_DE.length)
+      : "";
     if (!tay["o-the-tieu-de"]) o("o-the-tieu-de").value = tieu_de;
 
-    const mo_ta = catMoTa(nguonMoTa(), 160);
-    o("o-seo-mo-ta").value = mo_ta;
+    // Cắt phần mô tả NGẮN ĐI đúng bằng độ dài phần tên ở đầu, để cả dòng
+    // vẫn nằm trong mức 160 — bằng không thêm tên vào là câu cuối bị Google
+    // cắt ngang.
+    const mo_ta = catMoTa(nguonMoTa(), MUC_MO_TA - DAU_MO_TA.length);
+    o("o-seo-mo-ta").value = mo_ta ? DAU_MO_TA + mo_ta : "";
     if (!tay["o-the-mo-ta"]) o("o-the-mo-ta").value = mo_ta;
 
     veLaiDem();

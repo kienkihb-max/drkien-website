@@ -15,6 +15,12 @@ import Footer from "../components/Footer.astro";
 interface Props {
   /** Tiêu đề hiện trên tab và trên Google. Đã kèm sẵn " — Bác sĩ Lê Trung Kiên". */
   tieu_de: string;
+  /**
+   * Tiêu đề do người biên tập tự đặt trong CMS (ô "tiêu đề gửi Google").
+   * Khi bật, dùng NGUYÊN VĂN, không nối thêm tên bác sĩ vào cuối — người đặt
+   * đã tự canh tên và độ dài cho vừa dòng tiêu đề của Google.
+   */
+  tieu_de_tu_dat?: boolean;
   /** Mô tả hiện dưới tiêu đề trên Google. Nên 120–160 ký tự. */
   mo_ta: string;
   /** Đường dẫn không có đuôi .html, ví dụ "blog" hay "" cho trang chủ. */
@@ -52,6 +58,7 @@ interface Props {
 
 const {
   tieu_de,
+  tieu_de_tu_dat = false,
   mo_ta,
   duong_dan,
   // Ảnh chia sẻ dùng chung của site. Trang chủ, trang hồ sơ và trang blog
@@ -79,14 +86,18 @@ const anh_day_du = laAnhNgoai(anh) ? anh : GOC + "/" + anh.replace(/^\//, "");
 // có file trên đĩa để đo, nên dùng số đã ghi lại lúc tải lên (trang truyền
 // vào qua anh_co).
 const co = laAnhNgoai(anh) ? anh_co ?? { rong: 1200, cao: 630 } : coAnh(anh);
-// Tự thêm " — Bác sĩ Lê Trung Kiên" vào cuối tiêu đề, TRỪ KHI tên đã có sẵn
-// trong đó. Xét theo tên riêng và không phân biệt hoa thường: có trang đặt
-// tiêu đề "Hồ sơ bác sĩ Lê Trung Kiên…" viết thường chữ "bác sĩ", so khớp
-// nguyên văn thì trượt và tiêu đề bị nối thêm một lần nữa, dài gấp rưỡi rồi
-// Google cắt cụt.
-const tieu_de_day_du = /lê trung kiên/i.test(tieu_de)
-  ? tieu_de
-  : tieu_de + " — " + TEN_SITE;
+// Tự thêm " — Bác sĩ Lê Trung Kiên" vào cuối tiêu đề, nhưng CHỈ cho trang
+// dùng tiêu đề mặc định. Hai trường hợp phải để nguyên văn:
+//
+//  - Tiêu đề do người biên tập tự đặt (tieu_de_tu_dat) — họ đã canh sẵn tên
+//    và độ dài.
+//  - Tiêu đề đã tự chứa tên bác sĩ. Xét cả tên đầy đủ lẫn dạng ngắn "Bác sĩ
+//    Kiên" mà CMS gắn làm tiền tố, và không phân biệt hoa thường: trước đây
+//    chỉ dò tên đầy đủ nên mọi bài "Bác sĩ Kiên - …" đều bị nối thêm một lần
+//    nữa, tiêu đề vọt quá 80 ký tự rồi Google cắt cụt.
+const co_ten = /(bác sĩ|bs\.?)\s+(lê\s+trung\s+)?kiên/i.test(tieu_de);
+const tieu_de_day_du =
+  tieu_de_tu_dat || co_ten ? tieu_de : tieu_de + " — " + TEN_SITE;
 ---
 
 <!DOCTYPE html>

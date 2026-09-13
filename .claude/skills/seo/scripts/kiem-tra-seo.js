@@ -272,15 +272,28 @@ async function tai(u) {
       }
     }
 
-    // Ảnh thiếu alt. Ảnh trang trí thì để alt="" là hợp lệ, nên chỉ bắt khi
-    // không có thuộc tính alt.
-    const thieuAlt = [...html.matchAll(/<img\s[^>]*>/gi)].filter((m) => !/\salt=/i.test(m[0]));
+    // Ảnh thiếu alt.
+    //
+    // Phân biệt ba trường hợp, vì cách sửa khác hẳn nhau:
+    //   - không có thuộc tính alt      -> LỖI, trình đọc màn hình đọc cả
+    //     tên file ra cho người khiếm thị nghe
+    //   - alt rỗng trên ảnh trang trí  -> hợp lệ, bỏ qua
+    //   - alt rỗng trên ẢNH BÌA        -> NHẮC, đây là ảnh chính của bài
+    //
+    // Astro in alt="" ra thành đúng một chữ `alt` không có dấu bằng, nên
+    // phép kiểm phải nhận cả hai dạng. Bản trước chỉ tìm "alt=" rồi kết
+    // luận là thiếu hẳn thuộc tính — sai nguyên nhân, và người đọc báo cáo
+    // đi tìm trong thân bài trong khi lỗi nằm ở ô "Mô tả ảnh bìa".
+    const coAlt = (the) => /\salt(\s*=|[\s>])/i.test(the);
+    const altRong = (the) => /\salt\s*=\s*""/i.test(the) || /\salt(?=[\s>])/i.test(the);
+
+    const thieuAlt = [...html.matchAll(/<img\s[^>]*>/gi)].filter((m) => !coAlt(m[0]));
     if (thieuAlt.length) loi(ten, `${thieuAlt.length} thẻ <img> không có thuộc tính alt`);
 
     // Ảnh bìa bài viết để alt rỗng thì Google không biết ảnh chụp gì
-    const anhBia = html.match(/<div class="article-hero-img"[\s\S]*?<img[^>]*>/);
-    if (anhBia && /\salt=""/.test(anhBia[0])) {
-      nhac(ten, 'Ảnh bìa đang để alt rỗng — điền ô "Mô tả ảnh bìa" trong trang quản trị');
+    const anhBia = html.match(/<div class="article-hero-img[^"]*">\s*<img[^>]*>/);
+    if (anhBia && altRong(anhBia[0])) {
+      nhac(ten, 'Ảnh bìa đang để mô tả rỗng — điền ô "Mô tả ảnh bìa" trong trang quản trị');
     }
 
     // Gom link nội bộ để soát trang mồ côi ở bước sau

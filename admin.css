@@ -69,6 +69,25 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 }
 .qt-o-cao { resize: vertical; }
 .qt-o-hep { max-width: 220px; }
+/* Hai ô cùng dạng đứng cạnh nhau. Màn hẹp thì xếp dọc — bóp hai ô chọn
+   xuống còn nửa màn hình điện thoại là tên mục dài bị cắt cụt. */
+.qt-hai-o {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .qt-hai-o { grid-template-columns: 1fr; }
+}
+/* Icon đầu nhãn: cùng màu chữ nhãn, cùng đường nét với icon của site. */
+.qt-nhan-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  margin-right: 6px;
+  color: var(--qt-chu-mo);
+}
 /* Ô chọn (chuyên mục): vừa đủ chứa tên mục dài nhất, chứ kéo hết bề ngang
    thì mũi tên bị đẩy sang tận mép phải, cách chữ cả gang tay.
    Tự vẽ mũi tên thay vì dùng mũi tên mặc định của trình duyệt: mặc định nó
@@ -196,6 +215,13 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 }
 .qt-nhan-noi-bat { background: #fff4d6; color: #8a6100; }
 .qt-nhan-an { background: #eceff4; color: var(--qt-chu-mo); }
+/* Hai chip trên dòng dưới tiêu đề bài: chuyên mục và dịch vụ gắn kèm.
+   Khác màu nhau vì là hai thứ khác hẳn — liếc qua danh sách là thấy ngay
+   bài nào chưa gắn gì. */
+.qt-bai-chip { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.qt-bai-chip .qt-nhan-nho { margin-left: 0; }
+.qt-nhan-muc { background: #e8f0ff; color: #2450b8; }
+.qt-nhan-dv { background: #e7f6ec; color: #1e7e34; }
 .qt-bai-nut { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 .qt-bai-nut .qt-nut { padding: 6px 12px; font-size: 0.9rem; }
 

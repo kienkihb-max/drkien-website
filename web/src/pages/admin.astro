@@ -76,6 +76,8 @@ import VetLoi from "../components/VetLoi.astro";
 <script>
   import { supabase } from "../lib/supabase";
   import { duongDanAnh } from "../lib/dia-chi-anh.mjs";
+  import { tenChuyenMuc } from "../lib/chuyen-muc";
+  import { DICH_VU } from "../data/dich-vu.mjs";
   import { dungLaiWeb } from "../lib/dung-lai-web";
   import { xoaBaiVaAnh } from "../lib/xoa-bai";
 
@@ -88,6 +90,8 @@ import VetLoi from "../components/VetLoi.astro";
     an: boolean;
     noi_bat: boolean;
     anh: string | null;
+    nhan: string | null;
+    dich_vu: string | null;
   }
 
   /** Danh sách đang hiện, giữ lại để mấy nút Ẩn/Xoá tra ngược ra bài. */
@@ -131,7 +135,7 @@ import VetLoi from "../components/VetLoi.astro";
     const [{ data, error }, { data: ds_nhap }] = await Promise.all([
       supabase
         .from("bai_viet")
-        .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat, anh")
+        .select("id, slug, tieu_de, ngay_dang, da_dang, an, noi_bat, anh, nhan, dich_vu")
         .order("ngay_dang", { ascending: false }),
       supabase.from("ban_nhap").select("bai_id"),
     ]);
@@ -172,6 +176,18 @@ import VetLoi from "../components/VetLoi.astro";
       const anh = b.anh
         ? '<img class="qt-bai-anh" src="' + thoat(duongDanAnh(b.anh)) + '" alt="" loading="lazy">'
         : "";
+
+      // Hai chip: bài THUỘC chuyên mục nào, và DẪN TỚI dịch vụ nào. Hai màu
+      // khác nhau vì đây là hai thứ khác hẳn — nhìn danh sách là biết ngay
+      // bài nào còn chưa gắn, khỏi phải mở từng bài ra xem.
+      const ten_muc = tenChuyenMuc(b.nhan);
+      const chip_muc = ten_muc
+        ? '<span class="qt-nhan-nho qt-nhan-muc">' + thoat(ten_muc) + "</span>"
+        : "";
+      const dv = DICH_VU.find((d) => d.duong_dan === b.dich_vu);
+      const chip_dv = dv
+        ? '<span class="qt-nhan-nho qt-nhan-dv">' + thoat(dv.ten) + "</span>"
+        : "";
       // Bài chưa đăng thì chưa có trang trên web, mở ra chỉ ra lỗi 404 — nên
       // nút "Mở" chỉ hiện với bài đã đăng.
       const nut_mo = b.da_dang
@@ -189,6 +205,7 @@ import VetLoi from "../components/VetLoi.astro";
         '  <div class="qt-bai-giua">' +
         '    <p class="qt-bai-tieu-de">' + thoat(b.tieu_de) + the + noi_bat + "</p>" +
         '    <p class="qt-bai-meta">' + thoat(b.slug) + " · đăng " + thoat(b.ngay_dang) + "</p>" +
+        (chip_muc || chip_dv ? '    <p class="qt-bai-chip">' + chip_muc + chip_dv + "</p>" : "") +
         "  </div>" +
         '  <div class="qt-bai-nut">' +
         nut_mo +

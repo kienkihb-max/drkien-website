@@ -7,6 +7,10 @@
 // thảo dùng lại admin-soan-thao.js của trang cũ nguyên xi — phần nâng cấp
 // soạn thảo làm ở bước sau.
 import VetLoi from "../../components/VetLoi.astro";
+// Danh sách dịch vụ lấy thẳng từ nguồn duy nhất của site, in sẵn thành các
+// dòng <option> lúc dựng trang. Chép tay tên dịch vụ vào đây là có bản thứ
+// hai, đổi tên bên kia thì ô chọn này nói tên cũ mà chẳng ai hay.
+import { DICH_VU } from "../../data/dich-vu.mjs";
 ---
 
 <!DOCTYPE html>
@@ -70,16 +74,47 @@ import VetLoi from "../../components/VetLoi.astro";
              có sẵn — cắt là mất chữ mà người viết không kịp thấy. -->
         <input class="qt-o" type="text" id="o-tieu-de" maxlength="70" data-dem="70" required>
 
-        <label class="qt-nhan" for="o-nhan">Chuyên mục</label>
-        <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là những
-             mục các bài đang dùng, gom lại lúc mở trang. Thêm bảng nữa là
-             thêm chỗ để lệch — sửa tên mục ở bảng mà bài vẫn giữ tên cũ. -->
-        <select class="qt-o qt-o-chon" id="o-nhan">
-          <option value="">— Chưa chọn —</option>
-        </select>
-        <!-- Chỉ hiện khi chọn "Mục mới". Gõ xong thì Lưu là mục đó có mặt
-             trong danh sách của những bài sau. -->
-        <input class="qt-o qt-o-chon" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
+        <!-- Hai ô cùng dạng "chọn một" nên đứng cạnh nhau, đỡ tốn một tầng
+             cuộn. Icon ở đầu nhãn để liếc qua là phân biệt được: hai ô nhìn
+             y hệt nhau mà ý nghĩa khác hẳn — một cái nói bài THUỘC lĩnh vực
+             nào, một cái nói bài DẪN TỚI dịch vụ nào. -->
+        <div class="qt-hai-o">
+          <div>
+            <label class="qt-nhan" for="o-nhan">
+              <svg class="qt-nhan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/>
+                <circle cx="7.5" cy="7.5" r="1.2"/>
+              </svg>
+              Chuyên mục
+            </label>
+            <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là
+                 những mục các bài đang dùng, gom lại lúc mở trang. Thêm bảng
+                 nữa là thêm chỗ để lệch — sửa tên mục ở bảng mà bài vẫn giữ
+                 tên cũ. -->
+            <select class="qt-o qt-o-chon" id="o-nhan">
+              <option value="">— Chưa chọn —</option>
+            </select>
+            <!-- Chỉ hiện khi chọn "Mục mới". Gõ xong thì Lưu là mục đó có
+                 mặt trong danh sách của những bài sau. -->
+            <input class="qt-o qt-o-chon" type="text" id="o-nhan-moi" placeholder="Tên chuyên mục mới" hidden>
+          </div>
+
+          <div>
+            <label class="qt-nhan" for="o-dich-vu">
+              <svg class="qt-nhan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="7" width="18" height="13" rx="2"/>
+                <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Dịch vụ liên quan
+            </label>
+            <select class="qt-o qt-o-chon" id="o-dich-vu">
+              <option value="">— Không gắn —</option>
+              {DICH_VU.map((d) => <option value={d.duong_dan}>{d.ten}</option>)}
+            </select>
+          </div>
+        </div>
 
         <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
         <!-- Chặn cứng 300 ký tự, và ô cao sẵn 4 dòng — đo trong trình duyệt
@@ -685,6 +720,7 @@ import VetLoi from "../../components/VetLoi.astro";
       slug: o("o-slug").value.trim(),
       tieu_de: o("o-tieu-de").value.trim(),
       nhan: docChuyenMuc(),
+      dich_vu: (o("o-dich-vu") as unknown as HTMLSelectElement).value || null,
       lead: o("o-lead").value.trim() || null,
       than_bai: bo_soan ? bo_soan.layHTML() : "",
       // Mỗi dòng một tài liệu. Dòng trống bị bỏ, nên xuống dòng thừa không
@@ -709,6 +745,10 @@ import VetLoi from "../../components/VetLoi.astro";
     o("o-tieu-de").value = d.tieu_de ?? "";
     o("o-slug").value = d.slug ?? "";
     dienChuyenMuc(d.nhan ?? "");
+    // Bài cũ lưu một dịch vụ nay đã đổi đường dẫn thì ô chọn không khớp giá
+    // trị nào và tự về "— Không gắn —" — thà vậy còn hơn hiện một dịch vụ
+    // không còn tồn tại.
+    (o("o-dich-vu") as unknown as HTMLSelectElement).value = d.dich_vu ?? "";
     o("o-lead").value = d.lead ?? "";
     o("o-anh").value = d.anh ?? "";
     o("o-anh-alt").value = d.anh_alt ?? "";

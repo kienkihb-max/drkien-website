@@ -38,8 +38,23 @@ create table if not exists bai_viet (
   -- Thân bài, dạng HTML đã lọc sạch bởi trình soạn thảo.
   than_bai   text not null default '',
 
-  -- Nhãn trên đầu bài, dạng "Blog · Y học cổ truyền".
+  -- Nhãn trên đầu bài, dạng "Blog · Y học cổ truyền". Phần sau dấu · là
+  -- chuyên mục, và chính nó sinh ra trang /blog/<chuyên-mục>.
   nhan       text,
+
+  -- Dịch vụ mà bài này dẫn người đọc tới, lưu bằng đường dẫn trang dịch vụ:
+  -- "/dieu-tri", "/y-te-su-kien", "/dien-gia-seminar". Bài hiện ở khối "Bài
+  -- viết liên quan" cuối trang dịch vụ đó.
+  --
+  -- KHÁC chuyên mục: chuyên mục nói bài THUỘC lĩnh vực nào, cột này nói bài
+  -- DẪN TỚI dịch vụ nào. Một bài về Y học cổ truyền vẫn có thể dẫn tới trang
+  -- Y tế sự kiện, nên không suy được cột này từ cột kia — trước đây trang
+  -- dịch vụ lấy bài bằng một bảng gắn cứng "dịch vụ ↔ chuyên mục" và vướng
+  -- đúng chỗ đó.
+  --
+  -- Lưu đường dẫn chứ không lưu tên: tên dịch vụ còn đổi, đường dẫn thì
+  -- không (đổi là chết link cũ).
+  dich_vu    text,
 
   -- Danh mục "Tài liệu tham khảo" ở cuối bài, mỗi phần tử là một mục.
   -- Tách riêng khỏi than_bai vì nó được dàn trang bằng khối .article-refs

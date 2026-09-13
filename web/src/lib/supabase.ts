@@ -31,6 +31,8 @@ export interface BaiViet {
   lead: string | null;
   than_bai: string;
   nhan: string | null;
+  /** Dịch vụ bài này dẫn tới, lưu bằng đường dẫn trang: "/dieu-tri". */
+  dich_vu: string | null;
   /** Danh mục "Tài liệu tham khảo", mỗi phần tử là một mục (có thể chứa HTML). */
   tai_lieu: string[];
   anh: string | null;

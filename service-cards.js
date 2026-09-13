@@ -12,45 +12,19 @@
 // Nạp <script src="service-cards.js"></script> sau site-footer.js và TRƯỚC
 // script.js / sticky-cta.js, để hai file đó nhìn thấy các thẻ vừa dựng.
 (function () {
-  // ——— Nội dung, sửa ở đây ———
-  // Số Zalo lấy từ thong-tin.js — nguồn duy nhất cho toàn site.
+  // ——— Dữ liệu: KHÔNG sửa ở đây ———
+  // Tên, mô tả, ảnh của ba dịch vụ nằm ở web/src/data/dich-vu.mjs —
+  // nguồn duy nhất mà header, footer và breadcrumb cũng đọc. File đó được
+  // dong-bo-tinh.mjs nấu thành window.DICH_VU lúc build.
+  //
+  // Sửa tên một dịch vụ ở đây là tạo bản sao thứ hai, và bản sao đó sẽ
+  // lệch với phần còn lại của site đúng vào lần sửa sau.
   var ZALO = window.THONG_TIN.ZALO;
-  var CHU_NUT_XEM = "Tìm hiểu thêm";
-
-  // Tiêu đề khối "Xem thêm" ở cuối các trang dịch vụ
-  var XEM_THEM_NHAN = "Xem thêm";
-  var XEM_THEM_TIEU_DE = "Các dịch vụ khác mình cung cấp";
-
-  var DICH_VU = [
-    {
-      href: "y-te-su-kien",
-      ten: "Y tế sự kiện thể thao",
-      mo_ta:
-        "Hỗ trợ y tế, sơ cứu chấn thương cho các giải chạy, giải đấu thể thao phong trào.",
-      anh: "assets/img/sports-seagames31.jpg",
-      alt: "Y tế sự kiện thể thao",
-      chu_nut_lien_he: "Liên hệ hợp tác",
-    },
-    {
-      href: "dien-gia-seminar",
-      ten: "Diễn giả tại seminar",
-      mo_ta:
-        "Chia sẻ chuyên môn tại workshop, seminar chăm sóc sức khỏe cho doanh nghiệp, trường học.",
-      anh: "assets/img/offer-dien-gia-tigren.jpg",
-      alt: "Diễn giả tại seminar sức khỏe",
-      chu_nut_lien_he: "Liên hệ hợp tác",
-    },
-    {
-      href: "dieu-tri",
-      ten: "Thăm khám & điều trị",
-      mo_ta:
-        "Châm cứu, vật lý trị liệu cho đau cơ xương khớp và chấn thương thể thao.",
-      anh: "assets/img/offer-dien-cham-phong-dieu-tri.jpg",
-      alt: "Bác sĩ Lê Trung Kiên điều chỉnh máy điện châm cho người bệnh tại phòng điều trị, kết hợp đèn hồng ngoại",
-      chu_nut_lien_he: "Tư vấn điều trị",
-    },
-  ];
-
+  var DICH_VU = window.DICH_VU || [];
+  var CHU = window.DICH_VU_CHU || {};
+  var CHU_NUT_XEM = CHU.CHU_NUT_XEM;
+  var XEM_THEM_NHAN = CHU.XEM_THEM_NHAN;
+  var XEM_THEM_TIEU_DE = CHU.XEM_THEM_TIEU_DE;
   function thoat(s) {
     return String(s)
       .replace(/&/g, "&amp;")
@@ -63,12 +37,12 @@
   function theDichVu(dv) {
     return [
       '<div class="offer-card service-card">',
-      '  <div class="offer-img"><img src="' + thoat(dv.anh) + '" alt="' + thoat(dv.alt) + '" loading="lazy"></div>',
+      '  <div class="offer-img"><img src="' + thoat(dv.anh) + '" alt="' + thoat(dv.anh_alt) + '" loading="lazy"></div>',
       "  <h3>" + thoat(dv.ten) + "</h3>",
       "  <p>" + thoat(dv.mo_ta) + "</p>",
       '  <div class="offer-actions">',
-      '    <a class="btn btn-main btn-sm" href="' + ZALO + '" target="_blank" rel="noopener">' + thoat(dv.chu_nut_lien_he) + "</a>",
-      '    <a class="btn btn-outline btn-sm" href="' + thoat(dv.href) + '">' + thoat(CHU_NUT_XEM) + "</a>",
+      '    <a class="btn btn-main btn-sm" href="' + ZALO + '" target="_blank" rel="noopener">' + thoat(dv.chu_nut) + "</a>",
+      '    <a class="btn btn-outline btn-sm" href="' + thoat(dv.duong_dan) + '">' + thoat(CHU_NUT_XEM) + "</a>",
       "  </div>",
       "</div>",
     ].join("\n");
@@ -93,7 +67,7 @@
 
   var trangHienTai = tenTrang(window.location.pathname);
   var khac = DICH_VU.filter(function (dv) {
-    return tenTrang(dv.href) !== trangHienTai;
+    return tenTrang(dv.duong_dan) !== trangHienTai;
   });
   if (khac.length === 0) {
     khoi.remove();

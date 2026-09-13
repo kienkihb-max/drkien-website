@@ -11,17 +11,18 @@ interface Props {
   /** Tên trang hiện tại, dạng slug không đuôi: "blog", "dieu-tri"… */
   trang?: string;
 }
+import { DICH_VU } from "../data/dich-vu.mjs";
+
 const { trang = "" } = Astro.props;
 const la_trang_chu = trang === "" || trang === "index";
 
 // Trên trang chủ neo thẳng tới section; ở trang con phải quay về "/" trước.
 const toiTrangChu = (neo: string) => (la_trang_chu ? neo : "/" + neo);
 
-const MUC_DICH_VU = [
-  { trang: "/y-te-su-kien", chu: "Y tế sự kiện" },
-  { trang: "/dien-gia-seminar", chu: "Diễn giả" },
-  { trang: "/dieu-tri", chu: "Điều trị" },
-];
+// Tên dịch vụ lấy từ data/dich-vu.mjs — nguồn duy nhất cho toàn site.
+// Đừng rút gọn lại cho vừa menu: ba chỗ tự đặt tên ngắn khác nhau chính
+// là thứ đã làm người đọc tưởng có nhiều dịch vụ hơn thực tế.
+const MUC_DICH_VU = DICH_VU.map((d) => ({ trang: d.duong_dan, chu: d.ten }));
 ---
 
 <header class="site-header" id={la_trang_chu ? "top" : undefined}>

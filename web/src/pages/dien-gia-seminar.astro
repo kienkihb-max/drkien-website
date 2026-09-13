@@ -4,6 +4,8 @@
 // thì sửa ở mấy dòng thuộc tính ngay dưới đây, đừng thêm thẻ meta vào thân.
 import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
+import { timDichVu } from "../data/dich-vu.mjs";
+import BaiCuaDichVu from "../components/BaiCuaDichVu.astro";
 ---
 
 <Trang
@@ -18,7 +20,7 @@ import DuongDan from "../components/DuongDan.astro";
 >
 <section class="section cv-hero">
     <div class="container">
-      <DuongDan hien_tai="Diễn giả tại seminar" />
+      <DuongDan hien_tai={timDichVu("dien-gia-seminar").ten} />
       <h1>Diễn giả tại workshop, seminar sức khỏe</h1>
       <p class="lead">
         Với nền tảng chuyên môn Y học cổ truyền và kinh nghiệm giảng dạy tại các trường y dược,
@@ -88,6 +90,8 @@ import DuongDan from "../components/DuongDan.astro";
       </div>
     </div>
   </section>
+
+  <BaiCuaDichVu dich_vu="dien-gia-seminar" nen_xam />
 
   <!-- Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong file đó -->
   <section class="section service-related"></section>

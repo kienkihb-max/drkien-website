@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="markMoiTitle">
+<title id="markMoiTitle">Chạy bộ cùng bác sĩ Kiên</title>
+<!--
+  Bản vẽ lại từ mẫu logo xanh lá — giữ nguyên bố cục của mẫu (vòng tròn,
+  củ sâm và lá bên trái, kim châm cứu phía trên, người chạy ở giữa, mặt
+  trời + núi + đường chạy bên phải), nhưng chuyển toàn bộ sang bộ xanh
+  dương đang dùng trên web:
+
+    #1e3a6e  navy    vòng ngoài, người chạy, núi xa
+    #3364db          lá, núi gần, dải lụa
+    #3874ff          thân và rễ sâm, đường chạy
+    #7fa8ff  nhạt    mặt trời, kim châm cứu (thay sắc vàng đồng của mẫu)
+    #f3f6ff          đĩa nền
+
+  Đổi màu thì tìm và thay năm mã màu trên, không cần phần mềm đồ hoạ.
+
+  Bố cục chia vùng để các hình không chen nhau — sửa toạ độ thì giữ đúng
+  ranh giới này, nếu không củ sâm sẽ đè lên chân người chạy:
+    kim châm cứu  x 120–210, y  58–150
+    lá và củ sâm  x  62–190, y 130–402
+    người chạy    quanh tâm (292, 258)
+    mặt trời      (396, 168)
+    núi           x 296–462, y 232–330
+    đường chạy    từ (140, 412) sang (452, 300)
+
+  Đây là bản KHÔNG CHỮ, dùng cho cỡ nhỏ (header, chân trang, favicon).
+  Bản có chữ là logo-bs-kien-moi.svg — sửa dáng thì sửa song song cả hai.
+-->
+
+<defs>
+  <!-- Vòng ngoài chuyển sắc: đậm ở dưới trái, sáng dần lên trên phải,
+       giống hướng chuyển sắc của mẫu gốc. -->
+  <linearGradient id="vongNgoai" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#1e3a6e"/>
+    <stop offset="0.55" stop-color="#3364db"/>
+    <stop offset="1" stop-color="#7fa8ff"/>
+  </linearGradient>
+  <linearGradient id="duongChay" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#3874ff"/>
+    <stop offset="1" stop-color="#7fa8ff"/>
+  </linearGradient>
+  <!-- Cắt cảnh núi và đường chạy theo đúng đĩa nền, để chúng không tràn
+       ra ngoài vòng tròn. -->
+  <clipPath id="trongDia">
+    <circle cx="256" cy="256" r="232"/>
+  </clipPath>
+</defs>
+
+<!-- Đĩa nền và vòng ngoài -->
+<circle cx="256" cy="256" r="232" fill="#f3f6ff"/>
+<circle cx="256" cy="256" r="232" fill="none" stroke="url(#vongNgoai)" stroke-width="14"/>
+
+<g clip-path="url(#trongDia)">
+  <!-- ——— Cảnh bên phải: mặt trời, núi, đường chạy ——— -->
+  <circle cx="396" cy="168" r="28" fill="#7fa8ff"/>
+  <path d="M296 330 L348 246 L392 306 L416 268 L462 330 Z" fill="#3364db" opacity="0.85"/>
+  <path d="M336 330 L378 262 L420 330 Z" fill="#1e3a6e" opacity="0.5"/>
+  <!-- Đường chạy uốn từ góc dưới trái ra phía chân trời bên phải -->
+  <path d="M140 412 C 236 400 282 360 314 330 C 346 300 396 292 452 300"
+        fill="none" stroke="url(#duongChay)" stroke-width="30" stroke-linecap="round"/>
+  <path d="M176 392 C 254 378 288 348 316 322"
+        fill="none" stroke="#f3f6ff" stroke-width="5" stroke-linecap="round" opacity="0.75"/>
+</g>
+
+<!-- ——— Kim châm cứu phía trên, kèm dải lụa uốn ——— -->
+<g stroke-linecap="round">
+  <path d="M138 150 L152 74" stroke="#7fa8ff" stroke-width="7"/>
+  <path d="M166 146 L172 66" stroke="#7fa8ff" stroke-width="7"/>
+  <path d="M194 150 L192 74" stroke="#7fa8ff" stroke-width="7"/>
+</g>
+<circle cx="152" cy="70" r="9" fill="#7fa8ff"/>
+<circle cx="172" cy="62" r="9" fill="#7fa8ff"/>
+<circle cx="192" cy="70" r="9" fill="#7fa8ff"/>
+<!-- Dải lụa luồn qua chân ba cây kim -->
+<path d="M126 166 C 176 146 140 118 186 102"
+      fill="none" stroke="#3364db" stroke-width="9" stroke-linecap="round"/>
+
+<!-- ——— Củ sâm và lá bên trái ——— -->
+<!-- Ba lá toả lên từ cổ củ -->
+<path d="M122 196 C 80 172 66 208 110 228 C 130 236 132 216 122 196 Z" fill="#3364db"/>
+<path d="M130 172 C 118 128 160 124 160 166 C 160 186 144 192 130 172 Z" fill="#1e3a6e"/>
+<path d="M152 200 C 176 164 208 192 176 218 C 162 230 148 218 152 200 Z" fill="#3364db"/>
+<!-- Thân củ, thuôn dần xuống -->
+<path d="M128 224 C 156 216 168 232 160 258 C 154 280 140 292 128 284 C 116 276 112 242 128 224 Z"
+      fill="#3874ff"/>
+<!-- Chùm rễ toả xuống dưới trái -->
+<g fill="none" stroke="#3874ff" stroke-linecap="round">
+  <path d="M132 282 C 122 320 110 352 92 380" stroke-width="9"/>
+  <path d="M144 286 C 146 326 142 362 132 396" stroke-width="8"/>
+  <path d="M156 278 C 172 310 180 342 180 374" stroke-width="7"/>
+  <path d="M122 274 C 100 298 84 318 68 330" stroke-width="6"/>
+  <path d="M150 282 C 162 314 166 330 164 350" stroke-width="5"/>
+</g>
+
+<!-- ——— Người chạy ở giữa ———
+     Dáng chép từ logo-bs-kien-mark.svg nhưng vẽ một màu duy nhất để đọc
+     ra bóng người đặc như mẫu mới, thay vì hình que nhiều màu như bản cũ.
+     Sửa toạ độ là đổi dáng; nét bo tròn đầu nên các khúc tự nối liền. -->
+<g transform="translate(292,258) scale(1.08) translate(-246,-231)"
+   fill="none" stroke="#1e3a6e" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M240 258 L192 300 L150 340" stroke-width="27"/>
+  <path d="M278 194 L226 212" stroke-width="23"/>
+  <path d="M292 180 L240 258 L302 246 L272 306" stroke-width="30"/>
+  <path d="M292 184 L334 204 L342 170" stroke-width="23"/>
+  <!-- hai bàn chân -->
+  <path d="M150 340 L126 348" stroke-width="16"/>
+  <path d="M272 306 L296 314" stroke-width="16"/>
+  <circle cx="312" cy="148" r="27" fill="#1e3a6e" stroke="none"/>
+</g>
+</svg>

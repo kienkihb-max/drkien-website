@@ -316,7 +316,23 @@ h4 { font-size: var(--fs-base); }
   visibility: visible;
   transform: translateY(0);
 }
-.nav-dropdown-menu a { padding: 10px 14px; border-radius: 8px; white-space: nowrap; }
+/* Icon đứng trước chữ, cách một quãng cố định để các dòng thẳng hàng nhau
+   dù tên dịch vụ dài ngắn khác nhau. Màu nhạt hơn chữ: icon ở đây để mắt
+   bắt nhanh từng mục, không phải để tranh phần nổi với tên dịch vụ. */
+.nav-dropdown-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a svg {
+  flex: none;
+  color: var(--text-muted);
+  transition: color .2s ease;
+}
+.nav-dropdown-menu a:hover svg { color: var(--primary); }
 .nav-dropdown-menu a:hover { background: var(--primary-soft); color: var(--primary); }
 
 .nav-toggle {

@@ -12,6 +12,12 @@ interface Props {
   trang?: string;
 }
 import { DICH_VU } from "../data/dich-vu.mjs";
+import { HeartPulse, Presentation, Stethoscope } from "@lucide/astro";
+
+// Khai từng icon một chứ không nhập cả bộ Lucide: nhập cả bộ là kéo theo
+// hơn 1800 icon vào lúc dựng. Thêm dịch vụ mới thì thêm một dòng ở đây cho
+// khớp trường icon trong dich-vu.mjs.
+const ICON = { HeartPulse, Presentation, Stethoscope };
 
 const { trang = "" } = Astro.props;
 const la_trang_chu = trang === "" || trang === "index";
@@ -22,7 +28,11 @@ const toiTrangChu = (neo: string) => (la_trang_chu ? neo : "/" + neo);
 // Tên dịch vụ lấy từ data/dich-vu.mjs — nguồn duy nhất cho toàn site.
 // Đừng rút gọn lại cho vừa menu: ba chỗ tự đặt tên ngắn khác nhau chính
 // là thứ đã làm người đọc tưởng có nhiều dịch vụ hơn thực tế.
-const MUC_DICH_VU = DICH_VU.map((d) => ({ trang: d.duong_dan, chu: d.ten }));
+const MUC_DICH_VU = DICH_VU.map((d) => ({
+  trang: d.duong_dan,
+  chu: d.ten,
+  Icon: ICON[d.icon],
+}));
 ---
 
 <header class="site-header" id={la_trang_chu ? "top" : undefined}>
@@ -44,7 +54,12 @@ const MUC_DICH_VU = DICH_VU.map((d) => ({ trang: d.duong_dan, chu: d.ten }));
           <svg class="icon icon-sm nav-dropdown-arrow"><use href="#ic-chevron-down"/></svg>
         </a>
         <div class="nav-dropdown-menu">
-          {MUC_DICH_VU.map((m) => <a href={m.trang}>{m.chu}</a>)}
+          {MUC_DICH_VU.map((m) => (
+            <a href={m.trang}>
+              {m.Icon && <m.Icon size={17} stroke-width={1.8} />}
+              {m.chu}
+            </a>
+          ))}
         </div>
       </div>
       <a href="/bac-si-le-trung-kien">Giới thiệu</a>

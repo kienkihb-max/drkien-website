@@ -12,6 +12,7 @@ import BaiKhac from "../components/BaiKhac.astro";
 import { layBaiCanSinhFile, layBaiHienLen, type BaiViet } from "../lib/supabase";
 import { GOC, TEN_SITE } from "../data/thong-tin.mjs";
 import { duongDanAnh, laAnhNgoai } from "../lib/co-anh.mjs";
+import { tenChuyenMuc, diaChiChuyenMuc } from "../lib/chuyen-muc";
 
 export async function getStaticPaths() {
   const tat_ca = await layBaiCanSinhFile();
@@ -40,12 +41,12 @@ const mo_ta = bai.seo_mo_ta ?? bai.the_mo_ta ?? "";
 /** Ảnh bìa chụp dọc. Bài cũ chưa ghi kích thước thì coi như ảnh ngang. */
 const anh_bia_doc = !!(bai.anh_rong && bai.anh_cao && bai.anh_cao > bai.anh_rong);
 
-// Nhãn dạng "Blog · Y học cổ truyền" — tách lấy phần chuyên mục cho
-// breadcrumb, còn "Blog" là nấc trỏ về trang danh sách.
-const chuyen_muc = (bai.nhan ?? "")
-  .split("·")
-  .map((s) => s.trim())
-  .filter((s) => s && s !== "Blog");
+// Chuyên mục cho breadcrumb: "Blog" là nấc trỏ về trang danh sách, còn
+// tên mục nay bấm được — dẫn sang trang gom mọi bài cùng mục.
+const ten_muc = tenChuyenMuc(bai.nhan);
+const chuyen_muc = ten_muc
+  ? [{ chu: ten_muc, dia_chi: diaChiChuyenMuc(ten_muc) }]
+  : [];
 
 // Dữ liệu có cấu trúc cho Google. Dựng sẵn phía máy chủ thay vì để JS sinh
 // lúc chạy, vì đây đúng là thứ quyết định bài có được hiện dạng kết quả
@@ -75,7 +76,10 @@ const schema = {
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Trang chủ", item: GOC + "/" },
         { "@type": "ListItem", position: 2, name: "Blog", item: GOC + "/blog" },
-        { "@type": "ListItem", position: 3, name: bai.tieu_de, item: dia_chi },
+        ...(ten_muc
+          ? [{ "@type": "ListItem", position: 3, name: ten_muc, item: GOC + diaChiChuyenMuc(ten_muc) }]
+          : []),
+        { "@type": "ListItem", position: ten_muc ? 4 : 3, name: bai.tieu_de, item: dia_chi },
       ],
     },
   ],
@@ -98,7 +102,7 @@ const schema = {
   <section class="section cv-hero">
     <div class="container">
       <DuongDan
-        giua={[{ chu: "Blog", dia_chi: "/blog" }, ...chuyen_muc.map((c) => ({ chu: c }))]}
+        giua={[{ chu: "Blog", dia_chi: "/blog" }, ...chuyen_muc]}
         hien_tai={bai.tieu_de}
       />
       <h1>{bai.tieu_de}</h1>

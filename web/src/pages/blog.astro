@@ -9,10 +9,12 @@ import Trang from "../layouts/Trang.astro";
 import TheBai from "../components/TheBai.astro";
 import DuongDan from "../components/DuongDan.astro";
 import { layBaiHienLen } from "../lib/supabase";
+import { gomChuyenMuc, diaChiChuyenMuc } from "../lib/chuyen-muc";
 
 const bai = await layBaiHienLen();
 const noi_bat = bai.filter((b) => b.noi_bat);
 const con_lai = bai.filter((b) => !b.noi_bat);
+const muc = gomChuyenMuc(bai);
 
 // Ba bài báo mời viết. Đây là danh sách tay, không thuộc CMS — bài trên báo
 // người khác đăng, không phải bài của site.
@@ -69,6 +71,20 @@ const BAO_CHI = [
         <h2>Ghi chép &amp; chia sẻ chuyên môn</h2>
         <div class="divider mx-auto"></div>
       </div>
+
+      {/* Hàng chuyên mục: 17 bài xếp thành một dãy dài thì người đọc muốn
+          tìm đúng chủ đề mình quan tâm phải lướt hết. Mỗi mục có trang
+          riêng, và đây là đường vào. */}
+      {muc.length > 1 && (
+        <nav class="blog-muc" aria-label="Chuyên mục blog">
+          <span class="blog-muc-nhan blog-muc-dang-xem">Tất cả ({bai.length})</span>
+          {muc.map((m) => (
+            <a class="blog-muc-nhan" href={diaChiChuyenMuc(m.ten)}>
+              {m.ten} ({m.bai.length})
+            </a>
+          ))}
+        </nav>
+      )}
 
       <div class="blog-list">
         {noi_bat.length > 0 && (

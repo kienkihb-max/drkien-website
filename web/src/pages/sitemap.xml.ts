@@ -10,6 +10,7 @@
 
 import type { APIRoute } from "astro";
 import { layBaiHienLen } from "../lib/supabase";
+import { gomChuyenMuc } from "../lib/chuyen-muc";
 import { GOC } from "../data/thong-tin.mjs";
 
 // Trang tĩnh — sửa tay ở đây khi thêm trang mới.
@@ -31,6 +32,15 @@ export const GET: APIRoute = async () => {
   const muc = [
     ...TRANG_TINH,
     { duong_dan: "blog", lastmod: moi_nhat, tan_suat: "weekly", uu_tien: "0.7" },
+    // Trang chuyên mục sinh từ chính chuyên mục các bài đang dùng, nên đặt
+    // thêm mục mới trong CMS là sitemap có thêm địa chỉ — không phải nhớ
+    // chép tay như sitemap đời trước.
+    ...gomChuyenMuc(bai).map((m) => ({
+      duong_dan: "blog/" + m.slug,
+      lastmod: m.bai[0]?.ngay_sua || m.bai[0]?.ngay_dang || moi_nhat,
+      tan_suat: "weekly",
+      uu_tien: "0.65",
+    })),
     // Bài đã gỡ khỏi danh sách (an = true) KHÔNG vào sitemap — trang vẫn
     // sống để link cũ không chết, nhưng không mời Google vào đọc nữa.
     ...bai.map((b) => ({

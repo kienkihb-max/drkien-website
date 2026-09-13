@@ -1,0 +1,110 @@
+---
+// Trang một chuyên mục blog: /blog/y-hoc-the-thao, /blog/y-hoc-co-truyen…
+//
+// MỘT file lo hết mọi chuyên mục. Đặt thêm mục mới trong CMS là có trang
+// mới ngay lần dựng sau, không phải đụng vào code — đúng như thêm bài mới
+// thì có trang bài mới.
+//
+// Bài viết KHÔNG nằm dưới /blog/: địa chỉ bài vẫn là /ten-bai như cũ. Dời
+// bài vào đây là mọi link đã chia sẻ ra ngoài chết hết và bài mất thứ hạng
+// Google — cái giá quá đắt cho một chuyện sắp xếp.
+import Trang from "../../layouts/Trang.astro";
+import TheBai from "../../components/TheBai.astro";
+import DuongDan from "../../components/DuongDan.astro";
+import { layBaiHienLen, type BaiViet } from "../../lib/supabase";
+import { gomChuyenMuc, diaChiChuyenMuc } from "../../lib/chuyen-muc";
+import { GOC } from "../../data/thong-tin.mjs";
+
+export async function getStaticPaths() {
+  const bai = await layBaiHienLen();
+  const muc = gomChuyenMuc(bai);
+  return muc.map((m) => ({
+    params: { muc: m.slug },
+    props: { ten: m.ten, bai_cua_muc: m.bai, muc },
+  }));
+}
+
+interface Props {
+  ten: string;
+  bai_cua_muc: BaiViet[];
+  muc: { ten: string; slug: string; bai: BaiViet[] }[];
+}
+const { ten, bai_cua_muc, muc } = Astro.props;
+
+
+// Mô tả cho Google: nói rõ đây là mục gì và có bao nhiêu bài, thay vì chép
+// lại mô tả chung của trang blog — hai trang cùng một mô tả thì Google phải
+// tự đoán nên hiện trang nào.
+const mo_ta =
+  "Các bài viết về " +
+  ten.toLowerCase() +
+  " của Bác sĩ Lê Trung Kiên — " +
+  bai_cua_muc.length +
+  " bài, cập nhật thường xuyên.";
+
+// Danh sách bài có cấu trúc, để Google hiểu đây là trang gom bài chứ không
+// phải một bài viết.
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: ten + " — Blog Bác sĩ Lê Trung Kiên",
+  description: mo_ta,
+  url: GOC + diaChiChuyenMuc(ten),
+  mainEntity: {
+    "@type": "ItemList",
+    itemListElement: bai_cua_muc.map((b, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: GOC + "/" + b.slug,
+      name: b.tieu_de,
+    })),
+  },
+};
+---
+
+<Trang
+  tieu_de={ten + " — Bác sĩ Lê Trung Kiên"}
+  mo_ta={mo_ta}
+  duong_dan={diaChiChuyenMuc(ten).replace(/^\//, "")}
+  anh_alt="Bác sĩ Lê Trung Kiên — ThS. Y học cổ truyền, Bệnh viện Đa khoa Y học cổ truyền Hà Nội"
+  loai_trang="article"
+  lop_body="subpage"
+  schema={schema}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan giua={[{ chu: "Blog", dia_chi: "/blog" }]} hien_tai={ten} />
+      <h1>{ten}</h1>
+      <p class="lead">
+        {bai_cua_muc.length} bài trong chuyên mục này. Xem tất cả bài viết ở
+        <a href="/blog">trang blog</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <nav class="blog-muc" aria-label="Chuyên mục blog">
+        <a class="blog-muc-nhan" href="/blog">Tất cả</a>
+        {muc.map((m) =>
+          m.ten === ten ? (
+            <span class="blog-muc-nhan blog-muc-dang-xem">{m.ten} ({m.bai.length})</span>
+          ) : (
+            <a class="blog-muc-nhan" href={diaChiChuyenMuc(m.ten)}>
+              {m.ten} ({m.bai.length})
+            </a>
+          )
+        )}
+      </nav>
+
+      {/* Không tách khối "nổi bật" ở đây. Nổi bật là để chỉ đường giữa 17
+          bài đủ chủ đề ngoài trang blog tổng; vào tới chuyên mục thì người
+          đọc đã chọn xong chủ đề, việc còn lại chỉ là xem có bài nào. */}
+      <div class="blog-list">
+        <div class="events-grid">
+          {bai_cua_muc.map((b) => <TheBai bai={b} />)}
+        </div>
+      </div>
+    </div>
+  </section>
+</Trang>

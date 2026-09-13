@@ -587,6 +587,37 @@ h4 { font-size: var(--fs-base); }
 @media (max-width: 720px) {
   .content-media-grid { grid-template-columns: 1fr; }
 }
+/* ——— Hàng chuyên mục ở trang blog ———
+   Nhãn bấm được, xếp ngang, tự xuống dòng khi hẹp. Mục đang xem thì tô đặc
+   để người đọc biết mình đang đứng ở đâu — không có dấu đó thì trang mục
+   nhìn y hệt trang blog tổng. */
+.blog-muc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+.blog-muc-nhan {
+  display: inline-block;
+  padding: 7px 16px;
+  /* Màu viền lấy đúng sắc xanh xám của site. style.css không có biến riêng
+     cho màu viền — cả file chỉ dùng viền ở vài chỗ và mỗi chỗ một kiểu. */
+  border: 1px solid #d7dfeb;
+  border-radius: 99px;
+  background: var(--white);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-heading);
+  transition: border-color .2s ease, color .2s ease;
+}
+a.blog-muc-nhan:hover { border-color: var(--primary-2); color: var(--primary-2); }
+.blog-muc-dang-xem {
+  background: var(--primary-2);
+  border-color: var(--primary-2);
+  color: var(--white);
+}
+
 .events-featured-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

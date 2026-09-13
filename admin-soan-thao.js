@@ -384,9 +384,9 @@ window.SoanThao = (function () {
    * mô tả ảnh khi ảnh chưa có mô tả.
    *
    * Chú thích là chữ người đọc nhìn thấy dưới ảnh; mô tả ảnh (alt) là chữ
-   * dành cho người khiếm thị và cho Google. Hai chỗ này gần như luôn nói
-   * cùng một điều, nên bắt người viết gõ hai lần là thừa — gõ chú thích một
-   * lần, máy lấy làm mô tả.
+   * Google đọc để hiểu trong ảnh có gì. Hai chỗ này gần như luôn nói cùng
+   * một điều, nên bắt người viết gõ hai lần là thừa — gõ chú thích một lần,
+   * máy lấy làm mô tả.
    */
   function donDepAnh(hop) {
     Array.prototype.forEach.call(hop.querySelectorAll("figure"), function (fig) {

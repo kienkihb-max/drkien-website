@@ -68,7 +68,9 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
       <fieldset class="qt-nhom">
         <legend>Nội dung bài viết</legend>
 
-        <label class="qt-nhan" for="o-tieu-de">Tiêu đề bài viết</label>
+        <label class="qt-nhan" for="o-tieu-de">
+          Tiêu đề bài viết <span class="qt-sao" aria-hidden="true">*</span>
+        </label>
         <!-- Chặn cứng 70 ký tự. Bài cũ nào đang dài hơn thì vẫn mở và sửa
              được bình thường; maxlength chỉ chặn gõ thêm chứ không cắt chữ
              có sẵn — cắt là mất chữ mà người viết không kịp thấy. -->
@@ -86,7 +88,7 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
                 <path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/>
                 <circle cx="7.5" cy="7.5" r="1.2"/>
               </svg>
-              Chuyên mục
+              Chuyên mục <span class="qt-sao" aria-hidden="true">*</span>
             </label>
             <!-- Danh sách chuyên mục không phải bảng riêng: nó chính là
                  những mục các bài đang dùng, gom lại lúc mở trang. Thêm bảng
@@ -107,7 +109,7 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
                 <rect x="3" y="7" width="18" height="13" rx="2"/>
                 <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
               </svg>
-              Dịch vụ liên quan
+              Dịch vụ liên quan <span class="qt-sao" aria-hidden="true">*</span>
             </label>
             <select class="qt-o qt-o-chon" id="o-dich-vu">
               <option value="">— Không gắn —</option>
@@ -116,7 +118,7 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
           </div>
         </div>
 
-        <label class="qt-nhan" for="o-lead">Đoạn mở đầu</label>
+        <label class="qt-nhan" for="o-lead">Đoạn mở đầu <span class="qt-sao" aria-hidden="true">*</span></label>
         <!-- Chặn cứng 300 ký tự, và ô cao sẵn 4 dòng — đo trong trình duyệt
              thì 300 ký tự ở bề ngang này chiếm khoảng 3 dòng, nên 4 dòng là
              chứa hết mà vẫn còn dư. Không phải cuộn để đọc lại đoạn mình vừa
@@ -124,7 +126,7 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
         <textarea class="qt-o qt-o-cao" id="o-lead" rows="4"
                   maxlength="300" data-dem="300"></textarea>
 
-        <label class="qt-nhan">Thân bài</label>
+        <label class="qt-nhan">Thân bài <span class="qt-sao" aria-hidden="true">*</span></label>
         <div id="khung-soan"></div>
         <!-- Ô chọn file riêng cho ảnh CHÈN VÀO BÀI. Không dùng chung với ô
              của ảnh bìa: hai việc khác nhau, chung một ô thì chọn ảnh bìa
@@ -142,7 +144,7 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
       </fieldset>
 
       <fieldset class="qt-nhom">
-        <legend>Ảnh bìa</legend>
+        <legend>Ảnh bìa <span class="qt-sao" aria-hidden="true">*</span></legend>
         <p class="qt-goi-y">
           Ảnh này hiện ở đầu bài, trên thẻ ngoài trang blog, và là ảnh người
           ta thấy khi bài được chia sẻ lên Facebook hay Zalo. Ảnh to sẽ tự
@@ -162,12 +164,12 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
              xong, nút này dành cho lúc muốn bài KHÔNG có ảnh bìa. -->
         <button class="qt-nut qt-nut-nguy-nhe" type="button" id="nut-bo-anh" hidden>Xoá ảnh</button>
 
-        <label class="qt-nhan" for="o-anh-alt">Mô tả ảnh bìa</label>
+        <label class="qt-nhan" for="o-anh-alt">
+          Mô tả ảnh bìa <span class="qt-sao" aria-hidden="true">*</span>
+        </label>
         <p class="qt-goi-y">
-          Tả đúng những gì có trong ảnh, cho người khiếm thị và cho Google.
-          Ảnh có mặt bác sĩ thì viết đủ "Bác sĩ Lê Trung Kiên", đừng viết tắt.
-          Chữ này <strong>không hiện trên trang</strong> — khác với chú thích
-          gõ dưới ảnh trong thân bài, chữ đó người đọc nhìn thấy.
+          Google chỉ hiểu được ảnh qua dòng chữ này, và nó không hiện trên
+          trang. Ảnh có bác sĩ thì viết đủ "Bác sĩ Lê Trung Kiên".
         </p>
         <input class="qt-o" type="text" id="o-anh-alt">
 
@@ -181,11 +183,6 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
 
       <fieldset class="qt-nhom">
         <legend>Chữ hiện trên thẻ blog</legend>
-        <p class="qt-goi-y">
-          Đây là chữ người đọc thấy trên thẻ ngoài trang blog. Máy điền sẵn
-          theo tiêu đề và đoạn mở đầu; anh sửa được, và sửa rồi thì máy thôi
-          không điền đè. Tiêu đề bài dài thì đây là chỗ đặt câu ngắn hơn.
-        </p>
 
         <div class="qt-hai-cot">
           <div class="qt-cot-nhap">
@@ -934,12 +931,90 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
    * Bài chưa đăng: ghi thẳng vào bài, vì chính nó đã là bản nháp.
    * Bài đã đăng: ghi sang bảng ban_nhap, bài trên web nguyên vẹn.
    */
+  /**
+   * Soát những ô bắt buộc (đánh dấu * trên nhãn).
+   *
+   * Không chỉ báo lỗi mà còn NHẢY TỚI đúng ô còn thiếu: form này dài hơn một
+   * màn hình, báo "thiếu mô tả ảnh bìa" rồi để người viết tự đi tìm là bắt
+   * họ cuộn lên cuộn xuống dò từng khối.
+   *
+   * Chạy ở cả Lưu lẫn Đăng. Bài lưu dở mà thiếu thì lần sau mở ra vẫn thiếu,
+   * và tới lúc bấm Đăng mới báo thì đã qua mất lúc người viết còn nhớ tấm
+   * ảnh đó chụp gì.
+   *
+   * @returns true nếu điền đủ
+   */
+  function soatOBatBuoc() {
+    // Xét theo đúng thứ tự các ô trên form, để người viết được dẫn đi từ
+    // trên xuống chứ không bị nhảy cóc giữa các khối.
+    const can: { thieu: boolean; o: string; loi: string }[] = [
+      {
+        thieu: !o("o-tieu-de").value.trim(),
+        o: "o-tieu-de",
+        loi: "Chưa có tiêu đề bài viết.",
+      },
+      {
+        // Đường dẫn máy tự sinh từ tiêu đề nên hầu như không thể trống —
+        // giữ lại phòng bài cũ lỡ trống, và chỉ thẳng về ô tiêu đề.
+        thieu: !o("o-slug").value.trim(),
+        o: "o-tieu-de",
+        loi: "Chưa có đường dẫn — thử gõ lại tiêu đề.",
+      },
+      {
+        thieu: !docChuyenMuc(),
+        o: (o("o-nhan") as unknown as HTMLSelectElement).value === MUC_MOI
+          ? "o-nhan-moi"
+          : "o-nhan",
+        loi: "Chưa chọn chuyên mục.",
+      },
+      {
+        thieu: !(o("o-dich-vu") as unknown as HTMLSelectElement).value,
+        o: "o-dich-vu",
+        loi: "Chưa chọn dịch vụ liên quan.",
+      },
+      {
+        thieu: !o("o-lead").value.trim(),
+        o: "o-lead",
+        loi: "Chưa có đoạn mở đầu.",
+      },
+      {
+        thieu: !(bo_soan ? bo_soan.layHTML().trim() : ""),
+        o: "khung-soan",
+        loi: "Thân bài đang trống.",
+      },
+      {
+        thieu: !o("o-anh").value.trim(),
+        o: "tha-anh",
+        loi: "Chưa chọn ảnh bìa.",
+      },
+      {
+        thieu: !!o("o-anh").value.trim() && !o("o-anh-alt").value.trim(),
+        o: "o-anh-alt",
+        loi: "Ảnh bìa chưa có mô tả. Google chỉ hiểu được ảnh qua dòng chữ này.",
+      },
+    ];
+
+    const dau = can.find((c) => c.thieu);
+    if (!dau) return true;
+
+    bao(dau.loi, true);
+    const khoi = el(dau.o);
+    khoi.scrollIntoView({ block: "center", behavior: "smooth" });
+    // Thân bài không phải ô nhập thường: con trỏ phải vào vùng soạn bên
+    // trong, còn khung ảnh thì chẳng có gì để đặt con trỏ, chỉ cuộn tới.
+    const dat_con_tro =
+      dau.o === "khung-soan"
+        ? (khoi.querySelector(".st-vung") as HTMLElement | null)
+        : khoi;
+    if (dat_con_tro && typeof dat_con_tro.focus === "function") {
+      dat_con_tro.focus({ preventScroll: true });
+    }
+    return false;
+  }
+
   async function luu() {
     const d = docForm();
-    if (!d.tieu_de || !d.slug) {
-      bao("Cần có tiêu đề và đường dẫn.", true);
-      return;
-    }
+    if (!soatOBatBuoc()) return;
 
     if (!id_bai) {
       const { data, error } = await supabase
@@ -980,24 +1055,16 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
    * bài y như cũ.
    */
   /**
-   * Nhắc trước khi đăng nếu có ảnh trong bài chưa được gõ chú thích.
+   * Nhắc trước khi đăng nếu ảnh trong THÂN BÀI chưa có chú thích.
    *
-   * Chú thích lúc lưu cũng thành mô tả ảnh (alt), nên ảnh không chú thích là
-   * ảnh câm với người khiếm thị và với Google. Chỉ NHẮC chứ không chặn —
-   * đây là bài của chủ site, có lúc ảnh thật sự không cần nói gì thêm.
+   * Chỉ nhắc chứ không chặn — có lúc tấm ảnh thật sự không cần nói gì thêm,
+   * chặn cứng là bắt gõ cho có. Ảnh BÌA thì khác: nó là ô bắt buộc, soát ở
+   * soatOBatBuoc() và chặn hẳn cả Lưu lẫn Đăng.
    *
    * @returns true nếu được phép đăng tiếp
    */
   function hoiVeAnhThieuChuThich(than_bai: string) {
     const thieu: string[] = [];
-
-    // Ảnh bìa: quan trọng nhất trong bài — nó là ảnh lên Facebook, lên Zalo
-    // và lên thẻ ngoài trang blog. Trước đây chỉ nhắc ảnh trong thân bài,
-    // còn đúng tấm này thì không.
-    if (o("o-anh").value.trim() && !o("o-anh-alt").value.trim()) {
-      thieu.push("• Ảnh bìa chưa có mô tả (ô ngay dưới khung chọn ảnh)");
-    }
-
     const hop = document.createElement("div");
     hop.innerHTML = than_bai;
     const so_anh_bai = [...hop.querySelectorAll("img")].filter(
@@ -1011,17 +1078,15 @@ import { DICH_VU } from "../../data/dich-vu.mjs";
     return confirm(
       "Còn thiếu chữ mô tả ảnh:\n\n" +
         thieu.join("\n") +
-        "\n\nThiếu thì người khiếm thị và Google không biết trong ảnh có gì.\n" +
+        "\n\nThiếu thì Google không biết trong ảnh có gì, và ảnh của " +
+        "bài không lên được Google Hình ảnh.\n" +
         "Bấm Cancel để quay lại điền, hoặc OK để đăng luôn."
     );
   }
 
   async function dang() {
     const d = docForm();
-    if (!d.tieu_de || !d.slug) {
-      bao("Cần có tiêu đề và đường dẫn.", true);
-      return;
-    }
+    if (!soatOBatBuoc()) return;
     if (!id_bai) {
       bao("Lưu bài trước đã.", true);
       return;

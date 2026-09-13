@@ -57,6 +57,14 @@ code { background: #eef2f9; padding: 1px 5px; border-radius: 4px; font-size: 0.9
 }
 .qt-o:focus { outline: 2px solid var(--qt-chinh); outline-offset: 1px; border-color: transparent; }
 .qt-o:disabled { background: #f2f5fa; color: var(--qt-chu-mo); cursor: default; }
+/* Dấu * sau tên trường bắt buộc. Để aria-hidden trên dấu sao: trình đọc
+   màn hình đọc "sao" nghe như một ký tự lạ giữa câu, còn việc báo trường
+   bắt buộc đã có thuộc tính required của ô nhập lo. */
+.qt-sao {
+  color: var(--qt-nguy);
+  font-weight: 700;
+  margin-left: 2px;
+}
 .qt-tu-dong {
   font-size: 0.72rem;
   font-weight: 600;

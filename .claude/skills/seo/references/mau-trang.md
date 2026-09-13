@@ -1,124 +1,78 @@
-# Mẫu `<head>` và khối script
+# Thuộc tính của `Trang.astro`
 
-Chép nguyên rồi thay các chỗ đánh dấu `«...»`. Thứ tự các thẻ không quan
-trọng với trình duyệt, nhưng giữ đúng thứ tự này thì mọi trang giống nhau,
-dễ so sánh khi có gì sai.
+Mọi trang đều bọc trong `<Trang>`. Đây là **chỗ duy nhất** sinh ra thẻ
+`<head>`, nên toàn bộ SEO của một trang nằm ở mấy thuộc tính dưới đây —
+không trang nào tự viết thẻ `<meta>`.
 
-## Bài blog
+File: `web/src/layouts/Trang.astro`
 
-```html
-<!DOCTYPE html>
-<html lang="vi" data-page="article" data-ngay-dang="«2026-08-08»">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>«Tiêu đề ngắn gọn» — Bác sĩ Lê Trung Kiên</title>
-<meta name="description" content="«Mô tả 100–175 ký tự, nói về nội dung bài»">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Tải font không chặn hiển thị: trình duyệt vẽ chữ bằng font hệ thống trước,
-     đổi sang font riêng khi tải xong. Chữ hiện sớm hơn trên mạng chậm. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
-<link rel="canonical" href="https://bacsikien.com/«ten-trang»">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="Bác sĩ Lê Trung Kiên">
-<meta property="og:locale" content="vi_VN">
-<meta property="og:title" content="«giống hệt thẻ title ở trên»">
-<meta property="og:description" content="«giống hệt meta description ở trên»">
-<meta property="og:url" content="https://bacsikien.com/«ten-trang»">
-<meta property="og:image" content="https://bacsikien.com/assets/img/«anh-mo-dau-bai».jpg">
-<meta property="og:image:width" content="«chiều rộng thật của ảnh»">
-<meta property="og:image:height" content="«chiều cao thật của ảnh»">
-<meta property="og:image:alt" content="«mô tả ảnh»">
-<meta property="article:published_time" content="«2026-08-08»T08:00:00+07:00">
-<meta property="article:author" content="Bác sĩ Lê Trung Kiên">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="style.css">
-</head>
+## Bắt buộc
+
+| Thuộc tính | Dùng làm gì |
+|---|---|
+| `tieu_de` | Thẻ `<title>` và `og:title`. Máy **tự nối** " — Bác sĩ Lê Trung Kiên" vào cuối, trừ khi tên đã có sẵn trong chuỗi. Giữ tổng dưới 68 ký tự, tức phần tự viết dưới 45. |
+| `mo_ta` | `<meta name="description">` và `og:description`. Nên 120–160 ký tự, viết trọn ý chứ đừng để bị cắt. |
+| `duong_dan` | Đuôi địa chỉ, **không có gạch chéo đầu và không có đuôi `.html`**: `"blog"`, `"dieu-tri"`, `""` cho trang chủ. Canonical và `og:url` đều dựng từ đây, nên sai một chữ là canonical trỏ sang trang khác. |
+
+## Hay dùng
+
+| Thuộc tính | Mặc định | Dùng làm gì |
+|---|---|---|
+| `anh` | `assets/img/og-share.jpg` | Ảnh hiện khi chia sẻ lên Facebook/Zalo. Đường dẫn tương đối trong site. Kích thước **tự đo từ file lúc build**, không phải ghi tay. |
+| `anh_alt` | `""` | Mô tả ảnh chia sẻ. |
+| `loai` | `"website"` | `"article"` cho bài blog, `"profile"` cho trang hồ sơ bác sĩ. Vào thẻ `og:type`. |
+| `loai_trang` | — | Vào `data-page` của `<html>`. **Chỉ nhận `home`, `service`, `article`** — `style.css` dựa vào đó để đổi giao diện; đặt giá trị lạ là trang mất kiểu. |
+| `lop_body` | — | Thêm class cho `<body>`. Trang con dùng `"subpage"`. |
+| `scripts` | `[]` | Các file JS trong `web/public/` mà riêng trang này cần, ví dụ `["lightbox.js"]`. Header, footer và bộ icon đã dựng sẵn phía máy chủ nên **không khai ở đây**. |
+
+## Ít dùng
+
+| Thuộc tính | Dùng làm gì |
+|---|---|
+| `ngay_dang` | Chỉ cho bài viết. Vào `data-ngay-dang` và `article:published_time`. |
+| `anh_co` | `{ rong, cao }`. **Chỉ cần khi ảnh nằm ngoài site** (Supabase Storage) — lúc đó không có file trên đĩa để đo, nên phải truyền số đã ghi lại lúc tải lên. Ảnh trong repo thì bỏ qua. |
+| `schema` | JSON-LD riêng của trang. Trang bài viết truyền `MedicalScholarlyArticle`, trang chuyên mục truyền `CollectionPage`. |
+| `khong_lap_chi_muc` | Bật cho trang không muốn Google lưu, ví dụ trang 404. Nó thêm `noindex` **và bỏ luôn canonical** — trang 404 mà trỏ canonical về chính nó là đang bảo Google "đây là trang thật, cứ lưu vào". |
+
+## Mẫu một trang dịch vụ
+
+```astro
+---
+import Trang from "../layouts/Trang.astro";
+import DuongDan from "../components/DuongDan.astro";
+import { timDichVu } from "../data/dich-vu.mjs";
+---
+
+<Trang
+  tieu_de="«Nội dung ngắn gọn»"
+  mo_ta="«120–160 ký tự, có nhắc tên Bác sĩ Lê Trung Kiên»"
+  duong_dan="«ten-trang»"
+  anh="assets/img/«anh-chia-se».jpg"
+  anh_alt="«Mô tả ảnh»"
+  loai_trang="service"
+  lop_body="subpage"
+  scripts={["thong-tin.js","seo-schema.js","service-cards.js","sticky-cta.js"]}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan hien_tai={timDichVu("«ten-trang»").ten} />
+      <h1>«Tiêu đề lớn của trang»</h1>
+    </div>
+  </section>
+</Trang>
 ```
 
-Không biết kích thước ảnh thì chạy lệnh này, nó in ra rộng x cao:
+Thêm trang mới thì làm nốt hai việc ngoài file này, nếu không Google sẽ không
+tìm ra nó:
 
-```bash
-node -e "const b=require('fs').readFileSync(process.argv[1]);let i=2;while(i<b.length){if(b[i]===0xff&&b[i+1]>=0xc0&&b[i+1]<=0xcf&&![0xc4,0xc8,0xcc].includes(b[i+1])){console.log(b.readUInt16BE(i+7)+'x'+b.readUInt16BE(i+5));break}i+=2+b.readUInt16BE(i+2)}" assets/img/ten-anh.jpg
-```
+1. Thêm một khối vào `TRANG_TINH` trong `web/src/pages/sitemap.xml.ts`, kèm
+   `lastmod` là ngày hôm nay.
+2. Trỏ ít nhất một liên kết tới nó từ menu, chân trang hoặc một trang khác.
 
-Hoặc cứ điền đại rồi chạy bộ kiểm tra — nó đọc kích thước thật và báo cho
-biết con số đúng là bao nhiêu.
+## Những gì KHÔNG còn phải làm
 
-## Trang thường (dịch vụ, danh sách)
-
-Giống hệt mẫu trên, trừ bốn điểm:
-
-- Thẻ `<html>`: `data-page="service"` (hoặc `"home"` cho trang chủ), **bỏ**
-  `data-ngay-dang`.
-- `og:type` là `website`.
-- **Bỏ** `article:published_time` và `article:author`.
-- Mô tả nên nhắc tên "Bác sĩ Lê Trung Kiên".
-
-## Khối script cuối `<body>`
-
-```html
-<script src="icons.js"></script>
-<script src="thong-tin.js"></script>
-<script src="seo-schema.js"></script>
-<script src="blog-byline.js"></script>   <!-- chỉ bài blog -->
-<script src="site-header.js"></script>
-<script src="site-footer.js"></script>
-<script src="blog-cards.js"></script>    <!-- trang blog và các bài blog -->
-<script src="service-cards.js"></script> <!-- trang chủ và trang dịch vụ -->
-<script src="lightbox.js"></script>      <!-- trang có ảnh bấm vào phóng to -->
-<script src="sticky-cta.js"></script>    <!-- trang dịch vụ -->
-```
-
-Thứ tự có ý nghĩa ở hai chỗ:
-
-- `thong-tin.js` phải trước `seo-schema.js` — schema đọc địa chỉ, giờ làm
-  việc, số Zalo từ đó.
-- `service-cards.js` phải trước `sticky-cta.js` — thanh CTA nhân bản nút từ
-  thẻ dịch vụ đã dựng xong.
-
-## Trang chuyển hướng khi đổi địa chỉ
-
-Khi đổi tên một trang, đừng xóa file cũ. Thay ruột nó bằng đoạn này để link
-đã chia sẻ ra ngoài vẫn dẫn về đúng chỗ, và Google dồn điểm sang trang mới
-thay vì coi là hai trang trùng nội dung:
-
-```html
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=/«ten-trang-moi»">
-<link rel="canonical" href="https://bacsikien.com/«ten-trang-moi»">
-<meta name="robots" content="noindex, follow">
-<title>«Tiêu đề ngắn»</title>
-</head>
-<body>
-<p>Trang đã chuyển tới <a href="/«ten-trang-moi»">«tên trang mới»</a>.</p>
-<script>location.replace("/«ten-trang-moi»");</script>
-</body>
-</html>
-```
-
-Trang chuyển hướng **không** được nằm trong `sitemap.xml`.
-
-## Khối `<url>` cho sitemap.xml
-
-```xml
-  <url>
-    <loc>https://bacsikien.com/«ten-trang»</loc>
-    <lastmod>«2026-08-08»</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-```
-
-`changefreq` và `priority` chỉ là gợi ý cho Google, không phải mệnh lệnh.
-Quy ước đang dùng: trang chủ `weekly`/`1.0`, trang hồ sơ `monthly`/`0.9`,
-trang dịch vụ `monthly`/`0.8`, trang blog `weekly`/`0.7`, bài viết
-`yearly`/`0.6`.
+Site cũ viết tay từng file `.html`, nên tài liệu đời trước bảo phải chép ~20
+dòng thẻ meta, tự khai `data-page`, tự thêm bài vào `blog-cards.js`, tự thêm
+dòng vào khối `<noscript>` ở trang chủ, và giữ đúng thứ tự nạp script. **Không
+còn thứ nào trong số đó.** Header, footer, bộ icon, dòng tác giả, breadcrumb,
+danh sách bài, sitemap — tất cả đều dựng sẵn phía máy chủ.

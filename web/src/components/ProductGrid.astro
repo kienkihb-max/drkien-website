@@ -6,8 +6,11 @@
 // chỗ thứ hai là sau này sửa thẻ phải nhớ sửa hai nơi, và kiểu gì cũng có
 // ngày quên một nơi. Toàn bộ markup lẫn CSS của thẻ nằm gọn trong file này.
 //
+// THẺ CHỈ CÓ ẢNH, ICON VÀ TÊN. Không công dụng, không mô tả — chủ site đã
+// chốt nhiều lần. Muốn biết thêm thì bấm vào thẻ, sang trang chi tiết.
+//
 // Chữ trên thẻ và ảnh đọc từ data/san-pham.mjs, không sửa ở đây.
-import { CHU_BAN_CHAY } from "../data/san-pham.mjs";
+import { CHU_BAN_CHAY, moTaAnh } from "../data/san-pham.mjs";
 import {
   Leaf,
   Footprints,
@@ -38,7 +41,7 @@ const { items } = Astro.props;
             để lưới không so le. Có ảnh rồi thì thêm dòng anh/anh_alt trong
             san-pham.mjs, không phải sửa ở đây. */}
         {m.anh ? (
-          <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+          <img src={"/assets/img/" + m.anh} alt={moTaAnh(m.ten)} loading="lazy" />
         ) : (
           <span class="product-card-noimg">{Icon && <Icon size={56} stroke-width={1.3} />}</span>
         )}
@@ -66,9 +69,11 @@ const { items } = Astro.props;
       gap: 16px;
     }
   }
+  /* Điện thoại vẫn giữ 2 cột. Xuống 1 cột thì mỗi thẻ cao gần hết màn
+     hình, cuộn mãi mới hết 6 món — nhìn như trang chỉ có một sản phẩm. */
   @media (max-width: 520px) {
     .product-grid {
-      grid-template-columns: 1fr;
+      gap: 12px;
     }
   }
 
@@ -100,9 +105,9 @@ const { items } = Astro.props;
   .product-card img {
     display: block;
     width: 100%;
-    /* Khổ DỌC. Ảnh gốc hầu như đều chụp dọc (chai cồn, túi bột, xấp thang),
-       xén ngang thì chỉ còn một dải giữa, nhìn không ra là sản phẩm gì. */
-    aspect-ratio: 3 / 4;
+    /* Khổ VUÔNG. Ảnh đã cắt sẵn 1:1 từ ảnh gốc nên ở đây không xén thêm
+       gì — object-fit: cover chỉ để phòng khi có ảnh lạc khổ. */
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     background: #f1f1f1;
   }
@@ -115,7 +120,7 @@ const { items } = Astro.props;
     align-items: center;
     justify-content: center;
     width: 100%;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 1 / 1;
     background: #f2f5fb;
     color: var(--primary);
     opacity: 0.55;
@@ -143,6 +148,8 @@ const { items } = Astro.props;
   }
 
   .product-card-title {
+    /* Giãn ra lấp chiều cao thừa, để tên vẫn nằm giữa phần trắng dưới ảnh
+       kể cả khi thẻ bên cạnh có tên dài hơn một dòng. */
     flex: 1;
     display: flex;
     align-items: center;
@@ -151,8 +158,31 @@ const { items } = Astro.props;
     margin: 0;
     padding: 16px 14px;
     font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    /* Khai rõ cỡ chữ thay vì ăn theo cỡ h3 chung của site (20px): thẻ chỉ
+       rộng hơn 160px trên điện thoại, 20px là tên dài vỡ thành ba dòng. */
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--primary);
     text-align: center;
+  }
+
+  /* Trên điện thoại tên căn trái: căn giữa thì tên dài vỡ hai dòng xong
+     nhìn lệch hẳn so với thẻ tên ngắn bên cạnh. */
+  @media (max-width: 720px) {
+    .product-card-title {
+      justify-content: flex-start;
+      align-items: flex-start;
+      text-align: left;
+      gap: 6px;
+      padding: 12px 10px;
+      font-size: 0.9rem;
+    }
+    /* Icon không được co lại khi tên dài, và nhích xuống 2px cho khớp đường
+       chân chữ của dòng đầu — căn giữa theo chiều dọc thì nó trôi xuống
+       khoảng giữa hai dòng, trông như rơi ra khỏi chữ. */
+    .product-card-title svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
   }
 </style>

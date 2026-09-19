@@ -81,6 +81,25 @@
  */
 
 /**
+ * Mô tả ảnh (thuộc tính alt) cho MỌI ảnh sản phẩm, theo một khuôn duy nhất
+ * do chủ site chốt:
+ *
+ *     <tên món> — tự bào chế bởi Bác sĩ Lê Trung Kiên
+ *
+ * Thẻ ở trang danh sách, ảnh to lẫn dải ảnh nhỏ trong album đều gọi hàm
+ * này, nên đổi khuôn ở đây là đổi khắp site.
+ *
+ * Trường anh_alt của từng ảnh vì thế KHÔNG còn hiện ra trang nữa. Vẫn giữ
+ * trong dữ liệu để biết tấm nào chụp gì, và để quay lại lối cũ được nếu
+ * chủ site đổi ý.
+ *
+ * @param {string} ten Tên món, ví dụ "Bột tam thất"
+ */
+export function moTaAnh(ten) {
+  return ten + " — tự bào chế bởi Bác sĩ Lê Trung Kiên";
+}
+
+/**
  * Chữ trên nhãn góc ảnh. Để một chỗ vì nó lặp trên nhiều thẻ — sửa ở đây là
  * đổi hết, khỏi phải dò từng món.
  */

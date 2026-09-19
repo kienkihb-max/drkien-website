@@ -1,0 +1,245 @@
+---
+// Trang chi tiết từng sản phẩm: /san-pham/<slug>
+//
+// Nội dung KHÔNG nằm ở đây — tên, ảnh, công dụng, thành phần đọc từ
+// data/san-pham.mjs. Sửa chữ thì sửa file đó.
+//
+// Mục nào trong dữ liệu để mảng rỗng thì trang BỎ HẲN mục đó, không in ra
+// một tiêu đề trống. Chủ ý: công dụng và thành phần chỉ được chép từ nhãn
+// sản phẩm thật, món nào chưa có chữ thì thà thiếu mục còn hơn bịa ra.
+import Trang from "../../layouts/Trang.astro";
+import DuongDan from "../../components/DuongDan.astro";
+import { SAN_PHAM, CHU_NUT_TU_VAN, CHU_NUT_MUA } from "../../data/san-pham.mjs";
+import { GOI_DIEN, SO_ZALO } from "../../data/thong-tin.mjs";
+import { Leaf, Footprints, Droplets, BottleWine, FlaskConical } from "@lucide/astro";
+
+// Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
+// 1800 icon vào lúc dựng.
+const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
+
+export function getStaticPaths() {
+  return SAN_PHAM.map((mon) => ({ params: { slug: mon.slug }, props: { mon } }));
+}
+
+const { mon } = Astro.props;
+const Icon = ICON[mon.icon];
+
+// Ảnh đại diện luôn đứng đầu album, khỏi phải khai lại nó trong mảng album
+// của từng món — khai hai lần là có ngày hai chỗ lệch nhau.
+const anh_album = [{ anh: mon.anh, alt: mon.anh_alt }, ...(mon.album ?? [])];
+
+// Các mục nội dung. Gom thành mảng để trang chỉ duyệt một vòng, thêm mục
+// mới chỉ phải thêm một dòng ở đây.
+const MUC = [
+  { tieu_de: "Công dụng", icon: "ic-activity", dong: mon.cong_dung },
+  { tieu_de: "Thành phần", icon: "ic-scan", dong: mon.thanh_phan },
+  { tieu_de: "Đối tượng sử dụng", icon: "ic-run", dong: mon.doi_tuong },
+  { tieu_de: "Cách dùng", icon: "ic-clock", dong: mon.cach_dung },
+  { tieu_de: "Lưu ý & bảo quản", icon: "ic-shield", dong: mon.luu_y },
+].filter((m) => m.dong?.length > 0);
+---
+
+<Trang
+  tieu_de={mon.ten}
+  mo_ta={mon.mo_ta_seo}
+  duong_dan={"san-pham/" + mon.slug}
+  anh={"assets/img/" + mon.anh}
+  anh_alt={mon.anh_alt}
+  loai_trang="service"
+  lop_body="subpage"
+  scripts={["thong-tin.js", "seo-schema.js", "service-cards.js", "lightbox.js", "sticky-cta.js"]}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan giua={[{ chu: "Sản phẩm", dia_chi: "/san-pham" }]} hien_tai={mon.ten} />
+      <h1>{Icon && <Icon size={30} stroke-width={1.7} />} {mon.ten}</h1>
+    </div>
+  </section>
+
+  <section class="section chi-tiet">
+    <div class="container chi-tiet-grid">
+      {/* ——— Album: một ảnh to, dải ảnh nhỏ bên dưới ——— */}
+      <div class="album">
+        <div class="album-lon">
+          <img
+            id="anhLon"
+            src={"/assets/img/" + anh_album[0].anh}
+            alt={anh_album[0].alt}
+            width="900"
+            height="1200"
+          />
+        </div>
+        {anh_album.length > 1 && (
+          <div class="album-nho" role="list">
+            {anh_album.map((a, i) => (
+              <button
+                class:list={["album-nut", i === 0 && "dang-chon"]}
+                type="button"
+                role="listitem"
+                data-anh={"/assets/img/" + a.anh}
+                data-alt={a.alt}
+                aria-label={"Xem ảnh: " + a.alt}
+              >
+                <img src={"/assets/img/" + a.anh} alt="" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ——— Chữ và hai nút ——— */}
+      <div class="chi-tiet-chu">
+        {MUC.map((m) => (
+          <div class="muc">
+            <h2><svg class="icon icon-sm"><use href={"#" + m.icon}/></svg> {m.tieu_de}</h2>
+            <ul class="list-check">
+              {m.dong.map((d) => <li>{d}</li>)}
+            </ul>
+          </div>
+        ))}
+
+        {MUC.length === 0 && (
+          <p class="lead">
+            Món này mình chưa kịp viết phần giới thiệu lên trang. Bạn cứ nhắn Zalo, mình nói rõ
+            thành phần và cách dùng cho đúng với tình trạng của bạn.
+          </p>
+        )}
+
+        <div class="chi-tiet-nut">
+          <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+            {CHU_NUT_TU_VAN} <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+          </a>
+          <a class="btn btn-outline btn-icon" href={GOI_DIEN}>
+            <svg class="icon icon-sm"><use href="#ic-chat"/></svg> {CHU_NUT_MUA}: {SO_ZALO}
+          </a>
+        </div>
+        <p class="chi-tiet-ghi-chu">
+          Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      {/* Không có khối địa chỉ / giờ đón khách ở đây: chủ site đã bỏ. Hai
+          thứ đó vẫn nằm sẵn ở chân trang trên mọi trang. Đừng thêm lại. */}
+      <p class="cv-link-wrap">
+        <a class="btn btn-primary btn-icon" href="/san-pham">
+          Xem tất cả sản phẩm <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  {/* Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong dich-vu.mjs */}
+  <section class="section service-related"></section>
+</Trang>
+
+<script>
+  // Bấm ảnh nhỏ thì đổi ảnh to. Chỉ đổi src và alt chứ không dựng lại thẻ
+  // <img>: lightbox.js đã gắn sự kiện vào đúng thẻ đó lúc trang tải xong,
+  // thay thẻ mới là mất luôn tính năng bấm để phóng to.
+  const anh_lon = document.getElementById("anhLon");
+  const nut = document.querySelectorAll(".album-nut");
+  nut.forEach((n) => {
+    n.addEventListener("click", () => {
+      anh_lon.src = n.dataset.anh;
+      anh_lon.alt = n.dataset.alt;
+      nut.forEach((k) => k.classList.remove("dang-chon"));
+      n.classList.add("dang-chon");
+    });
+  });
+</script>
+
+<style>
+  /* Chỉ trang này dùng nên để trong <style> của trang, không thêm vào
+     style.css. Astro tự giới hạn phạm vi khối này cho riêng trang. */
+
+  h1 .lucide {
+    vertical-align: -0.12em;
+    margin-right: 6px;
+    color: var(--primary);
+  }
+
+  /* Ảnh bên trái, chữ bên phải. Cột ảnh hẹp hơn vì ảnh khổ dọc, để rộng
+     bằng nhau thì ảnh cao vống lên còn cột chữ hở một mảng trắng. */
+  .chi-tiet-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .album-lon img {
+    display: block;
+    width: 100%;
+    /* Bắt buộc có height:auto. Thẻ <img> mang sẵn width/height 900x1200 để
+       trình duyệt chừa chỗ trước khi ảnh tải xong (khỏi giật layout), nhưng
+       chừng nào chiều cao còn lấy từ thuộc tính đó thì aspect-ratio không
+       có tác dụng — ảnh bị kéo cao đúng 1200px, dài gấp đôi cột chữ. */
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    background: #f1f1f1;
+  }
+
+  /* Dải ảnh nhỏ. Bốn ô một hàng, ảnh thừa xuống hàng sau — không cuộn
+     ngang, vì dải cuộn ngang trên máy tính hay bị bỏ sót. */
+  .album-nho {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .album-nut {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+    line-height: 0;
+    transition: border-color 0.2s ease;
+  }
+  .album-nut img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    background: #f1f1f1;
+  }
+  .album-nut:hover { border-color: var(--primary); }
+  .album-nut.dang-chon { border-color: var(--primary); }
+
+  .muc { margin-bottom: 32px; }
+  .muc h2 {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+  .muc h2 .icon { vertical-align: -0.15em; margin-right: 6px; }
+
+  .chi-tiet-nut {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .chi-tiet-ghi-chu {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: var(--muted, #6b7280);
+  }
+
+  @media (max-width: 880px) {
+    .chi-tiet-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    /* Trên điện thoại ảnh dọc chiếm gần trọn màn hình, bó lại cho vừa mắt. */
+    .album-lon { max-width: 420px; margin: 0 auto; }
+    .album-nho { max-width: 420px; margin-left: auto; margin-right: auto; }
+  }
+</style>

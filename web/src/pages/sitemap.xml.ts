@@ -12,6 +12,7 @@ import type { APIRoute } from "astro";
 import { layBaiHienLen } from "../lib/supabase";
 import { gomChuyenMuc } from "../lib/chuyen-muc";
 import { GOC } from "../data/thong-tin.mjs";
+import { SAN_PHAM } from "../data/san-pham.mjs";
 
 // Trang tĩnh — sửa tay ở đây khi thêm trang mới.
 // changefreq và priority chỉ là gợi ý cho Google, giữ đúng như sitemap cũ.
@@ -40,6 +41,15 @@ const TRANG_TINH = [
   // 19/09: trang sản phẩm mới lập. Nội dung đọc từ data/san-pham.mjs, nên
   // thêm bớt một món trong file đó là phải sửa lastmod ở đây.
   { duong_dan: "san-pham", lastmod: "2026-09-19", tan_suat: "monthly", uu_tien: "0.8" },
+  // Trang chi tiết từng món sinh thẳng từ SAN_PHAM — thêm món mới trong
+  // data/san-pham.mjs là sitemap tự có thêm địa chỉ, không phải nhớ chép
+  // tay vào đây.
+  ...SAN_PHAM.map((mon) => ({
+    duong_dan: "san-pham/" + mon.slug,
+    lastmod: "2026-09-19",
+    tan_suat: "monthly" as const,
+    uu_tien: "0.7",
+  })),
 ];
 
 export const GET: APIRoute = async () => {

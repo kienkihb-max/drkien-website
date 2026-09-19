@@ -15,6 +15,11 @@ export const SO_ZALO = "034 590 1772";
 export const ZALO = "https://zalo.me/0345901772";
 export const FACEBOOK = "https://www.facebook.com/bskienyhcthn/";
 
+// Nút gọi điện suy ra từ SO_ZALO — ở Việt Nam số Zalo cũng chính là số điện
+// thoại, nên khai thêm một số thứ hai ở đây là tự tạo chỗ để hai số lệch
+// nhau. Cùng lý do với BAN_DO suy ra từ DIA_CHI bên dưới.
+export const GOI_DIEN = "tel:+84" + SO_ZALO.replace(/\D/g, "").replace(/^0/, "");
+
 export const GIO = [
   { ngay: "Thứ 2 – Thứ 6", gio: "17h30 – 19h30" },
   { ngay: "Thứ 7 – Chủ nhật", gio: "9h00 – 17h00" },

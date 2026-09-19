@@ -9,7 +9,7 @@
 // không phải chỗ còn thiếu chữ — lý do chép đầy đủ ở đầu san-pham.mjs.
 import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
-import { SAN_PHAM, TU_BAO_CHE, DAT_HO, CHU_NUT_HOI } from "../data/san-pham.mjs";
+import { SAN_PHAM, TU_BAO_CHE, DAT_HO, CHU_NUT_HOI, CHU_BAN_CHAY } from "../data/san-pham.mjs";
 import {
   Leaf,
   Footprints,
@@ -23,8 +23,6 @@ import {
 // cho khớp trường "icon" trong san-pham.mjs, nếu không thẻ sẽ thiếu hình.
 const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
 
-const noi_bat = SAN_PHAM.filter((m) => m.noi_bat);
-const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
 ---
 
 <Trang
@@ -91,35 +89,23 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
         <div class="divider mx-auto"></div>
       </div>
 
-      {/* Hai hàng cân nhau: hàng trên hai món nổi bật (thẻ rộng hơn), hàng
-          dưới ba món còn lại. Trước đây để một món nổi bật chiếm trọn bề
-          ngang, ảnh phóng quá to mà chẳng cân với hàng dưới. */}
-      <div class="luoi-noi-bat">
-        {noi_bat.map((m) => {
-          const Icon = ICON[m.icon];
-          return (
-            <div class="mon mon-lon">
-              <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
-              <h3 class="mon-ten">
-                {Icon && <Icon size={21} stroke-width={1.8} />}
-                {m.ten}
-              </h3>
-            </div>
-          );
-        })}
-      </div>
-
+      {/* Cả năm món trong MỘT lưới ba cột, thẻ nào cũng như thẻ nào. Trước
+          đây tách hai hàng, món nổi bật để thẻ to hơn — nhìn lệch, và mỗi
+          lần đổi số món lại phải sửa số cột của hai lưới cho khớp.
+          Thứ tự hiện đúng theo thứ tự trong SAN_PHAM, món nào cần đứng
+          trước thì xếp lên trên trong file đó. */}
       <div class="luoi-mon">
-        {con_lai.map((m) => {
+        {SAN_PHAM.map((m) => {
           const Icon = ICON[m.icon];
           return (
-            <div class="mon">
+            <a class="mon" href={"/san-pham/" + m.slug}>
               <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+              {m.ban_chay && <span class="nhan-ban-chay">{CHU_BAN_CHAY}</span>}
               <h3 class="mon-ten">
                 {Icon && <Icon size={19} stroke-width={1.8} />}
                 {m.ten}
               </h3>
-            </div>
+            </a>
           );
         })}
       </div>
@@ -142,21 +128,9 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="cards-2col">
-        <div class="info-card">
-          <h3><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Địa chỉ</h3>
-          {/* Địa chỉ và bản đồ do thong-tin.js điền — sửa trong file đó */}
-          <div data-tt="dia-chi-ban-do"></div>
-        </div>
-        <div class="info-card">
-          <h3><svg class="icon icon-sm"><use href="#ic-clock"/></svg> Giờ đón khách</h3>
-          <div data-tt="gio"></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  {/* Không có khối địa chỉ / giờ đón khách ở đây: chủ site đã bỏ. Hai thứ
+      đó vẫn nằm sẵn ở chân trang trên mọi trang, lặp lại giữa trang chỉ
+      làm dài thêm. Đừng thêm lại. */}
 
   {/* Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong dich-vu.mjs */}
   <section class="section service-related"></section>
@@ -189,6 +163,38 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
     overflow: hidden;
     box-shadow: var(--shadow-card);
     background: #fff;
+    /* Mốc cho nhãn "Bán chạy" đặt tuyệt đối lên góc ảnh. */
+    position: relative;
+    /* Cả thẻ là một liên kết sang trang chi tiết — bỏ gạch chân và giữ màu
+       chữ như cũ, chỉ nhích lên khi rê chuột để biết là bấm được. */
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .mon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.13);
+  }
+
+  /* Nhãn góc ảnh. Đặt đè lên ảnh chứ không chen thêm một dòng dưới tên: thẻ
+     chỉ có ảnh và tên, thêm dòng nữa là mấy thẻ không có nhãn bị hụt so với
+     thẻ có nhãn. */
+  .nhan-ban-chay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    /* Ảnh sản phẩm chỗ sáng chỗ tối, đổ bóng để chữ trắng không chìm mất
+       khi nhãn rơi đúng vùng sáng. */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   }
   .mon img {
     display: block;
@@ -215,45 +221,20 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
     color: var(--primary);
     text-align: center;
   }
-  .mon-lon .mon-ten {
-    padding: 20px 16px;
-    font-size: 1.15rem;
-  }
-
-  /* Hàng trên hai thẻ, hàng dưới ba thẻ. Hai lưới dùng chung một khoảng hở
-     nên hai hàng nhìn liền mạch với nhau. */
-  .luoi-noi-bat,
+  /* Lưới ba cột cho cả năm món. Năm món trên ba cột thành 3 + 2, ô cuối
+     hàng dưới để trống — chấp nhận, đổi lại mọi thẻ cùng một cỡ. */
   .luoi-mon {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
-  .luoi-noi-bat {
-    grid-template-columns: repeat(2, 1fr);
-    /* Bó lại và căn giữa. Để rộng hết khung thì mỗi thẻ rộng 545px, mà ảnh
-       khổ dọc 3:4 nghĩa là cao 725px — một tấm ảnh chiếm gần trọn màn hình.
-       Bó còn 880px thì thẻ nổi bật vẫn to hơn hàng dưới thấy rõ mà không
-       nuốt mất phần còn lại của trang. */
-    max-width: 880px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 24px;
-  }
-  .luoi-mon {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
   @media (max-width: 960px) {
-    .luoi-noi-bat,
     .luoi-mon {
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
-    .luoi-noi-bat {
-      margin-bottom: 16px;
-    }
   }
   @media (max-width: 520px) {
-    .luoi-noi-bat,
     .luoi-mon {
       grid-template-columns: 1fr;
     }

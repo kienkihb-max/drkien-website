@@ -9,8 +9,14 @@ import { DICH_VU } from "../data/dich-vu.mjs";
 const SO_DO_TRANG = [
   {
     tieu_de: "Dịch vụ",
-    // Tên dịch vụ lấy từ data/dich-vu.mjs, không chép tay.
-    muc: DICH_VU.map((d) => ({ trang: d.duong_dan, chu: d.ten })),
+    // Tên dịch vụ lấy từ data/dich-vu.mjs, không chép tay. Trang sản phẩm
+    // nối thêm ở cuối cột này — nó không phải một dịch vụ nên không đưa vào
+    // DICH_VU, nhưng vẫn là thứ mình cung cấp nên đứng chung cột thì người
+    // đọc dễ thấy hơn là lẫn vào cột "Đọc thêm".
+    muc: [
+      ...DICH_VU.map((d) => ({ trang: d.duong_dan, chu: d.ten })),
+      { trang: "/san-pham", chu: "Sản phẩm" },
+    ],
   },
   {
     tieu_de: "Đọc thêm",

@@ -1,0 +1,260 @@
+---
+// Trang giới thiệu sản phẩm. Nội dung KHÔNG nằm ở đây — tên món và ảnh đọc
+// từ data/san-pham.mjs. Sửa chữ thì sửa file đó.
+//
+// Thẻ SEO do layouts/Trang.astro sinh — đổi tiêu đề hay mô tả thì sửa mấy
+// dòng thuộc tính của <Trang> ngay bên dưới, đừng thêm thẻ meta vào thân.
+//
+// Mỗi món CHỈ HIỆN TÊN, không có câu mô tả nào. Đây là yêu cầu của chủ site,
+// không phải chỗ còn thiếu chữ — lý do chép đầy đủ ở đầu san-pham.mjs.
+import Trang from "../layouts/Trang.astro";
+import DuongDan from "../components/DuongDan.astro";
+import { SAN_PHAM, TU_BAO_CHE, DAT_HO, CHU_NUT_HOI } from "../data/san-pham.mjs";
+import {
+  Leaf,
+  Footprints,
+  Droplets,
+  BottleWine,
+  FlaskConical,
+} from "@lucide/astro";
+
+// Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
+// 1800 icon vào lúc dựng. Thêm món mới với icon lạ thì thêm một dòng ở đây
+// cho khớp trường "icon" trong san-pham.mjs, nếu không thẻ sẽ thiếu hình.
+const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
+
+const noi_bat = SAN_PHAM.filter((m) => m.noi_bat);
+const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
+---
+
+<Trang
+  tieu_de="Sản phẩm Y học cổ truyền"
+  mo_ta="Bột tam thất, bột ngâm chân, cồn xoa bóp, thuốc ngâm rượu, thuốc thang do bác sĩ Lê Trung Kiên tự bào chế; nhận đặt hộ dược liệu, trà dưỡng sinh, chế phẩm Đông y."
+  duong_dan="san-pham"
+  anh="assets/img/product-og.jpg"
+  anh_alt="Bác sĩ Lê Trung Kiên cân dược liệu để bào chế chế phẩm Y học cổ truyền"
+  loai_trang="service"
+  lop_body="subpage"
+  scripts={["thong-tin.js", "seo-schema.js", "service-cards.js", "sticky-cta.js"]}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan hien_tai="Sản phẩm" />
+      <h1>Sản phẩm Y học cổ truyền mình cung cấp</h1>
+      <p class="lead">
+        Ngoài việc thăm khám và điều trị, mình có bào chế một số chế phẩm quen dùng tại phòng
+        khám, và nhận đặt hộ dược liệu, trà dưỡng sinh, chế phẩm Đông y từ những nguồn mình
+        tin được.
+      </p>
+      <div class="offer-actions">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+          {CHU_NUT_HOI} <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Khối giới thiệu: cùng lưới .runner-grid với trang điều trị, ảnh bên
+      trái chữ bên phải. Ảnh dọc nên bọc trong .runner-media-featured để nó
+      bo góc và đổ bóng giống mọi ảnh khác của site. */}
+  <section class="section section-alt">
+    <div class="container runner-grid">
+      <div class="runner-media">
+        <div class="runner-media-featured gioi-thieu-anh">
+          <img
+            src="/assets/img/product-bao-che.jpg"
+            alt="Bác sĩ Lê Trung Kiên đeo găng, cân dược liệu trên cân điện tử tại phòng khám"
+            loading="lazy"
+          />
+        </div>
+      </div>
+      <div>
+        <p class="section-label">Cách mình làm</p>
+        <h2>Tự chọn dược liệu, tự cân từng mẻ</h2>
+        <p class="lead">
+          Dược liệu mình chọn và cân lấy, làm theo từng mẻ nhỏ chứ không đặt gia công hàng
+          loạt. Mẻ nào cũng qua tay mình nên biết rõ vị nào lấy ở đâu, mẻ ấy làm ngày nào.
+        </p>
+        <p class="lead">
+          Mấy món dưới đây đều là thứ mình vẫn dùng cho người bệnh tại phòng khám. Cần biết
+          dùng thế nào cho đúng người, đúng tình trạng thì nhắn mình hỏi.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id={TU_BAO_CHE.ma}>
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">{TU_BAO_CHE.nhan}</p>
+        <h2>{TU_BAO_CHE.tieu_de}</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+
+      {/* Hai hàng cân nhau: hàng trên hai món nổi bật (thẻ rộng hơn), hàng
+          dưới ba món còn lại. Trước đây để một món nổi bật chiếm trọn bề
+          ngang, ảnh phóng quá to mà chẳng cân với hàng dưới. */}
+      <div class="luoi-noi-bat">
+        {noi_bat.map((m) => {
+          const Icon = ICON[m.icon];
+          return (
+            <div class="mon mon-lon">
+              <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+              <h3 class="mon-ten">
+                {Icon && <Icon size={21} stroke-width={1.8} />}
+                {m.ten}
+              </h3>
+            </div>
+          );
+        })}
+      </div>
+
+      <div class="luoi-mon">
+        {con_lai.map((m) => {
+          const Icon = ICON[m.icon];
+          return (
+            <div class="mon">
+              <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+              <h3 class="mon-ten">
+                {Icon && <Icon size={19} stroke-width={1.8} />}
+                {m.ten}
+              </h3>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id={DAT_HO.ma}>
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">{DAT_HO.nhan}</p>
+        <h2>{DAT_HO.tieu_de}</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <p class="lead text-center dat-ho-dan">{DAT_HO.dan}</p>
+      <p class="cv-link-wrap">
+        <a class="btn btn-primary btn-icon" data-tt-href="zalo">
+          {CHU_NUT_HOI} <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cards-2col">
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-pin"/></svg> Địa chỉ</h3>
+          {/* Địa chỉ và bản đồ do thong-tin.js điền — sửa trong file đó */}
+          <div data-tt="dia-chi-ban-do"></div>
+        </div>
+        <div class="info-card">
+          <h3><svg class="icon icon-sm"><use href="#ic-clock"/></svg> Giờ đón khách</h3>
+          <div data-tt="gio"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong dich-vu.mjs */}
+  <section class="section service-related"></section>
+</Trang>
+
+<style>
+  /* Mấy lớp dưới đây chỉ trang này dùng nên để trong <style> của trang, không
+     thêm vào style.css: .info-card và các lưới chung đang được hơn 10 chỗ
+     khác dùng, đụng vào đó là đổi luôn cả mấy trang kia.
+     Astro tự giới hạn phạm vi khối này cho riêng trang. */
+
+  /* Ảnh giới thiệu là ảnh dọc, mà .runner-media-featured mặc định xén theo
+     khổ 16/10 rồi căn lên đỉnh — tức là chỉ còn cái đầu, mất hẳn hai tay và
+     khay dược liệu, đúng phần đáng xem. Xén vuông và hạ tâm xuống 45% thì
+     lấy trọn từ mặt tới cân. */
+  .gioi-thieu-anh img {
+    aspect-ratio: 1 / 1;
+    object-position: center 45%;
+  }
+
+  /* Thẻ món: chỉ có ảnh và tên, nên không dùng .info-card (thẻ đó có nền
+     trắng và padding dày, để trống một mảng lớn khi không có chữ bên trong). */
+  .mon {
+    /* Cột dọc để phần tên giãn ra lấp nốt chiều cao thừa: tên dài xuống hai
+       dòng làm thẻ đó cao hơn, lưới kéo mấy thẻ kia cao bằng, và nếu tên
+       không giãn thì mấy thẻ kia hở một khoảng trắng dưới đáy. */
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    background: #fff;
+  }
+  .mon img {
+    display: block;
+    width: 100%;
+    /* Cùng một khổ ảnh cho cả hai hàng. Thẻ nổi bật to hơn là vì ô của nó
+       rộng hơn, không phải vì ảnh xén khác đi — khác khổ thì hai hàng nhìn
+       như hai kiểu thẻ rời nhau. */
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: #f1f1f1;
+  }
+  .mon-ten {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: 16px 14px;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+  }
+  .mon-lon .mon-ten {
+    padding: 20px 16px;
+    font-size: 1.15rem;
+  }
+
+  /* Hàng trên hai thẻ, hàng dưới ba thẻ. Hai lưới dùng chung một khoảng hở
+     nên hai hàng nhìn liền mạch với nhau. */
+  .luoi-noi-bat,
+  .luoi-mon {
+    display: grid;
+    gap: 24px;
+  }
+  .luoi-noi-bat {
+    grid-template-columns: repeat(2, 1fr);
+    margin-bottom: 24px;
+  }
+  .luoi-mon {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 960px) {
+    .luoi-noi-bat,
+    .luoi-mon {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .luoi-noi-bat {
+      margin-bottom: 16px;
+    }
+  }
+  @media (max-width: 520px) {
+    .luoi-noi-bat,
+    .luoi-mon {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Đoạn dẫn khối đặt hộ: bó lại cho dòng chữ không kéo dài hết bề ngang,
+     đọc mỏi mắt. */
+  .dat-ho-dan {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>

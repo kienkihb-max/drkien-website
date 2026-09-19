@@ -85,7 +85,13 @@
     "    <h2>" + thoat(XEM_THEM_TIEU_DE) + "</h2>",
     '    <div class="divider mx-auto"></div>',
     "  </div>",
-    '  <div class="offer-grid service-cards-related">',
+    // Số thẻ quyết định số cột. Trang dịch vụ loại chính nó ra nên còn 2
+    // thẻ, lưới 2 cột là vừa. Trang không phải dịch vụ (ví dụ trang sản
+    // phẩm) thì đủ cả 3, mà lưới 2 cột sẽ xuống thành 2 + 1 lệch hẳn —
+    // nên gắn thêm lớp "co-3" cho style.css đổi sang 3 cột.
+    '  <div class="offer-grid service-cards-related' +
+      (khac.length === 3 ? " co-3" : "") +
+      '">',
     khac.map(theDichVu).join("\n"),
     "  </div>",
     "</div>",

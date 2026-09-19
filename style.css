@@ -456,6 +456,14 @@ h4 { font-size: var(--fs-base); }
   max-width: 760px;
   margin: 0 auto;
 }
+/* Trang không phải trang dịch vụ (ví dụ trang sản phẩm) thì khối này hiện
+   đủ cả 3 thẻ — service-cards.js gắn thêm lớp "co-3". Để nguyên lưới 2 cột
+   thì 3 thẻ xuống thành 2 + 1, thẻ lẻ nằm chỏng chơ một mình hàng dưới.
+   Bỏ luôn max-width để ba thẻ rộng bằng ngoài trang chủ. */
+.service-cards-related.co-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: none;
+}
 .offer-actions {
   display: flex;
   flex-wrap: wrap;

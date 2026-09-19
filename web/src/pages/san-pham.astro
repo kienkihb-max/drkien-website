@@ -193,10 +193,12 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
   .mon img {
     display: block;
     width: 100%;
-    /* Cùng một khổ ảnh cho cả hai hàng. Thẻ nổi bật to hơn là vì ô của nó
-       rộng hơn, không phải vì ảnh xén khác đi — khác khổ thì hai hàng nhìn
-       như hai kiểu thẻ rời nhau. */
-    aspect-ratio: 16 / 10;
+    /* Khổ DỌC. Từng để ngang 16/10 và bị cắt cụt gần hết: ảnh gốc hầu như
+       đều chụp dọc (chai cồn, túi bột, xấp thang), xén ngang thì chỉ còn
+       một dải giữa, nhìn không ra là sản phẩm gì.
+       Cùng một khổ cho cả hai hàng — thẻ nổi bật to hơn là vì ô của nó rộng
+       hơn, không phải vì ảnh xén khác đi. */
+    aspect-ratio: 3 / 4;
     object-fit: cover;
     background: #f1f1f1;
   }
@@ -227,6 +229,13 @@ const con_lai = SAN_PHAM.filter((m) => !m.noi_bat);
   }
   .luoi-noi-bat {
     grid-template-columns: repeat(2, 1fr);
+    /* Bó lại và căn giữa. Để rộng hết khung thì mỗi thẻ rộng 545px, mà ảnh
+       khổ dọc 3:4 nghĩa là cao 725px — một tấm ảnh chiếm gần trọn màn hình.
+       Bó còn 880px thì thẻ nổi bật vẫn to hơn hàng dưới thấy rõ mà không
+       nuốt mất phần còn lại của trang. */
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 24px;
   }
   .luoi-mon {

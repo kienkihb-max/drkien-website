@@ -11,11 +11,25 @@ import Trang from "../../layouts/Trang.astro";
 import DuongDan from "../../components/DuongDan.astro";
 import { SAN_PHAM, CHU_NUT_TU_VAN, CHU_NUT_MUA } from "../../data/san-pham.mjs";
 import { GOI_DIEN, SO_ZALO } from "../../data/thong-tin.mjs";
-import { Leaf, Footprints, Droplets, BottleWine, FlaskConical } from "@lucide/astro";
+import {
+  Leaf,
+  Footprints,
+  Droplets,
+  BottleWine,
+  FlaskConical,
+  Flower2,
+} from "@lucide/astro";
 
 // Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
 // 1800 icon vào lúc dựng.
-const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
+const ICON = {
+  Leaf,
+  Footprints,
+  Droplets,
+  BottleWine,
+  FlaskConical,
+  Flower2,
+};
 
 export function getStaticPaths() {
   return SAN_PHAM.map((mon) => ({ params: { slug: mon.slug }, props: { mon } }));
@@ -25,8 +39,18 @@ const { mon } = Astro.props;
 const Icon = ICON[mon.icon];
 
 // Ảnh đại diện luôn đứng đầu album, khỏi phải khai lại nó trong mảng album
-// của từng món — khai hai lần là có ngày hai chỗ lệch nhau.
-const anh_album = [{ anh: mon.anh, alt: mon.anh_alt }, ...(mon.album ?? [])];
+// của từng món — khai hai lần là có ngày hai chỗ lệch nhau. Món chưa có ảnh
+// nào thì album rỗng, trang hiện ô icon thay chỗ.
+const anh_album = [
+  ...(mon.anh ? [{ anh: mon.anh, alt: mon.anh_alt }] : []),
+  ...(mon.album ?? []),
+];
+
+// Ảnh hiện khi chia sẻ link lên Facebook/Zalo. Món chưa có ảnh thì để
+// undefined cho Trang.astro dùng ảnh chia sẻ chung của site — truyền
+// "assets/img/undefined" là thẻ og:image trỏ vào file không tồn tại, link
+// chia sẻ hiện trơ không ảnh mà trên trang chẳng có dấu hiệu gì.
+const anh_chia_se = mon.anh ? "assets/img/" + mon.anh : undefined;
 
 // Các mục nội dung. Gom thành mảng để trang chỉ duyệt một vòng, thêm mục
 // mới chỉ phải thêm một dòng ở đây.
@@ -43,7 +67,7 @@ const MUC = [
   tieu_de={mon.ten}
   mo_ta={mon.mo_ta_seo}
   duong_dan={"san-pham/" + mon.slug}
-  anh={"assets/img/" + mon.anh}
+  anh={anh_chia_se}
   anh_alt={mon.anh_alt}
   loai_trang="service"
   lop_body="subpage"
@@ -61,13 +85,22 @@ const MUC = [
       {/* ——— Album: một ảnh to, dải ảnh nhỏ bên dưới ——— */}
       <div class="album">
         <div class="album-lon">
-          <img
-            id="anhLon"
-            src={"/assets/img/" + anh_album[0].anh}
-            alt={anh_album[0].alt}
-            width="900"
-            height="1200"
-          />
+          {anh_album.length > 0 ? (
+            <img
+              id="anhLon"
+              src={"/assets/img/" + anh_album[0].anh}
+              alt={anh_album[0].alt}
+              width="900"
+              height="1200"
+            />
+          ) : (
+            /* Món chưa chụp được ảnh nào — hiện icon trên nền nhạt, giữ đúng
+               khổ để trang không hụt một mảng. Thêm ảnh trong san-pham.mjs
+               là khối này tự biến mất. */
+            <span class="chua-co-anh">
+              {Icon && <Icon size={88} stroke-width={1.2} />}
+            </span>
+          )}
         </div>
         {anh_album.length > 1 && (
           <div class="album-nho" role="list">
@@ -89,6 +122,8 @@ const MUC = [
 
       {/* ——— Chữ và hai nút ——— */}
       <div class="chi-tiet-chu">
+        {mon.gioi_thieu && <p class="lead">{mon.gioi_thieu}</p>}
+
         {MUC.map((m) => (
           <div class="muc">
             <h2><svg class="icon icon-sm"><use href={"#" + m.icon}/></svg> {m.tieu_de}</h2>
@@ -98,7 +133,7 @@ const MUC = [
           </div>
         ))}
 
-        {MUC.length === 0 && (
+        {MUC.length === 0 && !mon.gioi_thieu && (
           <p class="lead">
             Món này mình chưa kịp viết phần giới thiệu lên trang. Bạn cứ nhắn Zalo, mình nói rõ
             thành phần và cách dùng cho đúng với tình trạng của bạn.
@@ -142,7 +177,8 @@ const MUC = [
   // thay thẻ mới là mất luôn tính năng bấm để phóng to.
   const anh_lon = document.getElementById("anhLon");
   const nut = document.querySelectorAll(".album-nut");
-  nut.forEach((n) => {
+  // Món chưa có ảnh nào thì không có thẻ #anhLon lẫn nút nào — thoát sớm.
+  if (anh_lon) nut.forEach((n) => {
     n.addEventListener("click", () => {
       anh_lon.src = n.dataset.anh;
       anh_lon.alt = n.dataset.alt;
@@ -188,6 +224,18 @@ const MUC = [
 
   /* Dải ảnh nhỏ. Bốn ô một hàng, ảnh thừa xuống hàng sau — không cuộn
      ngang, vì dải cuộn ngang trên máy tính hay bị bỏ sót. */
+  .chua-co-anh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius);
+    background: #f2f5fb;
+    color: var(--primary);
+    opacity: 0.5;
+  }
+
   .album-nho {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

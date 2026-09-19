@@ -50,7 +50,9 @@
  * @property {string} slug      Đuôi địa chỉ trang chi tiết: /san-pham/<slug>
  * @property {string} ten       Tên món — thứ duy nhất hiện trên thẻ danh sách
  * @property {string} icon      Tên icon Lucide, PascalCase
- * @property {string} anh       Ảnh đại diện, hiện trên thẻ danh sách
+ * @property {string} [anh]     Ảnh đại diện, hiện trên thẻ danh sách. Bỏ
+ *                              trống thì thẻ hiện icon trên nền nhạt thay
+ *                              ảnh — dùng khi chưa chụp được ảnh.
  * @property {string} anh_alt   Mô tả ảnh cho Google và trình đọc màn hình
  * @property {string} mo_ta_seo Câu mô tả gửi Google cho trang chi tiết. Đây
  *                              KHÔNG phải mô tả sản phẩm hiện trên trang —
@@ -58,6 +60,10 @@
  *                              đừng nhét công dụng vào.
  * @property {AnhAlbum[]} [album] Ảnh phụ của album, KHÔNG kể ảnh đại diện —
  *                                trang tự đặt ảnh đại diện lên đầu.
+ * @property {string} [gioi_thieu]   Một đoạn giới thiệu chung, hiện ở đầu
+ *                                   phần chữ của trang chi tiết. Dùng cho
+ *                                   món là cả một nhóm nhiều thứ nhỏ, nói
+ *                                   chung thay vì liệt kê tên từng thứ.
  * @property {string[]} [cong_dung]  Chép từ nhãn sản phẩm
  * @property {string[]} [thanh_phan] Chép từ nhãn sản phẩm
  * @property {string[]} [doi_tuong]  Ai nên dùng
@@ -91,11 +97,15 @@ export const SAN_PHAM = [
     ten: "Bột tam thất",
     ban_chay: true,
     icon: "Leaf",
-    anh: "product-bot-tam-that-nb.jpg",
-    anh_alt: "Các túi bột tam thất đang cân trên cân điện tử",
+    anh: "product-tam-that-tui-cu-am-tra.jpg",
+    anh_alt: "Túi tam thất có nhãn đặt cạnh bộ ấm trà",
     mo_ta_seo:
       "Bột tam thất do bác sĩ Lê Trung Kiên tự chọn củ và bào chế tại phòng khám. Xem ảnh sản phẩm, cách dùng và cách bảo quản, nhắn Zalo để được tư vấn.",
     album: [
+      {
+        anh: "product-bot-tam-that-nb.jpg",
+        alt: "Các túi bột tam thất đang cân trên cân điện tử",
+      },
       { anh: "product-tam-that-cu-kho.jpg", alt: "Củ tam thất khô nguyên liệu" },
       {
         anh: "product-tam-that-cu-cat-doi.jpg",
@@ -106,10 +116,6 @@ export const SAN_PHAM = [
         alt: "Nắm củ tam thất khô trên tay trước kệ dược liệu",
       },
       { anh: "product-tam-that-tui-bot.jpg", alt: "Túi bột tam thất đã đóng gói, có nhãn" },
-      {
-        anh: "product-tam-that-tui-cu-am-tra.jpg",
-        alt: "Túi củ tam thất khô đặt cạnh bộ ấm trà",
-      },
     ],
     // Chép nguyên văn từ nhãn dán trên túi sản phẩm. Đổi nhãn thì sửa ở đây
     // cho khớp, đừng để trang nói một đằng nhãn nói một nẻo.
@@ -136,6 +142,7 @@ export const SAN_PHAM = [
     mo_ta_seo:
       "Thuốc thang bốc theo đơn và thuốc sắc sẵn đóng túi của bác sĩ Lê Trung Kiên. Xem ảnh sản phẩm, nhắn Zalo để được tư vấn và đặt.",
     album: [
+      { anh: "product-thang-goi-giay.jpg", alt: "Xấp thang thuốc gói giấy buộc dây" },
       {
         anh: "product-thuoc-sac-thung-hang.jpg",
         alt: "Thùng thuốc sắc đóng túi chuẩn bị giao",
@@ -176,8 +183,9 @@ export const SAN_PHAM = [
     slug: "thuoc-ngam-ruou",
     ten: "Thuốc ngâm rượu",
     icon: "BottleWine",
-    anh: "product-thang-goi-giay.jpg",
-    anh_alt: "Xấp thang thuốc gói giấy buộc dây",
+    anh: "product-thang-ngam-ruou.jpg",
+    anh_alt:
+      "Thang dược liệu ngâm rượu trải trong túi vải: nhân sâm, kỷ tử, thục địa, hoàng kỳ",
     mo_ta_seo:
       "Thang dược liệu cắt sẵn theo bài để mang về ngâm rượu, do bác sĩ Lê Trung Kiên bốc. Xem ảnh sản phẩm, nhắn Zalo để được tư vấn.",
     album: [
@@ -186,6 +194,24 @@ export const SAN_PHAM = [
         alt: "Các túi dược liệu chia sẵn: kỷ tử, táo đỏ, hoàng kỳ, hạt sen",
       },
     ],
+    cong_dung: [],
+    thanh_phan: [],
+    doi_tuong: [],
+  },
+  {
+    slug: "san-pham-duong-sinh",
+    ten: "Sản phẩm dưỡng sinh",
+    icon: "Flower2",
+    anh: "product-duong-sinh-ham-ga.jpg",
+    anh_alt: "Các túi hầm gà ngũ vị của bác sĩ Kiên, đóng gói có nhãn",
+    mo_ta_seo:
+      "Các sản phẩm dưỡng sinh của bác sĩ Lê Trung Kiên, dùng qua đường ăn uống và chăm sóc hằng ngày. Nhắn Zalo để được tư vấn và đặt.",
+    album: [],
+    // Không liệt kê tên từng món: chủ site chốt chỉ giới thiệu chung, vì
+    // mỗi đợt làm một số món khác nhau — ghi tên cụ thể ra là trang sai ngay
+    // đợt sau. Ai cần biết có gì thì nhắn Zalo hỏi.
+    gioi_thieu:
+      "Các sản phẩm dưỡng sinh qua đường ăn uống và chăm sóc hằng ngày, dùng đều đặn tại nhà. Mỗi đợt mình làm một số món khác nhau, cần món gì thì nhắn hỏi mình.",
     cong_dung: [],
     thanh_phan: [],
     doi_tuong: [],
@@ -202,21 +228,10 @@ export function timSanPham(slug) {
   return SAN_PHAM.find((m) => m.slug === slug);
 }
 
-/**
- * Khối "nhận đặt hộ". Chủ site chốt để gọn: một dòng nói nhận đặt những gì,
- * rồi mời nhắn Zalo — không liệt kê thành thẻ, vì hàng đặt hộ mỗi đợt mỗi
- * khác, ghi cụ thể ra là trang sai ngay tháng sau.
- */
-export const DAT_HO = {
-  ma: "dat-ho",
-  nhan: "Nhận đặt hộ",
-  tieu_de: "Đặt hộ chế phẩm Đông y, dược liệu, trà dưỡng sinh",
-  dan: "Mình nhận đặt hộ chế phẩm Đông y từ các nhà thuốc Trung Quốc như Đồng Nhân Đường, cùng dược liệu và trà dưỡng sinh. Cần món gì thì nhắn Zalo cho mình.",
-};
 
 /** Chữ trên hai nút kêu gọi ở trang chi tiết. Sửa chữ thì sửa ở đây. */
 export const CHU_NUT_TU_VAN = "Nhận tư vấn";
 export const CHU_NUT_MUA = "Liên hệ mua";
 
 /** Chữ trên nút liên hệ ở trang danh sách. */
-export const CHU_NUT_HOI = "Hỏi về sản phẩm";
+export const CHU_NUT_HOI = "Liên hệ tư vấn";

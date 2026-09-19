@@ -9,25 +9,27 @@
 // không phải chỗ còn thiếu chữ — lý do chép đầy đủ ở đầu san-pham.mjs.
 import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
-import { SAN_PHAM, TU_BAO_CHE, DAT_HO, CHU_NUT_HOI, CHU_BAN_CHAY } from "../data/san-pham.mjs";
+import { SAN_PHAM, TU_BAO_CHE, CHU_NUT_HOI, CHU_BAN_CHAY } from "../data/san-pham.mjs";
+import { TEN_BAC_SI } from "../data/thong-tin.mjs";
 import {
   Leaf,
   Footprints,
   Droplets,
   BottleWine,
   FlaskConical,
+  Flower2,
 } from "@lucide/astro";
 
 // Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
 // 1800 icon vào lúc dựng. Thêm món mới với icon lạ thì thêm một dòng ở đây
 // cho khớp trường "icon" trong san-pham.mjs, nếu không thẻ sẽ thiếu hình.
-const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
+const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
 
 ---
 
 <Trang
   tieu_de="Sản phẩm Y học cổ truyền"
-  mo_ta="Bột tam thất, bột ngâm chân, cồn xoa bóp, thuốc ngâm rượu, thuốc thang do bác sĩ Lê Trung Kiên tự bào chế; nhận đặt hộ dược liệu, trà dưỡng sinh, chế phẩm Đông y."
+  mo_ta="Bột tam thất, thuốc thang, thuốc sắc, bột ngâm chân, cồn xoa bóp, thuốc ngâm rượu và các sản phẩm dưỡng sinh do bác sĩ Lê Trung Kiên tự bào chế tại phòng khám."
   duong_dan="san-pham"
   anh="assets/img/product-og.jpg"
   anh_alt="Bác sĩ Lê Trung Kiên cân dược liệu để bào chế chế phẩm Y học cổ truyền"
@@ -41,8 +43,7 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
       <h1>Sản phẩm Y học cổ truyền mình cung cấp</h1>
       <p class="lead">
         Ngoài việc thăm khám và điều trị, mình có bào chế một số chế phẩm quen dùng tại phòng
-        khám, và nhận đặt hộ dược liệu, trà dưỡng sinh, chế phẩm Đông y từ những nguồn mình
-        tin được.
+        khám, và một vài món dưỡng sinh dùng hằng ngày.
       </p>
       <div class="offer-actions">
         <a class="btn btn-primary btn-icon" data-tt-href="zalo">
@@ -68,15 +69,21 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
       </div>
       <div>
         <p class="section-label">Cách mình làm</p>
-        <h2>Tự chọn dược liệu, tự cân từng mẻ</h2>
-        <p class="lead">
-          Dược liệu mình chọn và cân lấy, làm theo từng mẻ nhỏ chứ không đặt gia công hàng
-          loạt. Mẻ nào cũng qua tay mình nên biết rõ vị nào lấy ở đâu, mẻ ấy làm ngày nào.
+        <h2>Bắt đầu từ trong gia đình</h2>
+        {/* Lời chủ site tự viết — để nghiêng và đặt trong ngoặc kép cho thấy
+            rõ đây là lời kể của bác sĩ, không phải chữ quảng cáo. Ngoặc mở ở
+            đoạn đầu, ngoặc đóng ở đoạn sau, đúng lối trích một đoạn liền. */}
+        <p class="lead loi-ke">
+          “Mấy món này mình làm cho người nhà trước. Người nhà dùng thì không có chỗ cho hai
+          chữ ‘tạm được’: dược liệu tự tay chọn, tự tay cân, làm từng mẻ nhỏ, mẻ nào cũng
+          nhớ lấy ở đâu, đóng gói ngày nào. Rồi bạn bè hỏi mua, rồi người bệnh hỏi mua —
+          mình vẫn làm y như hồi làm cho nhà mình, không bớt một bước. Đứng sau mỗi mẻ vẫn
+          là thạc sĩ, bác sĩ, dược sĩ chuyên khoa Y học cổ truyền, đủ để mình biết đâu là
+          giới hạn mà không hứa điều mình không chắc. Nên mình không nói đây là thứ thần kỳ.
+          Chỉ là thứ mình yên tâm đưa cho người trong nhà dùng.”
         </p>
-        <p class="lead">
-          Mấy món dưới đây đều là thứ mình vẫn dùng cho người bệnh tại phòng khám. Cần biết
-          dùng thế nào cho đúng người, đúng tình trạng thì nhắn mình hỏi.
-        </p>
+        {/* Tên lấy từ data/thong-tin.mjs — nguồn duy nhất, đừng gõ tay lại. */}
+        <p class="ky-ten">— {TEN_BAC_SI}</p>
       </div>
     </div>
   </section>
@@ -99,7 +106,16 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
           const Icon = ICON[m.icon];
           return (
             <a class="mon" href={"/san-pham/" + m.slug}>
-              <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+              {/* Món chưa có ảnh thì ô ảnh hiện icon trên nền nhạt, giữ đúng
+                  khổ để lưới không so le. Có ảnh rồi thì thêm dòng anh/anh_alt
+                  trong san-pham.mjs, không phải sửa ở đây. */}
+              {m.anh ? (
+                <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+              ) : (
+                <span class="mon-chua-anh">
+                  {Icon && <Icon size={56} stroke-width={1.3} />}
+                </span>
+              )}
               {m.ban_chay && <span class="nhan-ban-chay">{CHU_BAN_CHAY}</span>}
               <h3 class="mon-ten">
                 {Icon && <Icon size={19} stroke-width={1.8} />}
@@ -112,14 +128,9 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
     </div>
   </section>
 
-  <section class="section section-alt" id={DAT_HO.ma}>
+  {/* Không còn khối "Nhận đặt hộ": chủ site đã bỏ. Đừng thêm lại. */}
+  <section class="section section-alt">
     <div class="container">
-      <div class="section-title text-center">
-        <p class="section-label">{DAT_HO.nhan}</p>
-        <h2>{DAT_HO.tieu_de}</h2>
-        <div class="divider mx-auto"></div>
-      </div>
-      <p class="lead text-center dat-ho-dan">{DAT_HO.dan}</p>
       <p class="cv-link-wrap">
         <a class="btn btn-primary btn-icon" data-tt-href="zalo">
           {CHU_NUT_HOI} <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
@@ -151,6 +162,21 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
     object-position: center 45%;
   }
 
+  /* Lời kể của bác sĩ trong khối "Cách mình làm". Chỉ nghiêng chữ, không đổi
+     cỡ hay màu — .lead đã lo phần đó rồi. */
+  .loi-ke {
+    font-style: italic;
+  }
+
+  /* Dòng ký tên dưới đoạn trích. Không nghiêng — để nó tách hẳn khỏi lời kể
+     chứ không đọc tiếp như một câu nữa trong ngoặc kép. */
+  .ky-ten {
+    margin-top: 14px;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
   /* Thẻ món: chỉ có ảnh và tên, nên không dùng .info-card (thẻ đó có nền
      trắng và padding dày, để trống một mảng lớn khi không có chữ bên trong). */
   .mon {
@@ -179,6 +205,20 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
   /* Nhãn góc ảnh. Đặt đè lên ảnh chứ không chen thêm một dòng dưới tên: thẻ
      chỉ có ảnh và tên, thêm dòng nữa là mấy thẻ không có nhãn bị hụt so với
      thẻ có nhãn. */
+  /* Ô thay ảnh cho món chưa có ảnh chụp. Cùng khổ 3:4 với thẻ có ảnh để lưới
+     không so le, nền nhạt và icon to ở giữa cho biết là còn thiếu ảnh chứ
+     không phải ảnh hỏng. */
+  .mon-chua-anh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #f2f5fb;
+    color: var(--primary);
+    opacity: 0.55;
+  }
+
   .nhan-ban-chay {
     position: absolute;
     top: 12px;
@@ -240,11 +280,4 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical };
     }
   }
 
-  /* Đoạn dẫn khối đặt hộ: bó lại cho dòng chữ không kéo dài hết bề ngang,
-     đọc mỏi mắt. */
-  .dat-ho-dan {
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-  }
 </style>

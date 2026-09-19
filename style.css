@@ -1102,6 +1102,18 @@ main img.zoomable { cursor: zoom-in; }
   gap: 10px 16px;
   margin-top: 16px;
 }
+/* Nút trong hộp dịch vụ ở cột bên: cao đúng 40px thay vì 47px như .btn-sm
+   mặc định. Chỉ hạ ở đây chứ không sửa thẳng .btn-sm — lớp đó còn dùng cho
+   hai nút của mỗi thẻ dịch vụ ngoài trang chủ, trang dịch vụ và trang sản
+   phẩm, hạ chung là mấy thẻ kia lùn theo.
+   Bỏ padding trên dưới rồi đặt height: box-sizing của site là border-box
+   nên 40px là cao đúng 40px, kể cả viền. */
+.aside-dv-cta .btn-sm {
+  height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .aside-dv-them {
   font-size: var(--fs-sm);
   font-weight: 600;
@@ -1502,6 +1514,16 @@ main img.zoomable { cursor: zoom-in; }
 
 /* Mobile spacing — lề 2 bên cố định 16px, khoảng cách dọc gọn lại */
 @media (max-width: 720px) {
+  /* Breadcrumb nhỏ lại. Nó viết hoa toàn bộ và giãn chữ 1px, nên ở 14px
+     trên màn hẹp nó nặng ngang cái tiêu đề ngay dưới — mà nó chỉ là dòng
+     chỉ đường, không phải thứ đáng đọc trước. */
+  .breadcrumb {
+    gap: 6px;
+    font-size: 0.75rem;
+    letter-spacing: 0.6px;
+  }
+  .breadcrumb .icon-sm { width: 14px; height: 14px; }
+
   /* Nhịp dọc trang phụ trên mobile — xem chú thích ở :root đầu file */
   :root {
     --sub-section-y: 32px;

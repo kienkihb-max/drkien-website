@@ -41,6 +41,34 @@ const image = "/" + service.anh.replace(/^\/+/, "");
     <a class="btn btn-main btn-sm" href={ZALO} target="_blank" rel="noopener">
       {service.chu_nut}
     </a>
-    <a class="btn btn-outline btn-sm" href={service.duong_dan}>{CHU_NUT_XEM}</a>
+    <a class="btn btn-outline btn-sm stretched-link" href={service.duong_dan}>{CHU_NUT_XEM}</a>
   </div>
 </div>
+
+<style>
+  /* Bấm vào BẤT KỲ đâu trên thẻ là sang trang dịch vụ.
+     Không bọc cả thẻ trong một thẻ <a>: bên trong đã có hai liên kết rồi,
+     mà <a> lồng trong <a> là HTML sai, trình duyệt tự tháo ra và nút Zalo
+     hỏng theo.
+     Cách làm: cho nút "Xem thêm" một lớp phủ vô hình trải kín thẻ. Vùng
+     bấm là của đúng liên kết đó nên trình đọc màn hình và chuột giữa (mở
+     tab mới) đều hiểu đúng. */
+  .service-card {
+    position: relative;
+  }
+  .stretched-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  /* KHÔNG đặt position cho chính .stretched-link: nó mà thành khối định vị
+     thì inset: 0 của ::after tính theo chính cái nút, lớp phủ chỉ to bằng
+     nút chứ không trải kín thẻ. Đã mất một lần vì chuyện này.
+     Chỉ nút Zalo mới cần nổi lên trên lớp phủ, nếu không bấm vào nó cũng
+     ra trang dịch vụ. */
+  .offer-actions .btn-main {
+    position: relative;
+    z-index: 2;
+  }
+</style>

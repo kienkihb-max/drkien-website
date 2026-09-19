@@ -74,7 +74,7 @@ export const CHU_NUT_XEM = "Xem thêm";
 
 /** Tiêu đề khối "Xem thêm" ở cuối mỗi trang dịch vụ. */
 export const XEM_THEM_NHAN = "Xem thêm";
-export const XEM_THEM_TIEU_DE = "Các dịch vụ khác mình cung cấp";
+export const XEM_THEM_TIEU_DE = "Các dịch vụ khác";
 
 /**
  * Tra một dịch vụ theo đuôi địa chỉ, ví dụ "dieu-tri" hay "/dieu-tri".

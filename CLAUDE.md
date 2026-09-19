@@ -1,30 +1,73 @@
 # drkien-website — Claude Instructions
 
-Personal one-page website for ThS.BS Lê Trung Kiên. Plain HTML/CSS/JS
-(no build step, no npm needed) — kept simple on purpose since the
-owner edits text by hand and isn't a developer.
+Personal one-page website for ThS.BS Lê Trung Kiên.
+
+**Site chạy bằng Astro, mã nguồn nằm trong `web/`.** Gốc kho còn giữ
+`style.css`, `assets/`, `image/` và vài file JS của đời site tĩnh cũ;
+`web/dong-bo-tinh.mjs` chép chúng sang `web/public` trước mỗi lần build.
+`web/public/` bị `.gitignore` bỏ qua — **để file mới ở đó là lên mạng mất
+file mà ở máy vẫn thấy bình thường.** Ảnh mới phải bỏ vào `assets/img` ở
+gốc kho.
+
+Chạy thử: `npm --prefix web run dev`. Dựng bản thật: `npm --prefix web run build`.
 
 ## Shared UI must be a component, never copy-paste
 
 Any UI that appears the same on more than one page — footer, header,
-sprite icon, CTA, card — must live in **one** place so sửa một chỗ là
-đổi đồng thời mọi trang. Never duplicate the markup into each HTML
-file: 9 copies means 9 edits and one of them will silently drift.
+card, CTA — must live in **one** place so sửa một chỗ là đổi đồng thời
+mọi trang. Never duplicate the markup into a second file: hai bản là có
+ngày hai bản lệch nhau mà không có lỗi nào hiện ra.
 
-There is no build step, so the pattern is a small self-contained JS
-file that renders into a placeholder element:
+Component là file `.astro` trong `web/src/components/`, dựng sẵn lúc
+build. Ví dụ đang có: `Header`, `Footer`, `ServiceCard`, `ServiceCards`,
+`ServiceCardsRelated`, `ProductGrid`, `DuongDan`, `TheBai`.
 
-- `site-footer.js` — footer dùng chung, mọi trang chỉ để
-  `<footer class="site-footer"></footer>` rồi nạp script. Nội dung
-  (địa chỉ, giờ làm việc, số Zalo) sửa trong file này.
-- `sticky-cta.js` — thanh CTA dính đáy trên mobile; nút được clone từ
-  CTA có sẵn của trang thay vì viết lại chữ.
+Chữ nghĩa sửa được thì để trong `web/src/data/*.mjs` (`thong-tin.mjs`,
+`dich-vu.mjs`, `san-pham.mjs`) — mỗi loại thông tin đúng một nguồn, và
+chủ site đổi chữ mà không phải đọc logic.
 
-When adding shared UI, keep the editable text as plain constants at the
-top of the file so the owner can change wording without reading logic.
-If a page needs an SVG symbol the component uses, the component should
-inject the missing symbol itself rather than requiring every page to
-carry the sprite.
+**Đừng viết component mới bằng JS chạy phía trình duyệt.** Mấy file còn
+lại trong `web/public/*.js` (`lightbox.js`, `sticky-cta.js`,
+`seo-schema.js`, `icons.js`…) là di sản của site tĩnh, chưa kịp chuyển.
+Cách đó đã trả giá thật: đường dẫn ảnh phải tự nối bằng tay nên có lần
+404 trên trang lồng sâu, dữ liệu phải sinh thêm một bản `window.*` cho
+trình duyệt đọc, và Google chỉ thấy nội dung sau khi chạy JS. Chạm vào
+file nào trong số đó thì cân nhắc chuyển luôn nó thành component Astro.
+
+## Đặt tên
+
+**Định danh viết tiếng Anh. Chú thích viết tiếng Việt.** Chủ site đọc
+chú thích, nên chú thích phải là tiếng Việt và nói *vì sao* chứ không
+chỉ *cái gì*.
+
+Tiếng Anh áp cho: tên file component (`ProductGrid.astro`), tên prop
+(`items`, `service`, `alt`), tên biến trong mã mới, tên lớp CSS mới
+(`.product-grid`, `.badge-bestseller`).
+
+Ngoại lệ được giữ nguyên, **đừng đổi**:
+
+- Tên file và trường dữ liệu trong `web/src/data/*.mjs` (`ten`, `anh`,
+  `mo_ta_seo`, `duong_dan`…) — chủ site sửa trực tiếp mấy file này.
+- Đường dẫn trang (`/san-pham`, `/dieu-tri`) — đổi là chết link cũ.
+- Component và lớp CSS đã có từ trước (`DuongDan`, `TheBai`,
+  `.offer-grid`, `.info-card`) — đổi phải sửa cả chục trang, không bõ.
+
+Nói cách khác: code mới viết tiếng Anh, code cũ để yên.
+
+## Khổ màn hình để ngắm
+
+Giao diện tối ưu cho **viewport 1280 × 700**. Sửa xong mà muốn xem lại,
+hoặc mở cho chủ site xem, thì đặt đúng khổ đó:
+
+```
+resize_window { width: 1280, height: 700 }
+```
+
+Đừng mở ở khổ khác rồi kết luận bố cục lệch — cao hơn 700 thì mọi thứ
+trông thoáng hơn thực tế, thấp hơn thì tưởng là chật.
+
+Vẫn phải thử thêm khổ điện thoại (`preset: "mobile"`, 375 × 812) trước
+khi báo xong: phần lớn người đọc vào bằng điện thoại.
 
 ## Trang quản trị blog (admin.html)
 

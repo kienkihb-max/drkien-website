@@ -101,7 +101,15 @@
     var imgs = Array.prototype.slice
       .call(khoi.querySelectorAll("img"))
       .filter(function (img) {
-        return !img.closest('[aria-hidden="true"]');
+        // Ảnh trong khối aria-hidden là bản nhân đôi của dải ảnh chạy
+        // ngang — bắt luôn nó thì lightbox có hai lần cùng một ảnh.
+        if (img.closest('[aria-hidden="true"]')) return false;
+        // Ảnh khai data-lightbox-skip thì không vào danh sách. Dùng cho ảnh
+        // đã có một bản khác của chính nó trong cùng khối — ví dụ ảnh TO ở
+        // trang sản phẩm chỉ là bản phóng của một trong mấy ảnh nhỏ, để cả
+        // hai vào danh sách thì lightbox có hai lần cùng một tấm.
+        if (img.hasAttribute("data-lightbox-skip")) return false;
+        return true;
       });
     if (imgs.length === 0) return;
 

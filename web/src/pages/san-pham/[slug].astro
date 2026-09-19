@@ -11,7 +11,7 @@
 import Trang from "../../layouts/Trang.astro";
 import DuongDan from "../../components/DuongDan.astro";
 import ProductGrid from "../../components/ProductGrid.astro";
-import { SAN_PHAM, CHU_NUT_TU_VAN, CHU_NUT_MUA } from "../../data/san-pham.mjs";
+import { SAN_PHAM, CHU_NUT_TU_VAN, CHU_NUT_MUA, moTaAnh } from "../../data/san-pham.mjs";
 import { GOI_DIEN } from "../../data/thong-tin.mjs";
 import {
   Leaf,
@@ -54,6 +54,20 @@ const anh_album = [
 // chia sẻ hiện trơ không ảnh mà trên trang chẳng có dấu hiệu gì.
 const anh_chia_se = mon.anh ? "assets/img/" + mon.anh : undefined;
 
+/**
+ * Bản ĐẦY ĐỦ của một ảnh: giữ nguyên khung hình gốc, không bị xén vuông.
+ * Trang hiện bản vuông cho lưới đều, còn bấm vào thì lightbox mở bản này —
+ * thấy trọn sản phẩm chứ không phải phần đã cắt.
+ *
+ * Quy ước tên: product-x.jpg (vuông) ↔ product-x-full.jpg (đầy đủ). Thêm
+ * ảnh sản phẩm mới thì phải sinh cả hai, nếu không lightbox trỏ vào file
+ * không có thật và bấm ảnh ra khung trắng.
+ */
+// Mô tả ảnh dùng chung cho mọi ảnh của món này — khuôn đặt ở san-pham.mjs.
+const mo_ta_anh = moTaAnh(mon.ten);
+
+const banDayDu = (ten) => "/assets/img/" + ten.replace(/\.jpg$/i, "-full.jpg");
+
 // Các mục nội dung. Gom thành mảng để trang chỉ duyệt một vòng, thêm mục
 // mới chỉ phải thêm một dòng ở đây.
 const MUC = [
@@ -71,7 +85,7 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
   mo_ta={mon.mo_ta_seo}
   duong_dan={"san-pham/" + mon.slug}
   anh={anh_chia_se}
-  anh_alt={mon.anh_alt}
+  anh_alt={mo_ta_anh}
   loai_trang="service"
   lop_body="subpage"
   scripts={["thong-tin.js", "seo-schema.js", "lightbox.js", "sticky-cta.js"]}
@@ -92,9 +106,11 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
             <img
               id="anhLon"
               src={"/assets/img/" + anh_album[0].anh}
-              alt={anh_album[0].alt}
-              width="900"
-              height="1200"
+              data-full={banDayDu(anh_album[0].anh)}
+              data-lightbox-skip
+              alt={mo_ta_anh}
+              width="1000"
+              height="1000"
             />
           ) : (
             /* Món chưa chụp được ảnh nào — hiện icon trên nền nhạt, giữ đúng
@@ -113,10 +129,19 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
                 type="button"
                 role="listitem"
                 data-anh={"/assets/img/" + a.anh}
-                data-alt={a.alt}
+                data-full={banDayDu(a.anh)}
+                data-alt={mo_ta_anh}
                 aria-label={"Xem ảnh: " + a.alt}
               >
-                <img src={"/assets/img/" + a.anh} alt="" loading="lazy" />
+                {/* data-full phải đặt trên chính thẻ <img>: lightbox.js đọc thuộc
+                    tính của ảnh, không đọc của nút bọc ngoài. Thiếu nó thì
+                    lightbox mở bản vuông đã xén chứ không phải bản đầy đủ. */}
+                <img
+                  src={"/assets/img/" + a.anh}
+                  data-full={banDayDu(a.anh)}
+                  alt={mo_ta_anh}
+                  loading="lazy"
+                />
               </button>
             ))}
           </div>
@@ -181,25 +206,75 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
 </Trang>
 
 <script>
-  // Bấm ảnh nhỏ thì đổi ảnh to. Chỉ đổi src và alt chứ không dựng lại thẻ
-  // <img>: lightbox.js đã gắn sự kiện vào đúng thẻ đó lúc trang tải xong,
-  // thay thẻ mới là mất luôn tính năng bấm để phóng to.
+  // ——— Album: ảnh nhỏ đổi ảnh to, ảnh to mở lightbox ———
+  //
+  // Ba việc phải khớp nhau, sai một cái là hỏng một cái khác:
+  //
+  //  1. Bấm ảnh NHỎ  → chỉ đổi ảnh to, KHÔNG mở lightbox.
+  //  2. Bấm ảnh TO   → mở lightbox đúng tấm đang xem.
+  //  3. Trong lightbox, nút tới/lui phải chạy hết cả album.
+  //
+  // Cách làm: danh sách của lightbox chính là dải ảnh nhỏ (lightbox.js tự
+  // gom mọi <img> trong section). Ảnh to bị loại khỏi danh sách bằng
+  // data-lightbox-skip, vì nó chỉ là bản phóng của một trong mấy ảnh nhỏ —
+  // để cả hai vào thì lightbox có hai lần cùng một tấm.
+  //
+  // Việc (1): lightbox.js gắn sự kiện thẳng vào từng <img>, mà sự kiện ở
+  // chính thẻ đích luôn chạy TRƯỚC sự kiện của thẻ cha. Nên muốn chặn nó
+  // phải bắt ở pha CAPTURE trên thẻ bọc ngoài rồi stopPropagation — lúc đó
+  // sự kiện chưa kịp xuống tới <img>.
+  //
+  // Việc (2): ảnh to không tự mở được (đã bị loại), nên nó bấm hộ vào ảnh
+  // nhỏ đang chọn. Lúc bấm hộ phải tạm tắt cái chặn ở trên, nếu không
+  // chính cú bấm hộ đó cũng bị chặn nốt.
   const anh_lon = document.getElementById("anhLon");
-  const nut = document.querySelectorAll(".album-nut");
-  // Món chưa có ảnh nào thì không có thẻ #anhLon lẫn nút nào — thoát sớm.
-  if (anh_lon) nut.forEach((n) => {
-    n.addEventListener("click", () => {
-      anh_lon.src = n.dataset.anh;
-      anh_lon.alt = n.dataset.alt;
-      nut.forEach((k) => k.classList.remove("dang-chon"));
-      n.classList.add("dang-chon");
+  const dai_anh = document.querySelector(".album-nho");
+  const nut = Array.from(document.querySelectorAll(".album-nut"));
+
+  // Món chưa có ảnh, hoặc chỉ có một ảnh nên không có dải ảnh nhỏ.
+  if (anh_lon && dai_anh) {
+    let dang_bam_ho = false;
+
+    dai_anh.addEventListener(
+      "click",
+      (su_kien) => {
+        if (dang_bam_ho) return;
+        const n = su_kien.target.closest(".album-nut");
+        if (!n) return;
+        su_kien.stopPropagation();
+        su_kien.preventDefault();
+        anh_lon.src = n.dataset.anh;
+        // Đổi cả data-full, nếu không bấm ảnh to lại ra bản đầy đủ của
+        // tấm trước đó.
+        anh_lon.dataset.full = n.dataset.full;
+        anh_lon.alt = n.dataset.alt;
+        nut.forEach((k) => k.classList.remove("dang-chon"));
+        n.classList.add("dang-chon");
+      },
+      true
+    );
+
+    anh_lon.addEventListener("click", () => {
+      const dang_chon = document.querySelector(".album-nut.dang-chon") || nut[0];
+      const anh_nho = dang_chon && dang_chon.querySelector("img");
+      if (!anh_nho) return;
+      dang_bam_ho = true;
+      anh_nho.click();
+      dang_bam_ho = false;
     });
-  });
+  }
 </script>
 
 <style>
   /* Chỉ trang này dùng nên để trong <style> của trang, không thêm vào
      style.css. Astro tự giới hạn phạm vi khối này cho riêng trang. */
+
+  /* Bỏ khoảng trống trên. Ngay phía trên là khối tiêu đề trang, vốn đã có
+     khoảng cách dưới của nó — hai khoảng cộng lại đẩy ảnh xuống gần hết
+     màn hình đầu tiên, người đọc phải cuộn mới thấy sản phẩm. */
+  .chi-tiet {
+    padding-top: 0;
+  }
 
   h1 .lucide {
     vertical-align: -0.12em;
@@ -219,12 +294,12 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
   .album-lon img {
     display: block;
     width: 100%;
-    /* Bắt buộc có height:auto. Thẻ <img> mang sẵn width/height 900x1200 để
+    /* Bắt buộc có height:auto. Thẻ <img> mang sẵn width/height 1000x1000 để
        trình duyệt chừa chỗ trước khi ảnh tải xong (khỏi giật layout), nhưng
        chừng nào chiều cao còn lấy từ thuộc tính đó thì aspect-ratio không
-       có tác dụng — ảnh bị kéo cao đúng 1200px, dài gấp đôi cột chữ. */
+       có tác dụng — ảnh bị kéo cao đúng 1000px thay vì cao bằng bề ngang ô. */
     height: auto;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: var(--radius);
     box-shadow: var(--shadow-card);
@@ -238,7 +313,7 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
     align-items: center;
     justify-content: center;
     width: 100%;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 1 / 1;
     border-radius: var(--radius);
     background: #f2f5fb;
     color: var(--primary);
@@ -272,8 +347,9 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
 
   .muc { margin-bottom: 32px; }
 
-  /* Gạch đầu dòng tròn đen bình thường. Không dùng .list-check của site —
-     lớp đó vẽ vòng tròn rỗng màu xanh, chủ site không muốn. */
+  /* Gạch đầu dòng tròn đen bình thường. Phải khai cả list-style lẫn padding:
+     style.css của site đặt ul { list-style: none } và bộ reset ở đầu file
+     xoá sạch padding, nên không khai lại thì danh sách mất hết chấm. */
   .bullet-list {
     margin: 0;
     padding-left: 22px;
@@ -285,6 +361,7 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
   .bullet-list li::marker {
     color: #1f2937;
   }
+
   .muc h2 {
     font-size: 1.25rem;
     color: var(--primary);
@@ -302,6 +379,42 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
     margin-top: 16px;
     font-size: 0.9rem;
     color: var(--muted, #6b7280);
+  }
+
+  /* ——— Điện thoại ——— */
+  @media (max-width: 720px) {
+    /* Hai nút dính đáy màn hình thay vì nằm lẫn trong bài. Không nhân bản
+       nút bằng JS như sticky-cta.js — chính hai nút này chuyển xuống, nên
+       không có chuyện hai bản nút lệch chữ nhau.
+       sticky-cta.js không dựng gì trên trang này vì nó nhân bản từ
+       .cv-hero .offer-actions, mà hero của trang sản phẩm không có nút. */
+    .chi-tiet-nut {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 95;
+      margin: 0;
+      padding: 10px 16px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 -2px 16px rgba(0, 42, 106, 0.12);
+    }
+    /* Hai nút chia đôi bề ngang, xếp ngang chứ không chồng lên nhau —
+       chồng thì thanh cao 110px, che mất một phần ba màn hình. */
+    .chi-tiet-nut .btn {
+      flex: 1;
+      justify-content: center;
+      padding-left: 12px;
+      padding-right: 12px;
+      white-space: nowrap;
+    }
+    /* Chừa chỗ để thanh không đè lên cuối trang. */
+    :global(.site-footer) {
+      padding-bottom: 76px;
+    }
   }
 
   @media (max-width: 880px) {

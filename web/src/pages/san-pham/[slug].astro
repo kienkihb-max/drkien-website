@@ -1,16 +1,18 @@
 ---
 // Trang chi tiết từng sản phẩm: /san-pham/<slug>
 //
-// Nội dung KHÔNG nằm ở đây — tên, ảnh, công dụng, thành phần đọc từ
+// Nội dung KHÔNG nằm ở đây — tên, ảnh và toàn bộ chữ đọc từ
 // data/san-pham.mjs. Sửa chữ thì sửa file đó.
 //
-// Mục nào trong dữ liệu để mảng rỗng thì trang BỎ HẲN mục đó, không in ra
-// một tiêu đề trống. Chủ ý: công dụng và thành phần chỉ được chép từ nhãn
-// sản phẩm thật, món nào chưa có chữ thì thà thiếu mục còn hơn bịa ra.
+// Khuôn ĐÚNG BA MỤC, không hơn: Điểm đặc biệt → Công dụng → Phù hợp với.
+// Mục nào để mảng rỗng thì trang bỏ hẳn, không in ra một tiêu đề trống.
+//
+// Từng có thêm mục "Lưu ý" ở cuối, chủ site đã bỏ. Đừng thêm lại.
 import Trang from "../../layouts/Trang.astro";
 import DuongDan from "../../components/DuongDan.astro";
+import ProductGrid from "../../components/ProductGrid.astro";
 import { SAN_PHAM, CHU_NUT_TU_VAN, CHU_NUT_MUA } from "../../data/san-pham.mjs";
-import { GOI_DIEN, SO_ZALO } from "../../data/thong-tin.mjs";
+import { GOI_DIEN } from "../../data/thong-tin.mjs";
 import {
   Leaf,
   Footprints,
@@ -55,12 +57,13 @@ const anh_chia_se = mon.anh ? "assets/img/" + mon.anh : undefined;
 // Các mục nội dung. Gom thành mảng để trang chỉ duyệt một vòng, thêm mục
 // mới chỉ phải thêm một dòng ở đây.
 const MUC = [
+  { tieu_de: "Điểm đặc biệt", icon: "ic-award", dong: mon.diem_dac_biet },
   { tieu_de: "Công dụng", icon: "ic-activity", dong: mon.cong_dung },
-  { tieu_de: "Thành phần", icon: "ic-scan", dong: mon.thanh_phan },
-  { tieu_de: "Đối tượng sử dụng", icon: "ic-run", dong: mon.doi_tuong },
-  { tieu_de: "Cách dùng", icon: "ic-clock", dong: mon.cach_dung },
-  { tieu_de: "Lưu ý & bảo quản", icon: "ic-shield", dong: mon.luu_y },
+  { tieu_de: "Phù hợp với", icon: "ic-run", dong: mon.doi_tuong },
 ].filter((m) => m.dong?.length > 0);
+
+// Các món khác, cho khối cuối trang. Loại chính món đang mở ra.
+const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
 ---
 
 <Trang
@@ -71,7 +74,7 @@ const MUC = [
   anh_alt={mon.anh_alt}
   loai_trang="service"
   lop_body="subpage"
-  scripts={["thong-tin.js", "seo-schema.js", "service-cards.js", "lightbox.js", "sticky-cta.js"]}
+  scripts={["thong-tin.js", "seo-schema.js", "lightbox.js", "sticky-cta.js"]}
 >
   <section class="section cv-hero">
     <div class="container">
@@ -97,7 +100,7 @@ const MUC = [
             /* Món chưa chụp được ảnh nào — hiện icon trên nền nhạt, giữ đúng
                khổ để trang không hụt một mảng. Thêm ảnh trong san-pham.mjs
                là khối này tự biến mất. */
-            <span class="chua-co-anh">
+            <span class="album-noimg">
               {Icon && <Icon size={88} stroke-width={1.2} />}
             </span>
           )}
@@ -127,7 +130,9 @@ const MUC = [
         {MUC.map((m) => (
           <div class="muc">
             <h2><svg class="icon icon-sm"><use href={"#" + m.icon}/></svg> {m.tieu_de}</h2>
-            <ul class="list-check">
+            {/* Dùng <ul> thường chứ không phải .list-check: chủ site chốt
+                gạch đầu dòng tròn đen bình thường, không phải chấm xanh. */}
+            <ul class="bullet-list">
               {m.dong.map((d) => <li>{d}</li>)}
             </ul>
           </div>
@@ -144,8 +149,10 @@ const MUC = [
           <a class="btn btn-primary btn-icon" data-tt-href="zalo">
             {CHU_NUT_TU_VAN} <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
           </a>
+          {/* Không in số điện thoại lên nút — chủ site chốt. Số vẫn nằm
+              trong href nên bấm là gọi được, và chân trang vẫn hiện số. */}
           <a class="btn btn-outline btn-icon" href={GOI_DIEN}>
-            <svg class="icon icon-sm"><use href="#ic-chat"/></svg> {CHU_NUT_MUA}: {SO_ZALO}
+            <svg class="icon icon-sm"><use href="#ic-chat"/></svg> {CHU_NUT_MUA}
           </a>
         </div>
         <p class="chi-tiet-ghi-chu">
@@ -155,20 +162,22 @@ const MUC = [
     </div>
   </section>
 
+  {/* Không có khối địa chỉ / giờ đón khách ở đây: chủ site đã bỏ. Hai thứ
+      đó vẫn nằm sẵn ở chân trang trên mọi trang. Đừng thêm lại.
+
+      Cũng KHÔNG có khối "Các dịch vụ khác mình cung cấp": người đang xem
+      một món hàng thì cái đáng mời xem tiếp là món khác, không phải dịch
+      vụ khám chữa. */}
   <section class="section section-alt">
     <div class="container">
-      {/* Không có khối địa chỉ / giờ đón khách ở đây: chủ site đã bỏ. Hai
-          thứ đó vẫn nằm sẵn ở chân trang trên mọi trang. Đừng thêm lại. */}
-      <p class="cv-link-wrap">
-        <a class="btn btn-primary btn-icon" href="/san-pham">
-          Xem tất cả sản phẩm <svg class="icon icon-sm"><use href="#ic-arrow"/></svg>
-        </a>
-      </p>
+      <div class="section-title text-center">
+        <p class="section-label">Xem thêm</p>
+        <h2>Các sản phẩm khác</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      <ProductGrid items={mon_khac} />
     </div>
   </section>
-
-  {/* Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong dich-vu.mjs */}
-  <section class="section service-related"></section>
 </Trang>
 
 <script>
@@ -224,7 +233,7 @@ const MUC = [
 
   /* Dải ảnh nhỏ. Bốn ô một hàng, ảnh thừa xuống hàng sau — không cuộn
      ngang, vì dải cuộn ngang trên máy tính hay bị bỏ sót. */
-  .chua-co-anh {
+  .album-noimg {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -262,6 +271,20 @@ const MUC = [
   .album-nut.dang-chon { border-color: var(--primary); }
 
   .muc { margin-bottom: 32px; }
+
+  /* Gạch đầu dòng tròn đen bình thường. Không dùng .list-check của site —
+     lớp đó vẽ vòng tròn rỗng màu xanh, chủ site không muốn. */
+  .bullet-list {
+    margin: 0;
+    padding-left: 22px;
+    list-style: disc;
+  }
+  .bullet-list li {
+    margin-bottom: 8px;
+  }
+  .bullet-list li::marker {
+    color: #1f2937;
+  }
   .muc h2 {
     font-size: 1.25rem;
     color: var(--primary);

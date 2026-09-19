@@ -2,6 +2,7 @@
 // Trang này chuyển từ index.html của site tĩnh cũ.
 // Toàn bộ thẻ SEO nay do layouts/Trang.astro sinh — sửa tiêu đề hay mô tả
 // thì sửa ở mấy dòng thuộc tính ngay dưới đây, đừng thêm thẻ meta vào thân.
+import ServiceCards from "../components/ServiceCards.astro";
 import Trang from "../layouts/Trang.astro";
 ---
 
@@ -12,7 +13,7 @@ import Trang from "../layouts/Trang.astro";
   anh="assets/img/og-share.jpg"
   anh_alt="Bác sĩ Lê Trung Kiên — ThS. Y học cổ truyền, Bệnh viện Đa khoa Y học cổ truyền Hà Nội"
   loai_trang="home"
-  scripts={["thong-tin.js","seo-schema.js","service-cards.js","lightbox.js","script.js"]}
+  scripts={["thong-tin.js","seo-schema.js","lightbox.js","script.js"]}
 >
 <section class="hero" id="home">
     <div class="container hero-inner">
@@ -50,8 +51,8 @@ import Trang from "../layouts/Trang.astro";
         <h2>Mình có thể hỗ trợ bạn</h2>
         <div class="divider mx-auto"></div>
       </div>
-      <!-- Thẻ dịch vụ do service-cards.js dựng — sửa nội dung trong file đó -->
-      <div class="offer-grid service-cards"></div>
+      {/* Thẻ dịch vụ — sửa tên, mô tả, ảnh trong data/dich-vu.mjs */}
+      <ServiceCards />
     </div>
   </section>
 

@@ -6,6 +6,7 @@ import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
 import { timDichVu } from "../data/dich-vu.mjs";
 import BaiCuaDichVu from "../components/BaiCuaDichVu.astro";
+import ServiceCardsRelated from "../components/ServiceCardsRelated.astro";
 ---
 
 <Trang
@@ -16,7 +17,7 @@ import BaiCuaDichVu from "../components/BaiCuaDichVu.astro";
   anh_alt="Điện châm điều trị tại khoa Y học cổ truyền"
   loai_trang="service"
   lop_body="subpage"
-  scripts={["thong-tin.js","seo-schema.js","service-cards.js","lightbox.js","sticky-cta.js"]}
+  scripts={["thong-tin.js","seo-schema.js","lightbox.js","sticky-cta.js"]}
 >
 <section class="section cv-hero">
     <div class="container">
@@ -201,6 +202,6 @@ import BaiCuaDichVu from "../components/BaiCuaDichVu.astro";
 
   <BaiCuaDichVu dich_vu="dieu-tri" nen_xam />
 
-  <!-- Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong file đó -->
-  <section class="section service-related"></section>
+  {/* Khối tự suy ra nền xám của nó từ articlesAlt — xem ServiceCardsRelated */}
+  <ServiceCardsRelated service="dieu-tri" articlesAlt />
 </Trang>

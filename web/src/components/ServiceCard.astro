@@ -1,0 +1,46 @@
+---
+// Một thẻ dịch vụ. Mẫu thẻ CHỈ có ở đây — trang chủ và khối "Xem thêm" ở
+// cuối trang dịch vụ đều dùng lại, nên sửa bố cục thẻ là đổi đồng thời cả
+// hai chỗ.
+//
+// Tên, mô tả, ảnh, chữ nút nằm ở data/dich-vu.mjs. Đừng viết lại ở đây.
+//
+// Trước 10/2026 thẻ này do service-cards.js dựng phía trình duyệt — di sản
+// từ hồi site còn là HTML tĩnh, chưa có Astro. Cách đó có ba cái giá: ảnh
+// phải tự nối đường dẫn tuyệt đối bằng tay (đã có lần 404 trên trang lồng
+// sâu), dữ liệu phải sinh thêm một bản window.DICH_VU cho trình duyệt đọc,
+// và Google chỉ thấy thẻ sau khi chạy JS. Nay dựng sẵn lúc build, hết cả ba.
+import { ZALO } from "../data/thong-tin.mjs";
+import { CHU_NUT_XEM } from "../data/dich-vu.mjs";
+
+interface Props {
+  /** Một phần tử của DICH_VU trong data/dich-vu.mjs. */
+  service: {
+    duong_dan: string;
+    ten: string;
+    mo_ta: string;
+    anh: string;
+    anh_alt: string;
+    chu_nut: string;
+  };
+}
+const { service } = Astro.props;
+
+// Trong dich-vu.mjs ảnh ghi dạng tương đối ("assets/img/…"). Phải có gạch
+// chéo đầu, nếu không trang nằm sâu một cấp sẽ hiểu thành đường dẫn con.
+const image = "/" + service.anh.replace(/^\/+/, "");
+---
+
+<div class="offer-card service-card">
+  <div class="offer-img">
+    <img src={image} alt={service.anh_alt} loading="lazy" />
+  </div>
+  <h3>{service.ten}</h3>
+  <p>{service.mo_ta}</p>
+  <div class="offer-actions">
+    <a class="btn btn-main btn-sm" href={ZALO} target="_blank" rel="noopener">
+      {service.chu_nut}
+    </a>
+    <a class="btn btn-outline btn-sm" href={service.duong_dan}>{CHU_NUT_XEM}</a>
+  </div>
+</div>

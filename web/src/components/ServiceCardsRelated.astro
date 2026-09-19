@@ -1,0 +1,67 @@
+---
+// Khối "Xem thêm — Các dịch vụ khác mình cung cấp" ở cuối mỗi trang dịch vụ.
+// Hiện hai dịch vụ còn lại; trang đang mở tự loại chính nó ra.
+//
+// Chỉ dùng ở ba trang dịch vụ. Trang sản phẩm KHÔNG dùng khối này — ở đó
+// người đọc đang xem một món hàng, thứ đáng mời xem tiếp là món khác, nên
+// trang đó dùng ProductGrid.
+import ServiceCard from "./ServiceCard.astro";
+import { DICH_VU, XEM_THEM_NHAN, XEM_THEM_TIEU_DE } from "../data/dich-vu.mjs";
+import { layBaiHienLen } from "../lib/supabase";
+
+interface Props {
+  /**
+   * Đuôi địa chỉ trang dịch vụ đang mở, ví dụ "dieu-tri" — dịch vụ đó bị
+   * loại khỏi danh sách, còn lại 2 thẻ xếp 2 cột.
+   *
+   * BỎ TRỐNG khi trang không phải trang dịch vụ (ví dụ trang sản phẩm):
+   * hiện đủ 3 thẻ, xếp 3 cột như ngoài trang chủ.
+   */
+  service?: string;
+  /**
+   * Chỉ dùng khi có `service`. Là giá trị nen_xam mà trang đang truyền cho
+   * <BaiCuaDichVu> ngay phía trên — khối này tự suy ra nền của mình từ đó.
+   */
+  articlesAlt?: boolean;
+  /** Nền xám. Dùng khi KHÔNG truyền `service`, lúc đó phải chọn tay. */
+  alt?: boolean;
+}
+const { service, articlesAlt = false, alt: altProp = false } = Astro.props;
+
+const key = service ? "/" + service.replace(/^\/+/, "") : null;
+const others = key ? DICH_VU.filter((d) => d.duong_dan !== key) : DICH_VU;
+
+// Nền xám xen kẽ. Rắc rối chỉ có ở trang dịch vụ: khối <BaiCuaDichVu> ngay
+// phía trên KHÔNG hiện khi dịch vụ đó chưa có bài nào — lúc ấy khối này nối
+// thẳng vào section phía trên nữa, và nền phải lật ngược lại.
+//
+// articlesAlt là nền của khối bài viết, tức là ngược với section trên nó.
+// Vậy: khối bài có hiện → mình lấy ngược articlesAlt; không hiện → mình
+// chính là articlesAlt.
+//
+// Trước đây service-cards.js dò previousElementSibling lúc chạy để tránh
+// đúng cái bẫy này. Nay tính sẵn lúc build nên không còn chớp nền.
+let alt = altProp;
+if (key) {
+  const articles = await layBaiHienLen();
+  const hasArticles = articles.some((b) => b.dich_vu === key);
+  alt = hasArticles ? !articlesAlt : articlesAlt;
+}
+---
+
+{others.length > 0 && (
+  <section class:list={["section", alt && "section-alt"]}>
+    <div class="container">
+      <div class="section-title text-center">
+        <p class="section-label">{XEM_THEM_NHAN}</p>
+        <h2>{XEM_THEM_TIEU_DE}</h2>
+        <div class="divider mx-auto"></div>
+      </div>
+      {/* Còn 2 thẻ thì bó lưới lại 2 cột cho cân (.service-cards-related);
+          đủ 3 thẻ thì để lưới 3 cột như ngoài trang chủ. */}
+      <div class:list={["offer-grid", others.length < 3 && "service-cards-related"]}>
+        {others.map((s) => <ServiceCard service={s} />)}
+      </div>
+    </div>
+  </section>
+)}

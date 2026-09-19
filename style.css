@@ -445,9 +445,6 @@ h4 { font-size: var(--fs-base); }
 .service-card { transition: box-shadow .25s ease; }
 .service-card:hover { box-shadow: 0 12px 34px rgba(0, 42, 106, 0.18); }
 
-/* Placeholder rỗng thì ẩn hẳn, đừng để chừa một dải trắng cao 192px giữa
-   trang khi service-cards.js chưa chạy hoặc không nạp được. */
-.service-related:empty { display: none; }
 
 /* Khối "Xem thêm" chỉ còn 2 thẻ nên thu lưới lại và căn giữa cho cân,
    thẻ vẫn rộng xấp xỉ ngoài trang chủ. */
@@ -455,14 +452,6 @@ h4 { font-size: var(--fs-base); }
   grid-template-columns: repeat(2, minmax(0, 1fr));
   max-width: 760px;
   margin: 0 auto;
-}
-/* Trang không phải trang dịch vụ (ví dụ trang sản phẩm) thì khối này hiện
-   đủ cả 3 thẻ — service-cards.js gắn thêm lớp "co-3". Để nguyên lưới 2 cột
-   thì 3 thẻ xuống thành 2 + 1, thẻ lẻ nằm chỏng chơ một mình hàng dưới.
-   Bỏ luôn max-width để ba thẻ rộng bằng ngoài trang chủ. */
-.service-cards-related.co-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  max-width: none;
 }
 .offer-actions {
   display: flex;

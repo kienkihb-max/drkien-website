@@ -1,0 +1,10 @@
+---
+// Lưới đủ ba dịch vụ — khối "Dịch vụ" ngoài trang chủ.
+// Danh sách đọc từ data/dich-vu.mjs, thêm bớt dịch vụ thì sửa file đó.
+import ServiceCard from "./ServiceCard.astro";
+import { DICH_VU } from "../data/dich-vu.mjs";
+---
+
+<div class="offer-grid">
+  {DICH_VU.map((service) => <ServiceCard service={service} />)}
+</div>

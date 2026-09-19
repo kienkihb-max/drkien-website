@@ -1,0 +1,158 @@
+---
+// Lưới thẻ sản phẩm — dùng chung cho trang danh sách /san-pham và khối
+// "Các sản phẩm khác" ở cuối mỗi trang chi tiết.
+//
+// Vì sao là component: hai chỗ đó dựng cùng một loại thẻ. Chép markup sang
+// chỗ thứ hai là sau này sửa thẻ phải nhớ sửa hai nơi, và kiểu gì cũng có
+// ngày quên một nơi. Toàn bộ markup lẫn CSS của thẻ nằm gọn trong file này.
+//
+// Chữ trên thẻ và ảnh đọc từ data/san-pham.mjs, không sửa ở đây.
+import { CHU_BAN_CHAY } from "../data/san-pham.mjs";
+import {
+  Leaf,
+  Footprints,
+  Droplets,
+  BottleWine,
+  FlaskConical,
+  Flower2,
+} from "@lucide/astro";
+
+// Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
+// 1800 icon vào lúc dựng. Thêm món mới với icon lạ thì thêm một dòng ở đây
+// cho khớp trường "icon" trong san-pham.mjs, nếu không thẻ sẽ thiếu hình.
+const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
+
+interface Props {
+  /** Các món cần hiện. Thứ tự hiện đúng thứ tự trong mảng truyền vào. */
+  items: any[];
+}
+const { items } = Astro.props;
+---
+
+<div class="product-grid">
+  {items.map((m) => {
+    const Icon = ICON[m.icon];
+    return (
+      <a class="product-card" href={"/san-pham/" + m.slug}>
+        {/* Món chưa có ảnh thì ô ảnh hiện icon trên nền nhạt, giữ đúng khổ
+            để lưới không so le. Có ảnh rồi thì thêm dòng anh/anh_alt trong
+            san-pham.mjs, không phải sửa ở đây. */}
+        {m.anh ? (
+          <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
+        ) : (
+          <span class="product-card-noimg">{Icon && <Icon size={56} stroke-width={1.3} />}</span>
+        )}
+        {m.ban_chay && <span class="badge-bestseller">{CHU_BAN_CHAY}</span>}
+        <h3 class="product-card-title">
+          {Icon && <Icon size={19} stroke-width={1.8} />}
+          {m.ten}
+        </h3>
+      </a>
+    );
+  })}
+</div>
+
+<style>
+  /* Lưới ba cột. Astro tự giới hạn phạm vi khối này cho riêng component,
+     nên không đụng tới lưới nào khác của site. */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 960px) {
+    .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+  @media (max-width: 520px) {
+    .product-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Thẻ món: chỉ có ảnh và tên, nên không dùng .info-card (thẻ đó có nền
+     trắng và padding dày, để trống một mảng lớn khi không có chữ bên trong). */
+  .product-card {
+    /* Cột dọc để phần tên giãn ra lấp nốt chiều cao thừa: tên dài xuống hai
+       dòng làm thẻ đó cao hơn, lưới kéo mấy thẻ kia cao bằng, và nếu tên
+       không giãn thì mấy thẻ kia hở một khoảng trắng dưới đáy. */
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    background: #fff;
+    /* Mốc cho nhãn "Bán chạy" đặt tuyệt đối lên góc ảnh. */
+    position: relative;
+    /* Cả thẻ là một liên kết sang trang chi tiết — bỏ gạch chân và giữ màu
+       chữ như cũ, chỉ nhích lên khi rê chuột để biết là bấm được. */
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.13);
+  }
+
+  .product-card img {
+    display: block;
+    width: 100%;
+    /* Khổ DỌC. Ảnh gốc hầu như đều chụp dọc (chai cồn, túi bột, xấp thang),
+       xén ngang thì chỉ còn một dải giữa, nhìn không ra là sản phẩm gì. */
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: #f1f1f1;
+  }
+
+  /* Ô thay ảnh cho món chưa có ảnh chụp. Cùng khổ 3:4 với thẻ có ảnh để lưới
+     không so le, nền nhạt và icon to ở giữa cho biết là còn thiếu ảnh chứ
+     không phải ảnh hỏng. */
+  .product-card-noimg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #f2f5fb;
+    color: var(--primary);
+    opacity: 0.55;
+  }
+
+  /* Nhãn góc ảnh. Đặt đè lên ảnh chứ không chen thêm một dòng dưới tên: thẻ
+     chỉ có ảnh và tên, thêm dòng nữa là mấy thẻ không có nhãn bị hụt so với
+     thẻ có nhãn. */
+  .badge-bestseller {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    /* Ảnh sản phẩm chỗ sáng chỗ tối, đổ bóng để chữ trắng không chìm mất
+       khi nhãn rơi đúng vùng sáng. */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .product-card-title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: 16px 14px;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+  }
+</style>

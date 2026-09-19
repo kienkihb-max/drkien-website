@@ -9,22 +9,10 @@
 // không phải chỗ còn thiếu chữ — lý do chép đầy đủ ở đầu san-pham.mjs.
 import Trang from "../layouts/Trang.astro";
 import DuongDan from "../components/DuongDan.astro";
-import { SAN_PHAM, TU_BAO_CHE, CHU_NUT_HOI, CHU_BAN_CHAY } from "../data/san-pham.mjs";
+import ProductGrid from "../components/ProductGrid.astro";
+import ServiceCardsRelated from "../components/ServiceCardsRelated.astro";
+import { SAN_PHAM, TU_BAO_CHE, CHU_NUT_HOI } from "../data/san-pham.mjs";
 import { TEN_BAC_SI } from "../data/thong-tin.mjs";
-import {
-  Leaf,
-  Footprints,
-  Droplets,
-  BottleWine,
-  FlaskConical,
-  Flower2,
-} from "@lucide/astro";
-
-// Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
-// 1800 icon vào lúc dựng. Thêm món mới với icon lạ thì thêm một dòng ở đây
-// cho khớp trường "icon" trong san-pham.mjs, nếu không thẻ sẽ thiếu hình.
-const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
-
 ---
 
 <Trang
@@ -35,7 +23,7 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
   anh_alt="Bác sĩ Lê Trung Kiên cân dược liệu để bào chế chế phẩm Y học cổ truyền"
   loai_trang="service"
   lop_body="subpage"
-  scripts={["thong-tin.js", "seo-schema.js", "service-cards.js", "sticky-cta.js"]}
+  scripts={["thong-tin.js", "seo-schema.js", "sticky-cta.js"]}
 >
   <section class="section cv-hero">
     <div class="container">
@@ -73,7 +61,7 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
         {/* Lời chủ site tự viết — để nghiêng và đặt trong ngoặc kép cho thấy
             rõ đây là lời kể của bác sĩ, không phải chữ quảng cáo. Ngoặc mở ở
             đoạn đầu, ngoặc đóng ở đoạn sau, đúng lối trích một đoạn liền. */}
-        <p class="lead loi-ke">
+        <p class="lead quote-story">
           “Mấy món này mình làm cho người nhà trước. Người nhà dùng thì không có chỗ cho hai
           chữ ‘tạm được’: dược liệu tự tay chọn, tự tay cân, làm từng mẻ nhỏ, mẻ nào cũng
           nhớ lấy ở đâu, đóng gói ngày nào. Rồi bạn bè hỏi mua, rồi người bệnh hỏi mua —
@@ -83,7 +71,7 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
           Chỉ là thứ mình yên tâm đưa cho người trong nhà dùng.”
         </p>
         {/* Tên lấy từ data/thong-tin.mjs — nguồn duy nhất, đừng gõ tay lại. */}
-        <p class="ky-ten">— {TEN_BAC_SI}</p>
+        <p class="quote-sign">— {TEN_BAC_SI}</p>
       </div>
     </div>
   </section>
@@ -96,35 +84,11 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
         <div class="divider mx-auto"></div>
       </div>
 
-      {/* Cả năm món trong MỘT lưới ba cột, thẻ nào cũng như thẻ nào. Trước
-          đây tách hai hàng, món nổi bật để thẻ to hơn — nhìn lệch, và mỗi
-          lần đổi số món lại phải sửa số cột của hai lưới cho khớp.
-          Thứ tự hiện đúng theo thứ tự trong SAN_PHAM, món nào cần đứng
-          trước thì xếp lên trên trong file đó. */}
-      <div class="luoi-mon">
-        {SAN_PHAM.map((m) => {
-          const Icon = ICON[m.icon];
-          return (
-            <a class="mon" href={"/san-pham/" + m.slug}>
-              {/* Món chưa có ảnh thì ô ảnh hiện icon trên nền nhạt, giữ đúng
-                  khổ để lưới không so le. Có ảnh rồi thì thêm dòng anh/anh_alt
-                  trong san-pham.mjs, không phải sửa ở đây. */}
-              {m.anh ? (
-                <img src={"/assets/img/" + m.anh} alt={m.anh_alt} loading="lazy" />
-              ) : (
-                <span class="mon-chua-anh">
-                  {Icon && <Icon size={56} stroke-width={1.3} />}
-                </span>
-              )}
-              {m.ban_chay && <span class="nhan-ban-chay">{CHU_BAN_CHAY}</span>}
-              <h3 class="mon-ten">
-                {Icon && <Icon size={19} stroke-width={1.8} />}
-                {m.ten}
-              </h3>
-            </a>
-          );
-        })}
-      </div>
+      {/* Thẻ sản phẩm dựng bằng component dùng chung — khối "Các sản phẩm
+          khác" ở cuối mỗi trang chi tiết cũng dùng đúng component đó.
+          Thứ tự hiện đúng thứ tự trong SAN_PHAM, món nào cần đứng trước thì
+          xếp lên trên trong data/san-pham.mjs. */}
+      <ProductGrid items={SAN_PHAM} />
     </div>
   </section>
 
@@ -143,8 +107,9 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
       đó vẫn nằm sẵn ở chân trang trên mọi trang, lặp lại giữa trang chỉ
       làm dài thêm. Đừng thêm lại. */}
 
-  {/* Nội dung do service-cards.js dựng — sửa danh sách dịch vụ trong dich-vu.mjs */}
-  <section class="section service-related"></section>
+  {/* Trang này không phải trang dịch vụ nên không loại thẻ nào — hiện đủ 3.
+      Sửa tên, mô tả, ảnh dịch vụ trong data/dich-vu.mjs. */}
+  <ServiceCardsRelated />
 </Trang>
 
 <style>
@@ -164,120 +129,18 @@ const ICON = { Leaf, Footprints, Droplets, BottleWine, FlaskConical, Flower2 };
 
   /* Lời kể của bác sĩ trong khối "Cách mình làm". Chỉ nghiêng chữ, không đổi
      cỡ hay màu — .lead đã lo phần đó rồi. */
-  .loi-ke {
+  .quote-story {
     font-style: italic;
   }
 
   /* Dòng ký tên dưới đoạn trích. Không nghiêng — để nó tách hẳn khỏi lời kể
      chứ không đọc tiếp như một câu nữa trong ngoặc kép. */
-  .ky-ten {
+  .quote-sign {
     margin-top: 14px;
     font-family: "Be Vietnam Pro", system-ui, sans-serif;
     font-weight: 600;
     color: var(--primary);
   }
 
-  /* Thẻ món: chỉ có ảnh và tên, nên không dùng .info-card (thẻ đó có nền
-     trắng và padding dày, để trống một mảng lớn khi không có chữ bên trong). */
-  .mon {
-    /* Cột dọc để phần tên giãn ra lấp nốt chiều cao thừa: tên dài xuống hai
-       dòng làm thẻ đó cao hơn, lưới kéo mấy thẻ kia cao bằng, và nếu tên
-       không giãn thì mấy thẻ kia hở một khoảng trắng dưới đáy. */
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    background: #fff;
-    /* Mốc cho nhãn "Bán chạy" đặt tuyệt đối lên góc ảnh. */
-    position: relative;
-    /* Cả thẻ là một liên kết sang trang chi tiết — bỏ gạch chân và giữ màu
-       chữ như cũ, chỉ nhích lên khi rê chuột để biết là bấm được. */
-    color: inherit;
-    text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .mon:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.13);
-  }
-
-  /* Nhãn góc ảnh. Đặt đè lên ảnh chứ không chen thêm một dòng dưới tên: thẻ
-     chỉ có ảnh và tên, thêm dòng nữa là mấy thẻ không có nhãn bị hụt so với
-     thẻ có nhãn. */
-  /* Ô thay ảnh cho món chưa có ảnh chụp. Cùng khổ 3:4 với thẻ có ảnh để lưới
-     không so le, nền nhạt và icon to ở giữa cho biết là còn thiếu ảnh chứ
-     không phải ảnh hỏng. */
-  .mon-chua-anh {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    background: #f2f5fb;
-    color: var(--primary);
-    opacity: 0.55;
-  }
-
-  .nhan-ban-chay {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 1;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: var(--primary);
-    color: #fff;
-    font-family: "Be Vietnam Pro", system-ui, sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    /* Ảnh sản phẩm chỗ sáng chỗ tối, đổ bóng để chữ trắng không chìm mất
-       khi nhãn rơi đúng vùng sáng. */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  }
-  .mon img {
-    display: block;
-    width: 100%;
-    /* Khổ DỌC. Từng để ngang 16/10 và bị cắt cụt gần hết: ảnh gốc hầu như
-       đều chụp dọc (chai cồn, túi bột, xấp thang), xén ngang thì chỉ còn
-       một dải giữa, nhìn không ra là sản phẩm gì.
-       Cùng một khổ cho cả hai hàng — thẻ nổi bật to hơn là vì ô của nó rộng
-       hơn, không phải vì ảnh xén khác đi. */
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
-    background: #f1f1f1;
-  }
-  .mon-ten {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 0;
-    padding: 16px 14px;
-    font-family: "Be Vietnam Pro", system-ui, sans-serif;
-    font-weight: 600;
-    color: var(--primary);
-    text-align: center;
-  }
-  /* Lưới ba cột cho cả năm món. Năm món trên ba cột thành 3 + 2, ô cuối
-     hàng dưới để trống — chấp nhận, đổi lại mọi thẻ cùng một cỡ. */
-  .luoi-mon {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  @media (max-width: 960px) {
-    .luoi-mon {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-  }
-  @media (max-width: 520px) {
-    .luoi-mon {
-      grid-template-columns: 1fr;
-    }
-  }
 
 </style>

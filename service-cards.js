@@ -37,7 +37,11 @@
   function theDichVu(dv) {
     return [
       '<div class="offer-card service-card">',
-      '  <div class="offer-img"><img src="' + thoat(dv.anh) + '" alt="' + thoat(dv.anh_alt) + '" loading="lazy"></div>',
+      // Đường dẫn ảnh phải bắt đầu bằng "/". Trong dich-vu.mjs nó ghi dạng
+      // tương đối ("assets/img/…"), mà trang chi tiết sản phẩm nằm sâu một
+      // cấp (/san-pham/<slug>) nên đường dẫn tương đối ở đó trỏ thành
+      // /san-pham/assets/img/… rồi 404 — ba ảnh dịch vụ mất trắng.
+      '  <div class="offer-img"><img src="/' + thoat(dv.anh).replace(/^\/+/, "") + '" alt="' + thoat(dv.anh_alt) + '" loading="lazy"></div>',
       "  <h3>" + thoat(dv.ten) + "</h3>",
       "  <p>" + thoat(dv.mo_ta) + "</p>",
       '  <div class="offer-actions">',

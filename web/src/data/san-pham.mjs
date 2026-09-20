@@ -159,9 +159,35 @@ export const SAN_PHAM = [
     ],
   },
   {
+    slug: "bot-ngam-chan",
+    ten: "Bột ngâm chân",
+    ban_chay: true,
+    icon: "Footprints",
+    anh: "product-bot-ngam-chan.jpg",
+    anh_alt: "Túi bột ngâm chân thảo dược đóng gói sẵn",
+    mo_ta_seo:
+      "Bột ngâm chân thảo dược do bác sĩ Lê Trung Kiên bào chế, đóng gói sẵn theo túi dùng một lần. Xem công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
+    album: [],
+    diem_dac_biet: [
+      "Thảo dược làm ấm đã cắt sẵn, đóng theo túi dùng một lần",
+      "Pha một túi với nước nóng, chờ bớt nóng rồi ngâm 15–20 phút",
+      "Không phải đun, không phải đong đếm gì thêm",
+    ],
+    cong_dung: [
+      "Hỗ trợ làm ấm cơ thể, thư giãn sau một ngày dài",
+      "Hỗ trợ lưu thông khí huyết vùng bàn chân, cẳng chân",
+      "Giúp dễ vào giấc hơn khi ngâm buổi tối",
+    ],
+    doi_tuong: [
+      "Người hay lạnh tay chân",
+      "Người đứng hoặc ngồi cả ngày, tối về mỏi chân",
+      "Người khó ngủ, hay tỉnh giấc giữa đêm",
+      "Người chạy bộ muốn thư giãn cơ sau buổi tập",
+    ],
+  },
+  {
     slug: "thuoc-thang-thuoc-sac",
     ten: "Thuốc thang, thuốc sắc",
-    ban_chay: true,
     icon: "FlaskConical",
     anh: "product-thuoc-sac-nb.jpg",
     anh_alt: "Túi thuốc đã sắc sẵn, nước thuốc màu nâu",
@@ -187,33 +213,6 @@ export const SAN_PHAM = [
       "Người đã khám và được bác sĩ kê đơn",
       "Người bận, không có thời gian sắc thuốc ở nhà",
       "Người ở xa, cần gửi thuốc theo từng đợt",
-    ],
-  },
-  {
-    slug: "bot-ngam-chan",
-    ten: "Bột ngâm chân",
-    ban_chay: true,
-    icon: "Footprints",
-    anh: "product-bot-ngam-chan.jpg",
-    anh_alt: "Túi bột ngâm chân thảo dược đóng gói sẵn",
-    mo_ta_seo:
-      "Bột ngâm chân thảo dược do bác sĩ Lê Trung Kiên bào chế, đóng gói sẵn theo túi dùng một lần. Xem công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
-    album: [],
-    diem_dac_biet: [
-      "Thảo dược làm ấm đã cắt sẵn, đóng theo túi dùng một lần",
-      "Pha một túi với nước nóng, chờ bớt nóng rồi ngâm 15–20 phút",
-      "Không phải đun, không phải đong đếm gì thêm",
-    ],
-    cong_dung: [
-      "Hỗ trợ làm ấm cơ thể, thư giãn sau một ngày dài",
-      "Hỗ trợ lưu thông khí huyết vùng bàn chân, cẳng chân",
-      "Giúp dễ vào giấc hơn khi ngâm buổi tối",
-    ],
-    doi_tuong: [
-      "Người hay lạnh tay chân",
-      "Người đứng hoặc ngồi cả ngày, tối về mỏi chân",
-      "Người khó ngủ, hay tỉnh giấc giữa đêm",
-      "Người chạy bộ muốn thư giãn cơ sau buổi tập",
     ],
   },
   {

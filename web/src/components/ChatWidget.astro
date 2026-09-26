@@ -109,6 +109,13 @@ const cau_hinh = JSON.stringify({
 
   if (root) {
     const config = JSON.parse(root.dataset.config || "{}");
+    // Chạy thử (npm run dev) và mở trang từ điện thoại qua địa chỉ Wi-Fi của
+    // máy tính (192.168.x.x): "localhost" trên điện thoại là chính điện
+    // thoại, nên đổi thành đúng máy đang chạy trang. Bản thật không bị ảnh
+    // hưởng vì địa chỉ máy chủ ở đó không phải localhost.
+    if (typeof config.dia_chi_agent === "string" && config.dia_chi_agent.startsWith("http://localhost:")) {
+      config.dia_chi_agent = config.dia_chi_agent.replace("localhost", location.hostname);
+    }
     const toggle = root.querySelector<HTMLButtonElement>("[data-chat-toggle]")!;
     const panel = root.querySelector<HTMLElement>("[data-chat-panel]")!;
     const log = root.querySelector<HTMLElement>("[data-chat-log]")!;
@@ -355,6 +362,16 @@ const cau_hinh = JSON.stringify({
       // Điện thoại: khung chat phủ kín màn hình, khoá cuộn trang phía sau
       // để vuốt trong khung không kéo luôn cả trang.
       document.body.classList.add("chat-open");
+      // Thêm mốc lịch sử TRƯỚC khi khoá trang: trình duyệt ghi vị trí cuộn
+      // hiện tại vào mốc cũ, Back về mốc đó là về đúng chỗ đang đọc (khoá
+      // xong thì vị trí cuộn đã thành 0). Viết window.history vì trong script
+      // này `history` là lịch sử trò chuyện.
+      if (!isDesktop() && !pushedHistory) {
+        window.history.pushState({ chat: true }, "");
+        pushedHistory = true;
+      }
+      lockPage();
+      fitToViewport();
       log.scrollTop = log.scrollHeight;
       animateSuggestions();
       // Chỉ tự đặt con trỏ vào ô nhập trên máy tính. Trên điện thoại, focus
@@ -368,7 +385,15 @@ const cau_hinh = JSON.stringify({
       toggle.setAttribute("aria-expanded", "false");
       root.classList.remove("is-open");
       document.body.classList.remove("chat-open");
-      toggle.focus();
+      unlockPage();
+      fitToViewport();
+      // Đóng bằng nút X/Esc: gỡ luôn mốc lịch sử đã thêm lúc mở, kẻo người
+      // đọc bấm Back một lần mà không thấy gì xảy ra.
+      if (pushedHistory) {
+        pushedHistory = false;
+        window.history.back();
+      }
+      toggle.focus({ preventScroll: true });
     };
 
     // Đoạn chat mới: xoá lịch sử — máy chủ chỉ biết những gì trình duyệt gửi
@@ -386,6 +411,56 @@ const cau_hinh = JSON.stringify({
       // Như lúc mở khung: trên điện thoại không tự bật bàn phím.
       if (window.matchMedia("(min-width: 768px)").matches) input.focus();
     };
+
+    // Điện thoại: khi bàn phím bật lên, Safari (iPhone) không co khung chat
+    // lại mà đẩy cả trang lên — lộ một khe trang web giữa ô nhập và bàn phím.
+    // visualViewport là phần màn hình thật sự còn nhìn thấy phía trên bàn
+    // phím; ép khung chat khớp đúng phần đó mỗi khi nó đổi cỡ hoặc bị cuộn.
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+    const fitToViewport = () => {
+      const vv = window.visualViewport;
+      if (!vv || panel.hidden || isDesktop()) {
+        panel.style.top = panel.style.height = panel.style.bottom = "";
+        return;
+      }
+      panel.style.top = vv.offsetTop + "px";
+      panel.style.height = vv.height + "px";
+      panel.style.bottom = "auto";
+      log.scrollTop = log.scrollHeight;
+    };
+    window.visualViewport?.addEventListener("resize", fitToViewport);
+    window.visualViewport?.addEventListener("scroll", fitToViewport);
+
+    // Điện thoại: màn chat là một màn riêng. Khoá đứng trang phía sau bằng
+    // position: fixed — overflow: hidden trên body không đủ, Safari (iPhone)
+    // vẫn cho cuộn trang phía sau. Nhớ vị trí đang đọc để đóng chat thì trang
+    // về đúng chỗ cũ.
+    let savedScrollY = 0;
+    const lockPage = () => {
+      if (isDesktop()) return;
+      savedScrollY = window.scrollY;
+      const s = document.body.style;
+      s.position = "fixed";
+      s.top = -savedScrollY + "px";
+      s.left = s.right = "0";
+    };
+    const unlockPage = () => {
+      const s = document.body.style;
+      if (s.position !== "fixed") return;
+      s.position = s.top = s.left = s.right = "";
+      window.scrollTo(0, savedScrollY);
+    };
+
+    // Nút Back / vuốt quay lại trên điện thoại đóng màn chat thay vì rời
+    // trang: lúc mở chat thêm một mốc vào lịch sử trình duyệt, Back là quay
+    // về mốc đó.
+    let pushedHistory = false;
+    window.addEventListener("popstate", () => {
+      if (pushedHistory && !panel.hidden) {
+        pushedHistory = false;
+        close();
+      }
+    });
 
     // Nút mở chat hiện đủ chữ lúc mới vào, 5 giây sau thu lại thành nút tròn
     // (chỉ thấy khác trên điện thoại — máy tính luôn hiện chữ).
@@ -450,6 +525,9 @@ const cau_hinh = JSON.stringify({
   .chat-launcher { position: relative; }
   /* Chấm xanh "đang online" ở góc nút mở chat, giống chấm ở ảnh đại diện. */
   .chat-launcher .chat-launcher-dot {
+    /* Chấm ở nút mở chat không viền (chủ site chọn), khác chấm ở ảnh đại
+       diện vốn cần viền để tách khỏi ảnh. */
+    border: none;
     top: 2px;
     right: 2px;
     bottom: auto;
@@ -469,7 +547,9 @@ const cau_hinh = JSON.stringify({
     height: min(600px, calc(100vh - 48px));
     display: flex;
     flex-direction: column;
-    background: #fff;
+    /* Nền xanh cùng màu đầu khung: phần thân chat (bo tròn hai góc trên)
+       nằm đè lên nền này nên trông như một tấm thẻ trượt lên từ đầu khung. */
+    background: var(--primary);
     border-radius: 16px;
     box-shadow: 0 16px 48px rgba(0, 42, 106, 0.24);
     overflow: hidden;
@@ -531,6 +611,7 @@ const cau_hinh = JSON.stringify({
     flex-direction: column;
     gap: 10px;
     background: var(--gray-bg);
+    border-radius: 20px 20px 0 0;
   }
 
   /* Bong bóng tạo bằng JS nên không mang dấu scoped của Astro — phải
@@ -594,7 +675,9 @@ const cau_hinh = JSON.stringify({
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 0 16px 12px;
+    /* Đáy chỉ 4px: ô nhập bên dưới đã có 12px phía trên, cộng lại vừa đủ
+       tách mà không để một khoảng trống lớn giữa câu gợi ý và ô nhập. */
+    padding: 0 16px 4px;
     background: var(--gray-bg);
     /* Giấu phần câu gợi ý còn nằm ngoài mép lúc đang trượt vào. */
     overflow: hidden;
@@ -640,7 +723,9 @@ const cau_hinh = JSON.stringify({
     align-items: flex-end;
     gap: 8px;
     padding: 12px 12px 4px;
-    border-top: 1px solid #e6edf5;
+    /* Cùng nền với vùng tin nhắn, không kẻ đường phân cách: ô nhập trắng nổi
+       thẳng trên nền chat, như các ứng dụng nhắn tin. */
+    background: var(--gray-bg);
   }
   .chat-input {
     flex: 1;
@@ -658,10 +743,14 @@ const cau_hinh = JSON.stringify({
     font-size: var(--fs-base);
     line-height: 1.4;
     color: var(--text-dark);
-    background: var(--gray-bg);
-    transition: border-color .2s ease, background .2s ease;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 42, 106, 0.08);
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .chat-input:focus { border-color: var(--primary); background: #fff; }
+  .chat-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 42, 106, 0.12);
+  }
   .chat-send {
     width: 44px;
     height: 44px;
@@ -683,6 +772,7 @@ const cau_hinh = JSON.stringify({
     font-size: var(--fs-xs);
     color: var(--text-muted);
     line-height: 1.4;
+    background: var(--gray-bg);
   }
 
   @media (max-width: 767px) {

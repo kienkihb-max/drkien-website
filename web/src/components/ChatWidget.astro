@@ -224,6 +224,16 @@ const cau_hinh = JSON.stringify({
       suggestions.hidden = history.length > 0;
     };
 
+    /** Chạy lại hiệu ứng trượt vào của câu gợi ý. Gỡ lớp, ép trình duyệt vẽ
+     *  lại (đọc offsetWidth), rồi gắn lại — không có bước giữa thì trình duyệt
+     *  coi như lớp chưa từng bị gỡ và không chạy lại hiệu ứng. */
+    const animateSuggestions = () => {
+      if (suggestions.hidden) return;
+      suggestions.classList.remove("is-entering");
+      void suggestions.offsetWidth;
+      suggestions.classList.add("is-entering");
+    };
+
     /**
      * Gửi câu hỏi và nhận câu trả lời chảy dần: mỗi khi có thêm chữ thì gọi
      * onText(toàn bộ chữ đã nhận), để bong bóng hiện chữ ngay từ những từ
@@ -346,6 +356,7 @@ const cau_hinh = JSON.stringify({
       // để vuốt trong khung không kéo luôn cả trang.
       document.body.classList.add("chat-open");
       log.scrollTop = log.scrollHeight;
+      animateSuggestions();
       // Chỉ tự đặt con trỏ vào ô nhập trên máy tính. Trên điện thoại, focus
       // là bàn phím bật lên che nửa màn hình ngay khi vừa mở — người đọc chưa
       // kịp thấy lời chào và câu gợi ý. Để họ tự chạm vào ô nhập khi muốn gõ.
@@ -369,9 +380,11 @@ const cau_hinh = JSON.stringify({
         sessionStorage.removeItem(STORE_KEY);
       } catch {}
       renderAll();
+      animateSuggestions();
       input.value = "";
       autoGrow();
-      input.focus();
+      // Như lúc mở khung: trên điện thoại không tự bật bàn phím.
+      if (window.matchMedia("(min-width: 768px)").matches) input.focus();
     };
 
     // Nút mở chat hiện đủ chữ lúc mới vào, 5 giây sau thu lại thành nút tròn
@@ -583,6 +596,8 @@ const cau_hinh = JSON.stringify({
     gap: 8px;
     padding: 0 16px 12px;
     background: var(--gray-bg);
+    /* Giấu phần câu gợi ý còn nằm ngoài mép lúc đang trượt vào. */
+    overflow: hidden;
   }
   .chat-suggestions[hidden] { display: none; }
   .chat-chip {
@@ -596,6 +611,29 @@ const cau_hinh = JSON.stringify({
     cursor: pointer;
   }
   .chat-chip:hover { background: var(--primary-soft); }
+
+  /* Câu gợi ý trượt vào lần lượt mỗi khi mở khung chat hoặc bắt đầu đoạn chat
+     mới (script gắn lại lớp is-entering để chạy lại hiệu ứng). Mỗi câu trễ
+     hơn câu trước 70ms nên trông như đang lần lượt xuất hiện. */
+  .chat-suggestions.is-entering .chat-chip {
+    animation: chat-chip-in .45s cubic-bezier(.2, .8, .2, 1) both;
+  }
+  .chat-suggestions.is-entering .chat-chip:nth-child(2) { animation-delay: 90ms; }
+  .chat-suggestions.is-entering .chat-chip:nth-child(3) { animation-delay: 180ms; }
+  .chat-suggestions.is-entering .chat-chip:nth-child(4) { animation-delay: 270ms; }
+  .chat-suggestions.is-entering .chat-chip:nth-child(5) { animation-delay: 360ms; }
+  /* Trượt nhẹ từ trái sang một đoạn ngắn (32px) kèm hiện dần — đủ để thấy
+     chuyển động mà không bay ngang cả khung. overflow: hidden ở khung câu
+     gợi ý giấu phần lấn ra ngoài mép lúc bắt đầu. */
+  @keyframes chat-chip-in {
+    from { opacity: 0; transform: translateX(-32px); }
+    60% { opacity: 1; }
+    to { opacity: 1; transform: none; }
+  }
+  /* Người đã bật "giảm chuyển động" trong máy thì hiện ngay, không trượt. */
+  @media (prefers-reduced-motion: reduce) {
+    .chat-suggestions.is-entering .chat-chip { animation: none; }
+  }
 
   .chat-form {
     display: flex;

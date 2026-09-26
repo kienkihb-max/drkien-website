@@ -1,29 +1,24 @@
-// Máy chủ trung gian giữa khung chat trên web và agent trên Google Cloud.
+// Máy chủ trung gian giữa khung chat trên web và Gemini (Vertex AI).
 //
-// Vì sao cần: muốn hỏi agent (Vertex AI Agent Engine) phải có quyền của tài
-// khoản Google Cloud. Để quyền đó trong code web thì ai mở trang cũng lấy
-// được và dùng agent bằng tiền của chủ site. File này chạy trên Cloud Run,
-// tự lấy quyền từ tài khoản dịch vụ của Cloud Run — không có khoá nào nằm
-// trong code hay trên trình duyệt.
+// Vì sao cần: gọi Gemini phải có quyền của tài khoản Google Cloud. Để quyền
+// đó trong code web thì ai mở trang cũng lấy được và dùng Gemini bằng tiền
+// của chủ site. File này chạy trên Cloud Run, tự lấy quyền từ tài khoản dịch
+// vụ của Cloud Run — không có khoá nào nằm trong code hay trên trình duyệt.
 //
-// Khuôn nói chuyện với khung chat (ChatWidget.astro):
-//   gửi   POST { message, user_id, session_id? }
-//   nhận       { reply, session_id }
-// session_id là mã phiên của agent. Lần đầu khung chat chưa có thì để trống,
-// máy chủ tạo phiên mới và trả về; các lần sau khung chat gửi lại để agent
-// nhớ các câu trước trong cùng cuộc trò chuyện.
+// Trước đây máy chủ gọi agent dựng trong Agent Studio. Agent đó tự lên Google
+// tìm và đọc trang web cho mỗi câu hỏi nên mất 20 giây đến vài phút một câu.
+// Nay lời dặn và kiến thức website nằm ngay trong kho (prompt-mvp1.md,
+// kien-thuc-website.md), máy chủ gửi thẳng cho Gemini: vài giây, rẻ hơn, và
+// sửa lời dặn không phải bấm trên giao diện Google nữa.
 
 import functions from "@google-cloud/functions-framework";
 import { GoogleAuth } from "google-auth-library";
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const PROJECT = process.env.AGENT_PROJECT || "warm-gantry-z0w9t";
-const LOCATION = process.env.AGENT_LOCATION || "us-west1";
-const ENGINE_ID = process.env.AGENT_ENGINE_ID || "7012601599071617024";
-
-const ENGINE_URL =
-  `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT}` +
-  `/locations/${LOCATION}/reasoningEngines/${ENGINE_ID}`;
+const PROJECT = process.env.GEMINI_PROJECT || "warm-gantry-z0w9t";
 
 // Chỉ trang của mình được gọi. Không chặn nguồn thì trang khác cũng nhúng
 // được khung chat trỏ vào đây và tiêu tiền agent của chủ site.
@@ -74,13 +69,12 @@ const MAX_MESSAGE_LENGTH = 1000;
 // Số liệu chỉnh được bằng biến môi trường, không phải sửa code.
 const RATE_LIMIT = Number(process.env.RATE_LIMIT_PER_IP) || 20; // câu hỏi…
 const RATE_WINDOW_MS = (Number(process.env.RATE_WINDOW_MINUTES) || 10) * 60 * 1000; // …mỗi 10 phút
-// Một cuộc trò chuyện dài bao nhiêu câu. Agent đọc lại cả lịch sử mỗi lần trả
-// lời, nên phiên càng dài thì mỗi câu càng tốn tiền. Người thật hiếm khi hỏi
+// Một cuộc trò chuyện dài bao nhiêu câu (đếm theo lịch sử trình duyệt gửi
+// lên). Chặn để một cửa sổ chat không bị dùng hỏi liên tục vô hạn. Người thật hiếm khi hỏi
 // quá vài chục câu; muốn hỏi tiếp thì bấm "Đoạn chat mới".
 const MAX_TURNS_PER_SESSION = Number(process.env.MAX_TURNS_PER_SESSION) || 30;
 
 const hitsByIp = new Map(); // ip → [thời điểm các lần hỏi gần đây]
-const turnsBySession = new Map(); // mã phiên → { count, last }
 
 /** Địa chỉ IP của người hỏi. Cloud Run ghi IP thật vào đầu X-Forwarded-For. */
 const clientIp = (req) =>
@@ -105,9 +99,6 @@ setInterval(() => {
   const now = Date.now();
   for (const [ip, times] of hitsByIp) {
     if (!times.some((t) => now - t < RATE_WINDOW_MS)) hitsByIp.delete(ip);
-  }
-  for (const [id, s] of turnsBySession) {
-    if (now - s.last > 24 * 60 * 60 * 1000) turnsBySession.delete(id);
   }
 }, 10 * 60 * 1000).unref();
 
@@ -137,77 +128,97 @@ const authHeaders = async () => {
   return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 };
 
-/**
- * Tạo phiên mới cho người đọc, trả về mã phiên.
- *
- * Dùng Sessions API của Agent Engine chứ không gọi class_method
- * "async_create_session": agent dựng bằng Agent Studio không mở phương thức
- * đó (gọi vào trả 404 — đã thử ngày 26/9/2026).
- */
-const createSession = async (userId) => {
-  const res = await fetch(`${ENGINE_URL}/sessions`, {
-    method: "POST",
-    headers: await authHeaders(),
-    body: JSON.stringify({ userId }),
-  });
-  if (!res.ok) throw new Error(`create_session ${res.status}: ${await res.text()}`);
-  // Kết quả là một "operation", mã phiên nằm trong tên:
-  // projects/…/reasoningEngines/…/sessions/<MÃ PHIÊN>/operations/…
-  const data = await res.json();
-  const id = data.name?.match(/\/sessions\/([^/]+)/)?.[1];
-  if (!id) throw new Error("create_session: không thấy mã phiên trong kết quả");
-  return id;
+// --- Gọi Gemini ---------------------------------------------------------------
+// Lời dặn = prompt-mvp1.md (bỏ khung chú thích đầu file) + kiến thức website
+// sinh sẵn. Đọc một lần lúc máy chủ khởi động; sửa lời dặn thì đưa máy chủ
+// lên lại. Hai file này PHẢI được gửi kèm khi deploy (xem .gcloudignore).
+const HERE = dirname(fileURLToPath(import.meta.url));
+const SYSTEM_PROMPT =
+  readFileSync(join(HERE, "prompt-mvp1.md"), "utf8").replace(/^<!--[\s\S]*?-->\s*/, "").trim() +
+  "\n\n" +
+  readFileSync(join(HERE, "kien-thuc-website.md"), "utf8").trim();
+
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const GEMINI_URL =
+  `https://aiplatform.googleapis.com/v1/projects/${PROJECT}/locations/global` +
+  `/publishers/google/models/${MODEL}:streamGenerateContent?alt=sse`;
+
+// Chỉ gửi kèm chừng này tin nhắn gần nhất làm ngữ cảnh. Gemini đọc lại cả
+// lịch sử mỗi lần trả lời, gửi dài thì chậm và tốn tiền mà không giúp thêm.
+const MAX_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_TEXT = 2000;
+
+/** Lịch sử do trình duyệt gửi lên → định dạng của Gemini. Không tin dữ liệu
+ *  gửi lên: chỉ nhận đúng hai vai, cắt độ dài, bỏ mục lạ. */
+const toContents = (history, message) => {
+  const contents = history
+    .filter((m) => m && (m.role === "user" || m.role === "bot") && typeof m.text === "string")
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({
+      role: m.role === "bot" ? "model" : "user",
+      parts: [{ text: m.text.slice(0, MAX_HISTORY_TEXT) }],
+    }));
+  contents.push({ role: "user", parts: [{ text: message }] });
+  return contents;
 };
 
 /**
- * Gửi câu hỏi và gom chữ trả lời.
- *
- * Agent trả về một chuỗi sự kiện (gọi công cụ, kết quả công cụ, chữ trả
- * lời…), mỗi sự kiện một dòng JSON, có thể có tiền tố "data: " của SSE.
- * Chỉ lấy phần chữ do agent (role "model") nói ra, bỏ qua phần gọi công cụ.
+ * Hỏi Gemini, gọi onText(đoạn chữ) mỗi khi có chữ mới về — để khung chat hiện
+ * chữ dần, người đọc không phải nhìn ba chấm suốt cả câu trả lời.
  */
-const streamQuery = async (userId, sessionId, message) => {
-  const res = await fetch(`${ENGINE_URL}:streamQuery?alt=sse`, {
+const askGemini = async (contents, onText) => {
+  const res = await fetch(GEMINI_URL, {
     method: "POST",
     headers: await authHeaders(),
     body: JSON.stringify({
-      class_method: "async_stream_query",
-      input: { user_id: userId, session_id: sessionId, message },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents,
+      generationConfig: {
+        // Thấp để bám sát lời dặn, bớt bịa.
+        temperature: 0.3,
+        maxOutputTokens: 2048,
+        // Nghĩ ít: câu hỏi của trang này đơn giản, nghĩ nhiều chỉ chậm thêm.
+        thinkingConfig: { thinkingLevel: "LOW" },
+      },
     }),
   });
-  if (!res.ok) {
-    const err = new Error(`stream_query ${res.status}: ${await res.text()}`);
-    err.status = res.status;
-    throw err;
-  }
+  if (!res.ok || !res.body) throw new Error(`gemini ${res.status}: ${await res.text()}`);
 
-  const raw = await res.text();
-  const texts = [];
-  for (let line of raw.split("\n")) {
-    line = line.trim();
-    if (line.startsWith("data:")) line = line.slice(5).trim();
-    if (!line) continue;
-    let event;
-    try {
-      event = JSON.parse(line);
-    } catch {
-      continue;
-    }
-    // Lỗi bên trong agent (ví dụ không đọc được tài liệu) vẫn về với mã 200,
-    // chỉ nằm trong một sự kiện có error_code — phải tự bắt.
-    if (event.error_code) {
-      throw new Error(`agent: ${event.error_message || event.error_code}`);
-    }
-    const content = event.content;
-    if (!content || (content.role && content.role !== "model")) continue;
-    for (const part of content.parts || []) {
-      // part.thought là phần "suy nghĩ" nội bộ của mô hình, không cho người đọc thấy.
-      if (typeof part.text === "string" && !part.thought) texts.push(part.text);
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let total = "";
+  for await (const chunk of res.body) {
+    buffer += decoder.decode(chunk, { stream: true });
+    let nl;
+    while ((nl = buffer.indexOf("\n")) >= 0) {
+      const line = buffer.slice(0, nl).trim();
+      buffer = buffer.slice(nl + 1);
+      if (!line.startsWith("data:")) continue;
+      let event;
+      try {
+        event = JSON.parse(line.slice(5));
+      } catch {
+        continue;
+      }
+      for (const part of event.candidates?.[0]?.content?.parts || []) {
+        // part.thought là phần "suy nghĩ" nội bộ của mô hình, không cho người đọc thấy.
+        if (typeof part.text === "string" && part.text && !part.thought) {
+          total += part.text;
+          onText(part.text);
+        }
+      }
     }
   }
-  return texts.join("").trim();
+  if (!total.trim()) throw new Error("Gemini không trả về chữ nào");
+  return total;
 };
 
+// --- Nhận câu hỏi ---------------------------------------------------------------
+// Khuôn nói chuyện với khung chat (ChatWidget.astro):
+//   gửi   POST { message, history: [{ role: "user" | "bot", text }], stream: true }
+//   nhận  stream: true → chữ thô (text/plain) chảy dần tới khi xong
+//         không có stream → JSON { reply } (khung chat bản cũ vẫn dùng được)
+// Máy chủ không nhớ gì giữa các lần hỏi: trình duyệt tự gửi lại lịch sử.
 functions.http("chat", async (req, res) => {
   const origin = req.get("Origin") || "";
   const allowed = isAllowedOrigin(origin);
@@ -226,38 +237,45 @@ functions.http("chat", async (req, res) => {
   if (isRateLimited(clientIp(req))) return res.status(429).json({ error: "Too many requests" });
 
   const message = String(req.body?.message || "").trim().slice(0, MAX_MESSAGE_LENGTH);
-  // user_id do trình duyệt tự sinh (UUID ngẫu nhiên), không phải thông tin cá nhân.
-  const userId = String(req.body?.user_id || "").slice(0, 64) || "web-anonymous";
-  // Mã phiên chỉ nhận chữ, số, gạch — chuỗi lạ thì coi như chưa có, tạo phiên mới.
-  let sessionId = String(req.body?.session_id || "");
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(sessionId)) sessionId = "";
   if (!message) return res.status(400).json({ error: "Empty message" });
 
-  // Phiên đã quá dài: từ chối, khung chat sẽ hiện câu báo lỗi kèm số Zalo.
-  const turns = sessionId ? turnsBySession.get(sessionId) : null;
-  if (turns && turns.count >= MAX_TURNS_PER_SESSION) {
+  const history = Array.isArray(req.body?.history) ? req.body.history : [];
+  // Cuộc trò chuyện đã quá dài: từ chối, khung chat hiện câu báo lỗi kèm Zalo.
+  if (history.filter((m) => m?.role === "user").length >= MAX_TURNS_PER_SESSION) {
     return res.status(429).json({ error: "Session too long" });
   }
 
-  try {
-    if (!sessionId) sessionId = await createSession(userId);
-    let reply;
+  const contents = toContents(history, message);
+
+  if (req.body?.stream !== true) {
     try {
-      reply = await streamQuery(userId, sessionId, message);
+      const reply = await askGemini(contents, () => {});
+      return res.json({ reply: reply.trim() });
     } catch (err) {
-      console.warn("Hỏi lại một lần:", err.message);
-      // Phiên cũ hết hạn phía agent thì tạo phiên mới rồi hỏi lại. Lỗi khác
-      // (agent thỉnh thoảng không đọc được tài liệu) thì hỏi lại đúng phiên
-      // đó — lần hai thường qua.
-      if (err.status === 400 || err.status === 404) sessionId = await createSession(userId);
-      reply = await streamQuery(userId, sessionId, message);
+      console.error(err);
+      return res.status(502).json({ error: "Agent error" });
     }
-    if (!reply) throw new Error("Agent không trả về chữ nào");
-    const t = turnsBySession.get(sessionId) || { count: 0, last: 0 };
-    turnsBySession.set(sessionId, { count: t.count + 1, last: Date.now() });
-    res.json({ reply, session_id: sessionId });
+  }
+
+  let started = false;
+  try {
+    await askGemini(contents, (text) => {
+      if (!started) {
+        started = true;
+        res.status(200);
+        res.set("Content-Type", "text/plain; charset=utf-8");
+        res.set("Cache-Control", "no-store");
+        // Không để lớp trung gian nào gom chữ lại rồi mới gửi một lần.
+        res.set("X-Accel-Buffering", "no");
+      }
+      res.write(text);
+    });
+    res.end();
   } catch (err) {
     console.error(err);
-    res.status(502).json({ error: "Agent error" });
+    // Chưa gửi chữ nào thì còn báo lỗi được; đã gửi dở thì chỉ đóng lại.
+    if (!started) res.status(502).json({ error: "Agent error" });
+    else res.end();
   }
 });
+

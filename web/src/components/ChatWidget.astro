@@ -52,6 +52,7 @@ const cau_hinh = JSON.stringify({
     id="chat-panel"
     class="chat-panel"
     role="dialog"
+    tabindex="-1"
     aria-label={CHATBOT.ten}
     hidden
     data-chat-panel
@@ -123,8 +124,6 @@ const cau_hinh = JSON.stringify({
     // Mọi lần đọc/ghi đều bọc try/catch: trình duyệt chặn lưu trữ (chế độ ẩn
     // danh của vài trình duyệt) thì khung chat vẫn chạy, chỉ không nhớ.
     const STORE_KEY = "chatbot-history";
-    const USER_KEY = "chatbot-user";
-    const AGENT_SESSION_KEY = "chatbot-agent-session";
 
     const loadHistory = (): Message[] => {
       try {
@@ -138,28 +137,6 @@ const cau_hinh = JSON.stringify({
         sessionStorage.setItem(STORE_KEY, JSON.stringify(items));
       } catch {}
     };
-
-    // Mã người đọc: chuỗi ngẫu nhiên do trình duyệt tự sinh, không gắn với
-    // danh tính ai. Agent cần nó để biết phiên nào thuộc về ai.
-    const userId = (() => {
-      try {
-        let id = sessionStorage.getItem(USER_KEY);
-        if (!id) {
-          id = crypto.randomUUID();
-          sessionStorage.setItem(USER_KEY, id);
-        }
-        return id;
-      } catch {
-        return crypto.randomUUID();
-      }
-    })();
-
-    // Mã phiên của agent: máy chủ trung gian trả về sau câu hỏi đầu tiên,
-    // gửi lại ở các câu sau để agent nhớ ngữ cảnh cuộc trò chuyện.
-    let agentSession = "";
-    try {
-      agentSession = sessionStorage.getItem(AGENT_SESSION_KEY) || "";
-    } catch {}
 
     let history = loadHistory();
     let busy = false;
@@ -248,37 +225,41 @@ const cau_hinh = JSON.stringify({
     };
 
     /**
-     * Gửi câu hỏi cho agent và trả về câu trả lời.
+     * Gửi câu hỏi và nhận câu trả lời chảy dần: mỗi khi có thêm chữ thì gọi
+     * onText(toàn bộ chữ đã nhận), để bong bóng hiện chữ ngay từ những từ
+     * đầu tiên thay vì chờ cả câu.
      *
-     * Chưa có địa chỉ agent (dia_chi_agent trống) thì chạy chế độ thử: chờ
+     * Chưa có địa chỉ máy chủ (dia_chi_agent trống) thì chạy chế độ thử: chờ
      * một chút cho giống thật rồi đáp bằng câu tra_loi_thu.
      *
-     * Khuôn gửi/nhận: POST { message, user_id, session_id } → { reply,
-     * session_id }. Máy chủ trung gian ở agent-proxy/ (gốc kho) trả đúng
-     * khuôn này.
+     * Khuôn gửi/nhận: POST { message, history, stream: true } → chữ thô chảy
+     * dần. Máy chủ không nhớ gì, nên lịch sử trò chuyện gửi kèm mỗi lần (máy
+     * chủ chỉ đọc vài câu gần nhất). Máy chủ ở agent-proxy/ (gốc kho).
      */
-    const askAgent = async (message: string): Promise<string> => {
+    const askAgent = async (message: string, past: Message[], onText: (all: string) => void) => {
       if (!config.dia_chi_agent) {
         await new Promise((r) => setTimeout(r, 900));
+        onText(config.tra_loi_thu);
         return config.tra_loi_thu;
       }
       const res = await fetch(config.dia_chi_agent, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, user_id: userId, session_id: agentSession }),
+        body: JSON.stringify({ message, history: past, stream: true }),
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-      if (typeof data.reply !== "string" || !data.reply.trim()) {
-        throw new Error("Empty reply");
+      if (!res.ok || !res.body) throw new Error("HTTP " + res.status);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let all = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        all += decoder.decode(value, { stream: true });
+        onText(all);
       }
-      if (data.session_id) {
-        agentSession = data.session_id;
-        try {
-          sessionStorage.setItem(AGENT_SESSION_KEY, agentSession);
-        } catch {}
-      }
-      return data.reply;
+      all += decoder.decode();
+      if (!all.trim()) throw new Error("Empty reply");
+      return all.trim();
     };
 
     const submit = async (raw: string) => {
@@ -291,22 +272,60 @@ const cau_hinh = JSON.stringify({
       input.value = "";
       autoGrow();
 
+      const past = history.slice();
       history.push({ role: "user", text });
       saveHistory(history);
       addBubble("user", text);
 
+      // Ba chấm chờ tới khi chữ đầu tiên về, rồi thay bằng bong bóng trả lời.
+      //
+      // Chữ từ máy chủ về theo từng cụm lớn, cách nhau không đều — vẽ thẳng
+      // từng cụm thì chữ nhảy cục, trông giật. Nên tách hai việc: `target` là
+      // toàn bộ chữ đã nhận, còn mỗi khung hình (~60 lần/giây) chỉ hiện thêm
+      // vài ký tự tiến dần tới `target`, như người đang gõ. Chữ về dồn nhiều
+      // thì gõ nhanh lên để không bị tụt lại quá xa.
       const typing = showTyping();
+      let bubble: HTMLElement | null = null;
+      let target = "";
+      let shown = 0;
+      let finished = false;
+      let resolveDone: () => void;
+      const done = new Promise<void>((r) => (resolveDone = r));
+
+      const draw = () => {
+        const remaining = target.length - shown;
+        if (remaining > 0) {
+          shown += Math.max(2, Math.ceil(remaining / 30));
+          if (!bubble) {
+            typing.remove();
+            bubble = addBubble("bot", "");
+          }
+          bubble.innerHTML = renderMarkdown(target.slice(0, shown));
+          // Chỉ tự cuộn xuống khi người đọc đang ở gần cuối, kẻo họ đang cuộn
+          // lên đọc lại mà bị giật xuống liên tục.
+          if (log.scrollHeight - log.scrollTop - log.clientHeight < 80) {
+            log.scrollTop = log.scrollHeight;
+          }
+        }
+        if (finished && shown >= target.length) resolveDone();
+        else requestAnimationFrame(draw);
+      };
+      requestAnimationFrame(draw);
+
       let reply: string;
       try {
-        reply = await askAgent(text);
+        reply = await askAgent(text, past, (all) => (target = all));
       } catch {
         reply = config.tra_loi_loi;
       }
-      typing.remove();
+      // Lỗi giữa chừng: thay hẳn phần đã hiện bằng câu báo lỗi.
+      if (!reply.startsWith(target.slice(0, shown).trimEnd())) shown = 0;
+      target = reply;
+      finished = true;
+      await done;
 
       history.push({ role: "bot", text: reply });
       saveHistory(history);
-      addBubble("bot", reply);
 
       busy = false;
       send.disabled = false;
@@ -327,7 +346,11 @@ const cau_hinh = JSON.stringify({
       // để vuốt trong khung không kéo luôn cả trang.
       document.body.classList.add("chat-open");
       log.scrollTop = log.scrollHeight;
-      input.focus();
+      // Chỉ tự đặt con trỏ vào ô nhập trên máy tính. Trên điện thoại, focus
+      // là bàn phím bật lên che nửa màn hình ngay khi vừa mở — người đọc chưa
+      // kịp thấy lời chào và câu gợi ý. Để họ tự chạm vào ô nhập khi muốn gõ.
+      if (window.matchMedia("(min-width: 768px)").matches) input.focus();
+      else panel.focus({ preventScroll: true });
     };
     const close = () => {
       panel.hidden = true;
@@ -337,15 +360,13 @@ const cau_hinh = JSON.stringify({
       toggle.focus();
     };
 
-    // Đoạn chat mới: xoá lịch sử và mã phiên của agent, để agent quên hết
-    // các câu trước — người dùng muốn hỏi chuyện khác từ đầu.
+    // Đoạn chat mới: xoá lịch sử — máy chủ chỉ biết những gì trình duyệt gửi
+    // lên, nên xoá ở đây là trợ lý quên hết các câu trước.
     const startNewChat = () => {
       if (busy) return;
       history = [];
-      agentSession = "";
       try {
         sessionStorage.removeItem(STORE_KEY);
-        sessionStorage.removeItem(AGENT_SESSION_KEY);
       } catch {}
       renderAll();
       input.value = "";
@@ -441,6 +462,8 @@ const cau_hinh = JSON.stringify({
     overflow: hidden;
   }
   .chat-panel[hidden] { display: none; }
+  /* Khung nhận focus khi mở trên điện thoại (thay cho ô nhập) — không cần viền. */
+  .chat-panel:focus { outline: none; }
 
   .chat-head {
     display: flex;

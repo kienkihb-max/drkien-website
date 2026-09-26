@@ -29,7 +29,7 @@ export const CHATBOT = {
     "Kinh nghiệm của bác sĩ Kiên?",
     "Phương pháp điều trị là gì?",
     "Đặt lịch khám thế nào?",
-    "Hợp tác với bác sĩ Kiên",
+    "Mình muốn hợp tác với bác sĩ Kiên",
   ],
   /** Chữ mờ trong ô nhập. */
   o_nhap: "Nhập câu hỏi của bạn…",

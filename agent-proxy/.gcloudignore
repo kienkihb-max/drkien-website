@@ -1,6 +1,10 @@
 # Những thứ KHÔNG gửi lên khi `gcloud run deploy --source agent-proxy`.
-# Thư viện Cloud Run tự cài lại từ package-lock.json; ghi chú và prompt của
-# agent không cần cho máy chủ chạy.
+# Thư viện Cloud Run tự cài lại từ package-lock.json.
+#
+# ĐỪNG bỏ qua prompt-mvp1.md và kien-thuc-website.md: máy chủ đọc hai file
+# này lúc khởi động làm lời dặn cho Gemini, thiếu là máy chủ không chạy.
 .gcloudignore
 node_modules/
-*.md
+HUONG-DAN.md
+prompt-mvp2-tu-van.md
+sinh-kien-thuc.mjs

@@ -25,6 +25,31 @@ Quá giới hạn thì khung chat hiện câu báo lỗi kèm số Zalo.
 
 ---
 
+## Lâm trả lời dựa vào đâu — và cập nhật thế nào
+
+Máy chủ gửi thẳng cho Gemini (gemini-3.5-flash) lời dặn gồm hai file:
+
+- `prompt-mvp1.md` — tính cách, giọng văn, quy tắc (không tư vấn bệnh…).
+- `kien-thuc-website.md` — nội dung website: hồ sơ bác sĩ, 3 dịch vụ, danh
+  sách bài blog. File này **sinh tự động**, đừng sửa tay.
+
+Khi website đổi nội dung (đăng bài mới, đổi dịch vụ, thêm sự kiện…), chạy
+lần lượt ở gốc kho để Lâm biết:
+
+```bash
+node agent-proxy/sinh-kien-thuc.mjs
+```
+
+```bash
+gcloud run deploy chatbot-proxy --source agent-proxy --region us-west1 --project warm-gantry-z0w9t --service-account chatbot-proxy@warm-gantry-z0w9t.iam.gserviceaccount.com --allow-unauthenticated --max-instances 2 --set-env-vars "ALLOWED_ORIGINS=https://bacsikien.com https://www.bacsikien.com"
+```
+
+Sửa `prompt-mvp1.md` cũng chạy lại lệnh thứ hai. Agent trong Agent Studio
+không còn được dùng cho web nữa (nó tự tra Google mỗi câu nên rất chậm) —
+giữ lại để thử bản tư vấn bệnh MVP2.
+
+---
+
 ## Chạy thử trên máy (chưa cần Cloud Run)
 
 Đã `gcloud auth login` một lần là đủ. Mở hai cửa sổ terminal ở gốc kho:

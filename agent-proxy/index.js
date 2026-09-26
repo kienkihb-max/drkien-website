@@ -139,9 +139,12 @@ const SYSTEM_PROMPT =
   readFileSync(join(HERE, "kien-thuc-website.md"), "utf8").trim();
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
-const GEMINI_URL =
+// Mẫu dự phòng khi mẫu chính báo 429 "Resource exhausted" (quá tải/hết hạn
+// mức — đã gặp trên web thật): cùng dòng, rẻ hơn, hạn mức tính riêng.
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash-lite";
+const geminiUrl = (model) =>
   `https://aiplatform.googleapis.com/v1/projects/${PROJECT}/locations/global` +
-  `/publishers/google/models/${MODEL}:streamGenerateContent?alt=sse`;
+  `/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
 
 // Chỉ gửi kèm chừng này tin nhắn gần nhất làm ngữ cảnh. Gemini đọc lại cả
 // lịch sử mỗi lần trả lời, gửi dài thì chậm và tốn tiền mà không giúp thêm.
@@ -167,24 +170,71 @@ const toContents = (history, message) => {
  * chữ dần, người đọc không phải nhìn ba chấm suốt cả câu trả lời.
  */
 const askGemini = async (contents, onText) => {
-  const res = await fetch(GEMINI_URL, {
-    method: "POST",
-    // Gemini treo quá 35 giây thì bỏ, trả lỗi để khung chat hiện câu báo
-    // bận kèm Zalo — không giữ người đọc chờ vô hạn.
-    signal: AbortSignal.timeout(35000),
-    headers: await authHeaders(),
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents,
-      generationConfig: {
-        // Thấp để bám sát lời dặn, bớt bịa.
-        temperature: 0.3,
-        maxOutputTokens: 2048,
-        // Nghĩ ít: câu hỏi của trang này đơn giản, nghĩ nhiều chỉ chậm thêm.
-        thinkingConfig: { thinkingLevel: "LOW" },
-      },
-    }),
+  // Gemini thỉnh thoảng treo, không trả chữ nào (đã gặp khi chạy bộ câu thử:
+  // treo tới hết 35 giây). Thường chữ đầu tiên về sau 2–6 giây, nên quá 9
+  // giây chưa có chữ thì bỏ lần đó và hỏi lại ngay một lần — lần hai thường
+  // trôi. Đã gửi chữ cho người đọc rồi thì không hỏi lại (sẽ lặp chữ).
+  let sent = false;
+  const relay = (text) => {
+    sent = true;
+    onText(text);
+  };
+  try {
+    return await askGeminiOnce(MODEL, contents, relay, 9000);
+  } catch (err) {
+    if (sent) throw err;
+    console.warn("Gemini chưa trả lời, hỏi lại một lần:", err.message);
+    // Lỗi 429 "Resource exhausted": mẫu chính đang quá tải hoặc hết hạn mức
+    // — hỏi lại mẫu đó thì dính tiếp, chuyển sang mẫu dự phòng.
+    const model = /gemini 429/.test(err.message) ? FALLBACK_MODEL : MODEL;
+    return await askGeminiOnce(model, contents, relay, 15000);
+  }
+};
+
+/** Một lần hỏi Gemini. Hẹn giờ: quá firstWordMs mà chưa có chữ, hoặc cả
+ *  câu quá 35 giây, thì bỏ. */
+const askGeminiOnce = async (model, contents, onText, firstWordMs) => {
+  const ctrl = new AbortController();
+  const firstTimer = setTimeout(() => ctrl.abort(new Error("no first word")), firstWordMs);
+  const totalTimer = setTimeout(() => ctrl.abort(new Error("total timeout")), 35000);
+  try {
+    return await streamGemini(model, contents, (text) => {
+      clearTimeout(firstTimer);
+      onText(text);
+    }, ctrl.signal);
+  } finally {
+    clearTimeout(firstTimer);
+    clearTimeout(totalTimer);
+  }
+};
+
+const streamGemini = async (model, contents, onText, signal) => {
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents,
+    generationConfig: {
+      // Thấp để bám sát lời dặn, bớt bịa.
+      temperature: 0.3,
+      maxOutputTokens: 2048,
+      // Nghĩ ít: câu hỏi của trang này đơn giản, nghĩ nhiều chỉ chậm thêm.
+      thinkingConfig: { thinkingLevel: "LOW" },
+    },
   });
+  const call = async () =>
+    fetch(geminiUrl(model), {
+      method: "POST",
+      signal,
+      headers: await authHeaders(),
+      body,
+    });
+
+  let res = await call();
+  // Mã đăng nhập hết hạn hoặc hỏng (đã gặp khi chạy thử trên máy: giữ mã cũ
+  // nên Google trả 401) — bỏ mã đang giữ, lấy mã mới, hỏi lại đúng một lần.
+  if (res.status === 401) {
+    localToken = { value: "", expires: 0 };
+    res = await call();
+  }
   if (!res.ok || !res.body) throw new Error(`gemini ${res.status}: ${await res.text()}`);
 
   const decoder = new TextDecoder();

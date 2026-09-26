@@ -490,10 +490,15 @@ const cau_hinh = JSON.stringify({
         panel.style.top = panel.style.height = panel.style.bottom = "";
         return;
       }
+      // Đang ở gần cuối thì giữ ở cuối sau khi đổi cỡ (bàn phím bật lên che
+      // tin mới nhất). Đang cuộn lên đọc lại thì để yên — trước đây luôn kéo
+      // về cuối nên trên iPhone vuốt cuộn tin nhắn lên không được, vì Safari
+      // báo "khung nhìn đổi" liên tục trong lúc vuốt.
+      const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
       panel.style.top = vv.offsetTop + "px";
       panel.style.height = vv.height + "px";
       panel.style.bottom = "auto";
-      log.scrollTop = log.scrollHeight;
+      if (nearBottom) log.scrollTop = log.scrollHeight;
     };
     window.visualViewport?.addEventListener("resize", fitToViewport);
     window.visualViewport?.addEventListener("scroll", fitToViewport);
@@ -659,7 +664,11 @@ const cau_hinh = JSON.stringify({
 
   .chat-log {
     flex: 1;
+    /* min-height 0: không có thì vùng tin nhắn trong khung flex dọc tự cao
+       theo nội dung, tràn ra ngoài khung thay vì cuộn bên trong. */
+    min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     padding: 16px;
     display: flex;
@@ -902,4 +911,11 @@ const cau_hinh = JSON.stringify({
   /* Nền trang cùng màu nền chat: có bị kéo quá mép (cuộn nảy trên iPhone)
      thì cũng chỉ thấy cùng một màu, không lộ gì khác. */
   :global(body.chat-page) { background: var(--gray-bg); }
+  /* Trang chat không có gì để cuộn ngoài vùng tin nhắn: khoá cuộn cả trang
+     để cú vuốt luôn cuộn tin nhắn, không kéo trang đi. */
+  :global(html:has(body.chat-page)),
+  :global(body.chat-page) {
+    overflow: hidden;
+    height: 100%;
+  }
 </style>

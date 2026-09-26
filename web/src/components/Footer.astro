@@ -1,7 +1,7 @@
 ---
 // Footer dùng chung cho toàn site — chuyển từ site-footer.js sang.
 // Địa chỉ, giờ, Zalo, Facebook lấy từ data/thong-tin.ts, đừng viết lại ở đây.
-import { DIA_CHI, GIO, ZALO, SO_ZALO, FACEBOOK, BAN_DO } from "../data/thong-tin.mjs";
+import { DIA_CHI, GIO, ZALO, SO_ZALO, FACEBOOK, BAN_DO, CHI_DUONG } from "../data/thong-tin.mjs";
 import { DICH_VU } from "../data/dich-vu.mjs";
 
 // Sơ đồ trang — hai cột cuối của hàng footer. Thêm cột thì nhớ sửa số cột
@@ -47,6 +47,7 @@ const nam = new Date().getFullYear();
     <div class="footer-col">
       <h3>Địa chỉ phòng khám</h3>
       <p><svg class="icon icon-sm"><use href="#ic-pin"/></svg> {DIA_CHI}</p>
+      <p><a class="map-link" href={CHI_DUONG} target="_blank" rel="noopener">Mở Google Maps chỉ đường</a></p>
       <div class="footer-map">
         <iframe src={BAN_DO} title="Bản đồ tới phòng khám" loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>

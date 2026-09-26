@@ -25,9 +25,15 @@ export const GIO = [
   { ngay: "Thứ 7 – Chủ nhật", gio: "9h00 – 17h00" },
 ];
 
-// Bản đồ suy ra từ địa chỉ, nên đổi địa chỉ là bản đồ đổi theo.
-export const BAN_DO =
-  "https://www.google.com/maps?q=" + encodeURIComponent(DIA_CHI) + "&output=embed";
+// Link Google Maps của phòng khám (chủ site gửi 26/9/2026). Bấm vào là mở
+// đúng điểm "Bác sĩ Lê Trung Kiên" trên Google Maps, có nút chỉ đường.
+export const CHI_DUONG = "https://maps.app.goo.gl/s8rgHvPo5umnBPVh6";
+
+// Toạ độ của đúng điểm đó. Bản đồ nhúng ghim theo toạ độ chứ không tìm theo
+// chữ địa chỉ: tìm "Ngõ 8, Ngô Quyền" thì Google ghim vào đầu ngõ, lệch khỏi
+// cửa phòng khám. Chuyển phòng khám thì sửa cả DIA_CHI, CHI_DUONG và dòng này.
+const TOA_DO = "20.9747673,105.7733621";
+export const BAN_DO = "https://www.google.com/maps?q=" + TOA_DO + "&z=17&output=embed";
 
 export const TEN_BAC_SI = "ThS.BS Lê Trung Kiên";
 export const TEN_SITE = "Bác sĩ Lê Trung Kiên";

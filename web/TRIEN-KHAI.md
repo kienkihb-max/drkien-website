@@ -120,3 +120,20 @@ Theo thứ tự này, đừng đảo:
 6. Google Search Console: gửi lại `https://bacsikien.com/sitemap.xml`.
 
 Nếu có gì sai, quay lại rất nhanh: trỏ DNS về GitHub Pages như cũ.
+
+---
+
+## 8. Chatbot (khung chat trợ lý)
+
+Khung chat cần thêm **một biến môi trường**, đặt riêng cho từng môi trường
+ở **Settings → Variables and Secrets** của project Pages:
+
+| Biến | Production (web thật) | Preview (bản xem trước) |
+| --- | --- | --- |
+| `PUBLIC_CHATBOT_URL` | địa chỉ máy chủ `chatbot-proxy` | địa chỉ máy chủ `chatbot-proxy-thu`, hoặc để trống |
+
+Để trống thì khung chat chạy chế độ thử (luôn đáp "đang thử nghiệm"). Đặt
+xong phải **Retry deployment** thì mới ăn.
+
+Cách dựng máy chủ, lấy địa chỉ, và khoá bản xem trước bằng Cloudflare
+Access: `agent-proxy/HUONG-DAN.md`.

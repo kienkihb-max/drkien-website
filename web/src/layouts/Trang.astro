@@ -11,6 +11,7 @@ import { coAnh, laAnhNgoai } from "../lib/co-anh.mjs";
 import BoIcon from "../components/BoIcon.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import ChatWidget from "../components/ChatWidget.astro";
 
 interface Props {
   /** Tiêu đề hiện trên tab và trên Google. Đã kèm sẵn " — Bác sĩ Lê Trung Kiên". */
@@ -157,6 +158,8 @@ const tieu_de_day_du =
 </main>
 
 <Footer />
+
+<ChatWidget />
 
 {/* Mấy phần còn chạy phía trình duyệt, chưa chuyển thành component Astro.
     thong-tin.js điền các chỗ đánh dấu data-tt, seo-schema.js sinh dữ liệu

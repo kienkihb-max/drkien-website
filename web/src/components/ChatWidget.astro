@@ -1,0 +1,675 @@
+---
+// Khung chat trợ lý AI ở góc phải dưới của mọi trang.
+//
+// Gắn một lần trong layouts/Trang.astro nên trang nào dùng layout đó cũng có.
+// Chữ nghĩa nằm trong data/chatbot.mjs — sửa chữ ở đó, đừng sửa ở đây.
+//
+// Khung chat dựng sẵn phía máy chủ, chỉ phần gửi/nhận tin mới chạy ở trình
+// duyệt (không thể khác: tin nhắn chỉ có sau khi người đọc gõ).
+import { CHATBOT } from "../data/chatbot.mjs";
+import { Send, X, MessageCircle, SquarePen } from "@lucide/astro";
+
+// Chữ mà phần chạy ở trình duyệt cần tới. Truyền qua thuộc tính data-* chứ
+// không dùng define:vars, vì define:vars ép script thành inline, mất đóng gói.
+//
+// Lúc chạy thử trên máy (npm run dev) khung chat gọi máy chủ trung gian chạy
+// ở máy luôn (agent-proxy, cổng 8099). Chỉ bản dựng thật mới dùng địa chỉ
+// thật — nhờ vậy không có cách nào địa chỉ localhost lọt lên web.
+//
+// Bản dựng thật lấy địa chỉ theo thứ tự:
+//   1. biến môi trường PUBLIC_CHATBOT_URL lúc build — Cloudflare Pages đặt
+//      được giá trị khác nhau cho Production (web thật) và Preview (bản
+//      xem trước), nên thử agent mới ở Preview không ảnh hưởng web thật;
+//   2. dia_chi_agent trong data/chatbot.mjs;
+//   3. cả hai trống → chế độ thử, luôn đáp bằng tra_loi_thu.
+const DEV_PROXY = "http://localhost:8099";
+const agentUrl = import.meta.env.DEV
+  ? DEV_PROXY
+  : (import.meta.env.PUBLIC_CHATBOT_URL || "").trim() || CHATBOT.dia_chi_agent;
+const cau_hinh = JSON.stringify({
+  loi_chao: CHATBOT.loi_chao,
+  tra_loi_loi: CHATBOT.tra_loi_loi,
+  tra_loi_thu: CHATBOT.tra_loi_thu,
+  cho_tra_loi: CHATBOT.cho_tra_loi,
+  dia_chi_agent: agentUrl,
+});
+---
+
+<div class="chat-widget" data-chat data-config={cau_hinh}>
+  <button
+    type="button"
+    class="chat-launcher is-peek"
+    aria-expanded="false"
+    aria-controls="chat-panel"
+    data-chat-toggle
+  >
+    <MessageCircle size={26} stroke-width={2} aria-hidden="true" />
+    <span class="chat-online chat-launcher-dot" aria-hidden="true"></span>
+    <span class="chat-launcher-label">{CHATBOT.chu_nut_mo}</span>
+  </button>
+
+  <section
+    id="chat-panel"
+    class="chat-panel"
+    role="dialog"
+    aria-label={CHATBOT.ten}
+    hidden
+    data-chat-panel
+  >
+    <header class="chat-head">
+      {/* Chấm xanh ở góc ảnh đại diện: báo trợ lý luôn sẵn sàng trả lời. */}
+      <span class="chat-avatar-wrap">
+        <img class="chat-avatar" src="/assets/img/logo-bs-kien-mark.svg" alt="" width="40" height="40">
+        <span class="chat-online" aria-hidden="true"></span>
+      </span>
+      <div class="chat-title">
+        <strong>{CHATBOT.ten}</strong>
+        <span>{CHATBOT.trang_thai}</span>
+      </div>
+      <button type="button" class="chat-close" aria-label="Đoạn chat mới" title="Đoạn chat mới" data-chat-new>
+        <SquarePen size={20} stroke-width={2} aria-hidden="true" />
+      </button>
+      <button type="button" class="chat-close" aria-label="Đóng khung chat" data-chat-close>
+        <X size={22} stroke-width={2} aria-hidden="true" />
+      </button>
+    </header>
+
+    {/* aria-live để trình đọc màn hình đọc tin mới của trợ lý khi nó tới. */}
+    <div class="chat-log" aria-live="polite" data-chat-log></div>
+
+    <div class="chat-suggestions" data-chat-suggestions>
+      {CHATBOT.goi_y.map((cau) => (
+        <button type="button" class="chat-chip" data-chat-chip>{cau}</button>
+      ))}
+    </div>
+
+    <form class="chat-form" data-chat-form>
+      <textarea
+        class="chat-input"
+        rows="1"
+        placeholder={CHATBOT.o_nhap}
+        aria-label={CHATBOT.o_nhap}
+        maxlength="1000"
+        data-chat-input
+      ></textarea>
+      <button type="submit" class="chat-send" aria-label="Gửi" data-chat-send>
+        <Send size={20} stroke-width={2} aria-hidden="true" />
+      </button>
+    </form>
+    <p class="chat-note">{CHATBOT.luu_y}</p>
+  </section>
+</div>
+
+<script>
+  type Role = "user" | "bot";
+  type Message = { role: Role; text: string };
+
+  const root = document.querySelector<HTMLElement>("[data-chat]");
+
+  if (root) {
+    const config = JSON.parse(root.dataset.config || "{}");
+    const toggle = root.querySelector<HTMLButtonElement>("[data-chat-toggle]")!;
+    const panel = root.querySelector<HTMLElement>("[data-chat-panel]")!;
+    const log = root.querySelector<HTMLElement>("[data-chat-log]")!;
+    const suggestions = root.querySelector<HTMLElement>("[data-chat-suggestions]")!;
+    const form = root.querySelector<HTMLFormElement>("[data-chat-form]")!;
+    const input = root.querySelector<HTMLTextAreaElement>("[data-chat-input]")!;
+    const send = root.querySelector<HTMLButtonElement>("[data-chat-send]")!;
+
+    // Giữ cuộc trò chuyện trong sessionStorage: người đọc bấm sang trang khác
+    // rồi mở lại khung chat vẫn thấy câu hỏi cũ, nhưng đóng tab là xoá — tin
+    // nhắn về sức khoẻ không nên nằm lại lâu trên máy dùng chung.
+    //
+    // Mọi lần đọc/ghi đều bọc try/catch: trình duyệt chặn lưu trữ (chế độ ẩn
+    // danh của vài trình duyệt) thì khung chat vẫn chạy, chỉ không nhớ.
+    const STORE_KEY = "chatbot-history";
+    const USER_KEY = "chatbot-user";
+    const AGENT_SESSION_KEY = "chatbot-agent-session";
+
+    const loadHistory = (): Message[] => {
+      try {
+        return JSON.parse(sessionStorage.getItem(STORE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    };
+    const saveHistory = (items: Message[]) => {
+      try {
+        sessionStorage.setItem(STORE_KEY, JSON.stringify(items));
+      } catch {}
+    };
+
+    // Mã người đọc: chuỗi ngẫu nhiên do trình duyệt tự sinh, không gắn với
+    // danh tính ai. Agent cần nó để biết phiên nào thuộc về ai.
+    const userId = (() => {
+      try {
+        let id = sessionStorage.getItem(USER_KEY);
+        if (!id) {
+          id = crypto.randomUUID();
+          sessionStorage.setItem(USER_KEY, id);
+        }
+        return id;
+      } catch {
+        return crypto.randomUUID();
+      }
+    })();
+
+    // Mã phiên của agent: máy chủ trung gian trả về sau câu hỏi đầu tiên,
+    // gửi lại ở các câu sau để agent nhớ ngữ cảnh cuộc trò chuyện.
+    let agentSession = "";
+    try {
+      agentSession = sessionStorage.getItem(AGENT_SESSION_KEY) || "";
+    } catch {}
+
+    let history = loadHistory();
+    let busy = false;
+
+    const escapeHtml = (s: string) =>
+      s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
+    /** Chữ đậm, chữ nghiêng, liên kết trong một dòng. Chạy SAU escapeHtml nên
+     *  mọi thẻ HTML trong câu trả lời đã thành chữ thường, chỉ còn đúng mấy
+     *  thẻ tạo ra ở đây. Liên kết chỉ nhận http/https — chặn "javascript:". */
+    const renderInline = (s: string) =>
+      s
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/(^|[\s(])(https?:\/\/[^\s<)]+[^\s<).,;:!?])/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/(^|[^*\w])\*(?!\s)(.+?)\*(?!\w)/g, "$1<em>$2</em>");
+
+    /**
+     * Đổi câu trả lời dạng markdown của agent (**đậm**, * gạch đầu dòng, ---)
+     * thành HTML. Chỉ làm đủ mấy dạng agent hay dùng, không kéo cả thư viện
+     * markdown về chỉ để hiện vài chữ đậm.
+     */
+    const renderMarkdown = (text: string) => {
+      const out: string[] = [];
+      let list: "ul" | "ol" | null = null;
+      const closeList = () => {
+        if (list) out.push(`</${list}>`);
+        list = null;
+      };
+      for (const rawLine of escapeHtml(text).split("\n")) {
+        const line = rawLine.trim();
+        const bullet = line.match(/^[*-]\s+(.*)$/);
+        const numbered = line.match(/^\d+[.)]\s+(.*)$/);
+        if (bullet || numbered) {
+          const kind = bullet ? "ul" : "ol";
+          if (list !== kind) {
+            closeList();
+            out.push(`<${kind}>`);
+            list = kind;
+          }
+          out.push(`<li>${renderInline((bullet || numbered)![1])}</li>`);
+          continue;
+        }
+        closeList();
+        if (!line) continue;
+        if (/^(-{3,}|\*{3,})$/.test(line)) out.push("<hr>");
+        else out.push(`<p>${renderInline(line.replace(/^#+\s*/, ""))}</p>`);
+      }
+      closeList();
+      return out.join("");
+    };
+
+    /** Vẽ một bong bóng tin nhắn. Câu của người đọc hiện nguyên văn
+     *  (textContent); câu của trợ lý qua renderMarkdown, vốn đã khử sạch HTML
+     *  trước khi thêm định dạng — câu trả lời đến từ máy chủ ngoài, không được
+     *  để nó chèn mã vào trang. */
+    const addBubble = (role: Role, text: string) => {
+      const el = document.createElement("div");
+      el.className = "chat-msg chat-msg-" + role;
+      if (role === "bot") el.innerHTML = renderMarkdown(text);
+      else el.textContent = text;
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    };
+
+    const showTyping = () => {
+      const el = document.createElement("div");
+      el.className = "chat-msg chat-msg-bot chat-typing";
+      // Ba chấm nhấp nháy kèm một câu chờ: agent thường mất 5–15 giây, chỉ
+      // có ba chấm thì người đọc dễ tưởng khung chat bị treo.
+      el.innerHTML =
+        '<span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span>' +
+        '<em class="chat-typing-text"></em>';
+      el.querySelector(".chat-typing-text")!.textContent = config.cho_tra_loi || "";
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    };
+
+    const renderAll = () => {
+      log.textContent = "";
+      addBubble("bot", config.loi_chao);
+      history.forEach((m) => addBubble(m.role, m.text));
+      suggestions.hidden = history.length > 0;
+    };
+
+    /**
+     * Gửi câu hỏi cho agent và trả về câu trả lời.
+     *
+     * Chưa có địa chỉ agent (dia_chi_agent trống) thì chạy chế độ thử: chờ
+     * một chút cho giống thật rồi đáp bằng câu tra_loi_thu.
+     *
+     * Khuôn gửi/nhận: POST { message, user_id, session_id } → { reply,
+     * session_id }. Máy chủ trung gian ở agent-proxy/ (gốc kho) trả đúng
+     * khuôn này.
+     */
+    const askAgent = async (message: string): Promise<string> => {
+      if (!config.dia_chi_agent) {
+        await new Promise((r) => setTimeout(r, 900));
+        return config.tra_loi_thu;
+      }
+      const res = await fetch(config.dia_chi_agent, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, user_id: userId, session_id: agentSession }),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (typeof data.reply !== "string" || !data.reply.trim()) {
+        throw new Error("Empty reply");
+      }
+      if (data.session_id) {
+        agentSession = data.session_id;
+        try {
+          sessionStorage.setItem(AGENT_SESSION_KEY, agentSession);
+        } catch {}
+      }
+      return data.reply;
+    };
+
+    const submit = async (raw: string) => {
+      const text = raw.trim();
+      if (!text || busy) return;
+
+      busy = true;
+      send.disabled = true;
+      suggestions.hidden = true;
+      input.value = "";
+      autoGrow();
+
+      history.push({ role: "user", text });
+      saveHistory(history);
+      addBubble("user", text);
+
+      const typing = showTyping();
+      let reply: string;
+      try {
+        reply = await askAgent(text);
+      } catch {
+        reply = config.tra_loi_loi;
+      }
+      typing.remove();
+
+      history.push({ role: "bot", text: reply });
+      saveHistory(history);
+      addBubble("bot", reply);
+
+      busy = false;
+      send.disabled = false;
+      input.focus();
+    };
+
+    // Ô nhập tự cao lên theo số dòng, tới 5 dòng thì cuộn bên trong.
+    const autoGrow = () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 120) + "px";
+    };
+
+    const open = () => {
+      panel.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      root.classList.add("is-open");
+      // Điện thoại: khung chat phủ kín màn hình, khoá cuộn trang phía sau
+      // để vuốt trong khung không kéo luôn cả trang.
+      document.body.classList.add("chat-open");
+      log.scrollTop = log.scrollHeight;
+      input.focus();
+    };
+    const close = () => {
+      panel.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      root.classList.remove("is-open");
+      document.body.classList.remove("chat-open");
+      toggle.focus();
+    };
+
+    // Đoạn chat mới: xoá lịch sử và mã phiên của agent, để agent quên hết
+    // các câu trước — người dùng muốn hỏi chuyện khác từ đầu.
+    const startNewChat = () => {
+      if (busy) return;
+      history = [];
+      agentSession = "";
+      try {
+        sessionStorage.removeItem(STORE_KEY);
+        sessionStorage.removeItem(AGENT_SESSION_KEY);
+      } catch {}
+      renderAll();
+      input.value = "";
+      autoGrow();
+      input.focus();
+    };
+
+    // Nút mở chat hiện đủ chữ lúc mới vào, 5 giây sau thu lại thành nút tròn
+    // (chỉ thấy khác trên điện thoại — máy tính luôn hiện chữ).
+    window.setTimeout(() => toggle.classList.remove("is-peek"), 5000);
+
+    toggle.addEventListener("click", () => (panel.hidden ? open() : close()));
+    root.querySelector("[data-chat-new]")!.addEventListener("click", startNewChat);
+    root.querySelector("[data-chat-close]")!.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !panel.hidden) close();
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      submit(input.value);
+    });
+    // Enter là gửi, Shift+Enter là xuống dòng. Bỏ qua lúc đang gõ dấu tiếng
+    // Việt bằng bộ gõ (isComposing), kẻo Enter chốt chữ lại gửi luôn câu.
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        submit(input.value);
+      }
+    });
+    input.addEventListener("input", autoGrow);
+
+    suggestions.querySelectorAll<HTMLButtonElement>("[data-chat-chip]").forEach((chip) => {
+      chip.addEventListener("click", () => submit(chip.textContent || ""));
+    });
+
+    renderAll();
+  }
+</script>
+
+<style>
+  /* Tầng xếp: 150 — trên header (100) và các nút nổi (90–95) để khung chat
+     không bị che, nhưng dưới lightbox xem ảnh (200). */
+  .chat-widget {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 150;
+    font-family: var(--font-body);
+  }
+
+  .chat-launcher {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 22px 0 16px;
+    border: none;
+    border-radius: 28px;
+    background: var(--primary);
+    color: #fff;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 42, 106, 0.28);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .chat-launcher { position: relative; }
+  /* Chấm xanh "đang online" ở góc nút mở chat, giống chấm ở ảnh đại diện. */
+  .chat-launcher .chat-launcher-dot {
+    top: 2px;
+    right: 2px;
+    bottom: auto;
+    width: 14px;
+    height: 14px;
+  }
+  .chat-launcher:hover { background: var(--primary-2); transform: translateY(-2px); }
+  .chat-launcher:focus-visible { outline: 3px solid var(--primary-soft); outline-offset: 2px; }
+  .is-open .chat-launcher { display: none; }
+
+  .chat-panel {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    /* 700px là khổ màn hình site nhắm tới — chừa 48px trên dưới. */
+    height: min(600px, calc(100vh - 48px));
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 42, 106, 0.24);
+    overflow: hidden;
+  }
+  .chat-panel[hidden] { display: none; }
+
+  .chat-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px 14px 16px;
+    background: var(--primary);
+    color: #fff;
+  }
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .chat-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .chat-title strong { font-family: var(--font-heading); font-size: var(--fs-base); }
+  .chat-title span { font-size: var(--fs-xs); opacity: .85; }
+  .chat-avatar-wrap { position: relative; flex-shrink: 0; line-height: 0; }
+  .chat-online {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22c55e;
+    /* Viền cùng màu nền đầu khung để chấm tách khỏi ảnh đại diện. */
+    border: 2px solid var(--primary);
+  }
+  .chat-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+  .chat-close:hover { background: rgba(255, 255, 255, 0.15); }
+
+  .chat-log {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--gray-bg);
+  }
+
+  /* Bong bóng tạo bằng JS nên không mang dấu scoped của Astro — phải
+     :global mới ăn style. */
+  .chat-log :global(.chat-msg) {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .chat-log :global(.chat-msg-bot) {
+    align-self: flex-start;
+    background: #fff;
+    color: var(--text-dark);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 42, 106, 0.08);
+  }
+  .chat-log :global(.chat-msg-user) {
+    align-self: flex-end;
+    background: var(--primary);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  /* Định dạng trong câu trả lời của trợ lý (đoạn, gạch đầu dòng, liên kết). */
+  .chat-log :global(.chat-msg-bot) { white-space: normal; }
+  .chat-log :global(.chat-msg-bot p),
+  .chat-log :global(.chat-msg-bot ul),
+  .chat-log :global(.chat-msg-bot ol) { margin: 0 0 8px; }
+  .chat-log :global(.chat-msg-bot > :last-child) { margin-bottom: 0; }
+  .chat-log :global(.chat-msg-bot ul),
+  .chat-log :global(.chat-msg-bot ol) { padding-left: 20px; }
+  .chat-log :global(.chat-msg-bot li) { margin-bottom: 4px; }
+  .chat-log :global(.chat-msg-bot a) { color: var(--primary); text-decoration: underline; }
+  .chat-log :global(.chat-msg-bot hr) { border: 0; border-top: 1px solid #e6edf5; margin: 10px 0; }
+  .chat-log :global(.chat-msg-bot em) { color: var(--text-muted); }
+
+  .chat-log :global(.chat-typing) { display: flex; align-items: center; gap: 4px; padding: 10px 14px; }
+  .chat-log :global(.chat-typing-text) {
+    margin-left: 6px;
+    font-style: normal;
+    color: var(--text-muted);
+  }
+  .chat-log :global(.chat-typing .chat-dot) {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: chat-dot 1.2s infinite ease-in-out;
+  }
+  .chat-log :global(.chat-typing .chat-dot:nth-child(2)) { animation-delay: .15s; }
+  .chat-log :global(.chat-typing .chat-dot:nth-child(3)) { animation-delay: .3s; }
+  @keyframes chat-dot {
+    0%, 60%, 100% { opacity: .3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px 12px;
+    background: var(--gray-bg);
+  }
+  .chat-suggestions[hidden] { display: none; }
+  .chat-chip {
+    padding: 8px 14px;
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--primary);
+    font-size: var(--fs-sm);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .chat-chip:hover { background: var(--primary-soft); }
+
+  .chat-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 12px 12px 4px;
+    border-top: 1px solid #e6edf5;
+  }
+  .chat-input {
+    flex: 1;
+    resize: none;
+    max-height: 120px;
+    /* Ô nhập dạng viên thuốc bo tròn, cao bằng nút gửi 44px khi còn một dòng. */
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid #dbe4ef;
+    border-radius: 22px;
+    outline: none;
+    font-family: inherit;
+    /* 16px chứ không 14px: iOS tự phóng to trang khi chạm vào ô nhập có
+       chữ nhỏ hơn 16px, rồi không thu lại. */
+    font-size: var(--fs-base);
+    line-height: 1.4;
+    color: var(--text-dark);
+    background: var(--gray-bg);
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .chat-input:focus { border-color: var(--primary); background: #fff; }
+  .chat-send {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+  }
+  .chat-send:disabled { opacity: .5; cursor: default; }
+
+  .chat-note {
+    margin: 0;
+    padding: 4px 16px 12px;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 767px) {
+    .chat-widget {
+      right: 16px;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+    /* Điện thoại: mới vào trang thì nút hiện đủ chữ cho người đọc biết đây
+       là gì, sau 5 giây thu lại thành nút tròn để khỏi che nội dung (lớp
+       is-peek do script bên trên gỡ). Chữ co bằng max-width chứ không bằng
+       display: none, để có đường thu lại mượt và trình đọc màn hình vẫn đọc
+       được nhãn nút. */
+    .chat-launcher {
+      min-width: 56px;
+      padding: 0 15px;
+      gap: 0;
+      justify-content: center;
+    }
+    .chat-launcher-label {
+      max-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      opacity: 0;
+      transition: max-width .35s ease, opacity .2s ease, margin .35s ease;
+    }
+    .chat-launcher.is-peek .chat-launcher-label {
+      max-width: 180px;
+      margin-left: 8px;
+      margin-right: 5px;
+      opacity: 1;
+    }
+    /* Nhường chỗ cho thanh nút liên hệ dính đáy (trang dịch vụ) và nút nổi
+       giữa đáy khi đọc bài — không thì nút chat đè lên chúng. */
+    :global(body.sticky-cta-on) .chat-widget { bottom: calc(16px + 76px); }
+    :global(body:has(.cta-noi:not(.an))) .chat-widget { bottom: calc(16px + 64px); }
+
+    /* Khung chat phủ kín màn hình, như mở một ứng dụng nhắn tin. */
+    .is-open.chat-widget { inset: 0; }
+    .chat-panel {
+      position: fixed;
+      inset: 0;
+      width: auto;
+      height: 100%;
+      /* dvh: tính cả lúc bàn phím điện thoại bật lên, ô nhập không bị che. */
+      height: 100dvh;
+      border-radius: 0;
+    }
+    .chat-note { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+    :global(body.chat-open) { overflow: hidden; }
+  }
+</style>

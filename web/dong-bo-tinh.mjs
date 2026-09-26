@@ -136,6 +136,7 @@ const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
       FACEBOOK: TT.FACEBOOK,
       GIO: TT.GIO,
       BAN_DO: TT.BAN_DO,
+      CHI_DUONG: TT.CHI_DUONG,
     },
     null,
     2
@@ -158,7 +159,11 @@ const js_thong_tin = `// FILE NÀY DO MÁY SINH RA — đừng sửa ở đây.
 
   var MAU = {
     "dia-chi": function () { return TT.DIA_CHI; },
-    "dia-chi-ban-do": function () { return "<p>" + TT.DIA_CHI + "</p>" + TT.htmlBanDo(); },
+    "dia-chi-ban-do": function () {
+      return "<p>" + TT.DIA_CHI + "</p>" +
+        '<p><a class="map-link" href="' + TT.CHI_DUONG + '" target="_blank" rel="noopener">Mở Google Maps chỉ đường</a></p>' +
+        TT.htmlBanDo();
+    },
     "ban-do": function () { return TT.htmlBanDo(); },
     "gio": function () { return TT.htmlGio(); },
     "so-zalo": function () { return TT.SO_ZALO; },

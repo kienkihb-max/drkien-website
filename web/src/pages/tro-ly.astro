@@ -1,0 +1,22 @@
+---
+// Trang chat riêng cho điện thoại: bấm nút chat trên điện thoại là sang đây
+// thay vì mở khung nổi (xem ChatWidget.astro, vì sao). Chỉ có khung chat,
+// không đầu trang/chân trang; nút X đưa về trang trước.
+//
+// Không cho Google lập chỉ mục và không có trong sitemap: đây là công cụ,
+// không phải nội dung để tìm thấy trên Google.
+import Trang from "../layouts/Trang.astro";
+import ChatWidget from "../components/ChatWidget.astro";
+import { CHATBOT } from "../data/chatbot.mjs";
+---
+
+<Trang
+  tieu_de={CHATBOT.ten}
+  mo_ta="Hỏi đáp nhanh với trợ lý của bác sĩ Lê Trung Kiên về dịch vụ, lịch khám và cách đặt lịch."
+  duong_dan="tro-ly"
+  khong_lap_chi_muc
+  bare
+  lop_body="chat-page"
+>
+  <ChatWidget mode="page" />
+</Trang>

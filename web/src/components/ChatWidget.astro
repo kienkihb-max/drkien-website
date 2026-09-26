@@ -6,8 +6,24 @@
 //
 // Khung chat dựng sẵn phía máy chủ, chỉ phần gửi/nhận tin mới chạy ở trình
 // duyệt (không thể khác: tin nhắn chỉ có sau khi người đọc gõ).
+//
+// Hai kiểu hiển thị (prop mode):
+//   - "popup" (mặc định): nút tròn góc phải dưới, bấm mở khung chat nổi. Trên
+//     điện thoại, bấm nút là chuyển sang trang /tro-ly thay vì mở khung nổi.
+//   - "page": dùng riêng cho trang /tro-ly — khung chat là cả trang, không
+//     có nút mở, nút đóng đưa người đọc về trang trước.
+// Vì sao điện thoại dùng trang riêng: khung nổi đè lên trang web khác gặp đủ
+// chuyện trên iPhone (bàn phím đẩy trang, lộ khe nhìn xuyên xuống trang phía
+// sau). Một trang riêng chỉ có khung chat thì không còn gì phía sau để lộ,
+// và nút Back của điện thoại tự hoạt động đúng.
 import { CHATBOT } from "../data/chatbot.mjs";
 import { Send, X, MessageCircle, SquarePen } from "@lucide/astro";
+
+interface Props {
+  mode?: "popup" | "page";
+}
+const { mode = "popup" } = Astro.props;
+const isPage = mode === "page";
 
 // Chữ mà phần chạy ở trình duyệt cần tới. Truyền qua thuộc tính data-* chứ
 // không dùng define:vars, vì define:vars ép script thành inline, mất đóng gói.
@@ -35,26 +51,33 @@ const cau_hinh = JSON.stringify({
 });
 ---
 
-<div class="chat-widget" data-chat data-config={cau_hinh}>
-  <button
-    type="button"
-    class="chat-launcher is-peek"
-    aria-expanded="false"
-    aria-controls="chat-panel"
-    data-chat-toggle
-  >
-    <MessageCircle size={26} stroke-width={2} aria-hidden="true" />
-    <span class="chat-online chat-launcher-dot" aria-hidden="true"></span>
-    <span class="chat-launcher-label">{CHATBOT.chu_nut_mo}</span>
-  </button>
+<div
+  class:list={["chat-widget", { "chat-widget--page is-open": isPage }]}
+  data-chat
+  data-mode={mode}
+  data-config={cau_hinh}
+>
+  {!isPage && (
+    <button
+      type="button"
+      class="chat-launcher is-peek"
+      aria-expanded="false"
+      aria-controls="chat-panel"
+      data-chat-toggle
+    >
+      <MessageCircle size={26} stroke-width={2} aria-hidden="true" />
+      <span class="chat-online chat-launcher-dot" aria-hidden="true"></span>
+      <span class="chat-launcher-label">{CHATBOT.chu_nut_mo}</span>
+    </button>
+  )}
 
   <section
     id="chat-panel"
     class="chat-panel"
-    role="dialog"
+    role={isPage ? undefined : "dialog"}
     tabindex="-1"
     aria-label={CHATBOT.ten}
-    hidden
+    hidden={!isPage}
     data-chat-panel
   >
     <header class="chat-head">
@@ -70,7 +93,7 @@ const cau_hinh = JSON.stringify({
       <button type="button" class="chat-close" aria-label="Đoạn chat mới" title="Đoạn chat mới" data-chat-new>
         <SquarePen size={20} stroke-width={2} aria-hidden="true" />
       </button>
-      <button type="button" class="chat-close" aria-label="Đóng khung chat" data-chat-close>
+      <button type="button" class="chat-close" aria-label={isPage ? "Quay lại trang trước" : "Đóng khung chat"} data-chat-close>
         <X size={22} stroke-width={2} aria-hidden="true" />
       </button>
     </header>
@@ -116,7 +139,8 @@ const cau_hinh = JSON.stringify({
     if (typeof config.dia_chi_agent === "string" && config.dia_chi_agent.startsWith("http://localhost:")) {
       config.dia_chi_agent = config.dia_chi_agent.replace("localhost", location.hostname);
     }
-    const toggle = root.querySelector<HTMLButtonElement>("[data-chat-toggle]")!;
+    // Trang chat riêng (mode "page") không có nút mở.
+    const toggle = root.querySelector<HTMLButtonElement>("[data-chat-toggle]");
     const panel = root.querySelector<HTMLElement>("[data-chat-panel]")!;
     const log = root.querySelector<HTMLElement>("[data-chat-log]")!;
     const suggestions = root.querySelector<HTMLElement>("[data-chat-suggestions]")!;
@@ -259,22 +283,72 @@ const cau_hinh = JSON.stringify({
         onText(config.tra_loi_thu);
         return config.tra_loi_thu;
       }
+      // Hẹn giờ: quá FIRST_WORD_MS mà chưa có chữ nào về, hoặc cả câu kéo quá
+      // TOTAL_MS, thì thôi chờ và hiện câu báo bận kèm Zalo. Thường câu trả
+      // lời bắt đầu hiện sau 2–6 giây; chờ hơn 15 giây là người đọc bỏ đi.
+      const FIRST_WORD_MS = 15000;
+      const TOTAL_MS = 40000;
+      const ctrl = new AbortController();
+      let firstTimer = window.setTimeout(() => ctrl.abort(), FIRST_WORD_MS);
+      const totalTimer = window.setTimeout(() => ctrl.abort(), TOTAL_MS);
+      const gotWords = () => {
+        window.clearTimeout(firstTimer);
+        firstTimer = 0;
+      };
+      try {
+        return await readReply(message, past, onText, ctrl.signal, gotWords);
+      } finally {
+        window.clearTimeout(firstTimer);
+        window.clearTimeout(totalTimer);
+      }
+    };
+
+    const readReply = async (
+      message: string,
+      past: Message[],
+      onText: (all: string) => void,
+      signal: AbortSignal,
+      gotWords: () => void,
+    ) => {
       const res = await fetch(config.dia_chi_agent, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, history: past, stream: true }),
+        signal,
       });
-      if (!res.ok || !res.body) throw new Error("HTTP " + res.status);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      // Máy chủ chỉ gửi phản hồi khi đã có chữ đầu tiên, nên nhận được phản
+      // hồi là coi như đã có chữ — tắt hẹn giờ "chờ chữ đầu tiên".
+      gotWords();
+
+      // Trình duyệt dựng sẵn trong ứng dụng khác (Zalo, Messenger, Facebook…)
+      // có loại không cho đọc câu trả lời chảy dần. Khi đó chờ nhận cả câu
+      // một lần rồi hiện — chậm hơn chút nhưng vẫn có câu trả lời.
+      if (!res.body || typeof res.body.getReader !== "function") {
+        const all = (await res.text()).trim();
+        if (!all) throw new Error("Empty reply");
+        gotWords();
+        onText(all);
+        return all;
+      }
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let all = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        all += decoder.decode(value, { stream: true });
-        onText(all);
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          all += decoder.decode(value, { stream: true });
+          if (value?.length) gotWords();
+          onText(all);
+        }
+        all += decoder.decode();
+      } catch (err) {
+        // Đứt giữa chừng mà đã nhận được một đoạn thì giữ đoạn đó, còn hơn
+        // xoá hết để hiện câu báo lỗi.
+        if (!all.trim()) throw err;
       }
-      all += decoder.decode();
       if (!all.trim()) throw new Error("Empty reply");
       return all.trim();
     };
@@ -355,45 +429,38 @@ const cau_hinh = JSON.stringify({
       input.style.height = Math.min(input.scrollHeight, 120) + "px";
     };
 
+    const isPage = root.dataset.mode === "page";
+    // Trang chat riêng cho điện thoại (src/pages/tro-ly.astro).
+    const CHAT_PAGE = "/tro-ly";
+
+    // Khung nổi chỉ còn mở trên máy tính — điện thoại đi sang trang riêng.
     const open = () => {
       panel.hidden = false;
-      toggle.setAttribute("aria-expanded", "true");
+      toggle?.setAttribute("aria-expanded", "true");
       root.classList.add("is-open");
-      // Điện thoại: khung chat phủ kín màn hình, khoá cuộn trang phía sau
-      // để vuốt trong khung không kéo luôn cả trang.
-      document.body.classList.add("chat-open");
-      // Thêm mốc lịch sử TRƯỚC khi khoá trang: trình duyệt ghi vị trí cuộn
-      // hiện tại vào mốc cũ, Back về mốc đó là về đúng chỗ đang đọc (khoá
-      // xong thì vị trí cuộn đã thành 0). Viết window.history vì trong script
-      // này `history` là lịch sử trò chuyện.
-      if (!isDesktop() && !pushedHistory) {
-        window.history.pushState({ chat: true }, "");
-        pushedHistory = true;
-      }
-      lockPage();
-      fitToViewport();
       log.scrollTop = log.scrollHeight;
       animateSuggestions();
-      // Chỉ tự đặt con trỏ vào ô nhập trên máy tính. Trên điện thoại, focus
-      // là bàn phím bật lên che nửa màn hình ngay khi vừa mở — người đọc chưa
-      // kịp thấy lời chào và câu gợi ý. Để họ tự chạm vào ô nhập khi muốn gõ.
-      if (window.matchMedia("(min-width: 768px)").matches) input.focus();
-      else panel.focus({ preventScroll: true });
+      input.focus();
     };
+
+    /** Trang chat riêng: nút đóng đưa về trang người đọc vừa ở. Vào thẳng
+     *  /tro-ly (gõ địa chỉ, mở từ link chia sẻ) thì không có trang trước
+     *  trong site — về trang chủ. */
+    const leavePage = () => {
+      let cameFromSite = false;
+      try {
+        cameFromSite = !!document.referrer && new URL(document.referrer).origin === location.origin;
+      } catch {}
+      if (cameFromSite && window.history.length > 1) window.history.back();
+      else location.href = "/";
+    };
+
     const close = () => {
+      if (isPage) return leavePage();
       panel.hidden = true;
-      toggle.setAttribute("aria-expanded", "false");
+      toggle?.setAttribute("aria-expanded", "false");
       root.classList.remove("is-open");
-      document.body.classList.remove("chat-open");
-      unlockPage();
-      fitToViewport();
-      // Đóng bằng nút X/Esc: gỡ luôn mốc lịch sử đã thêm lúc mở, kẻo người
-      // đọc bấm Back một lần mà không thấy gì xảy ra.
-      if (pushedHistory) {
-        pushedHistory = false;
-        window.history.back();
-      }
-      toggle.focus({ preventScroll: true });
+      toggle?.focus({ preventScroll: true });
     };
 
     // Đoạn chat mới: xoá lịch sử — máy chủ chỉ biết những gì trình duyệt gửi
@@ -431,42 +498,30 @@ const cau_hinh = JSON.stringify({
     window.visualViewport?.addEventListener("resize", fitToViewport);
     window.visualViewport?.addEventListener("scroll", fitToViewport);
 
-    // Điện thoại: màn chat là một màn riêng. Khoá đứng trang phía sau bằng
-    // position: fixed — overflow: hidden trên body không đủ, Safari (iPhone)
-    // vẫn cho cuộn trang phía sau. Nhớ vị trí đang đọc để đóng chat thì trang
-    // về đúng chỗ cũ.
-    let savedScrollY = 0;
-    const lockPage = () => {
-      if (isDesktop()) return;
-      savedScrollY = window.scrollY;
-      const s = document.body.style;
-      s.position = "fixed";
-      s.top = -savedScrollY + "px";
-      s.left = s.right = "0";
-    };
-    const unlockPage = () => {
-      const s = document.body.style;
-      if (s.position !== "fixed") return;
-      s.position = s.top = s.left = s.right = "";
-      window.scrollTo(0, savedScrollY);
-    };
+    if (isPage) {
+      // Trang chat riêng: khung chat đã hiện sẵn, chỉ cần khớp màn hình và
+      // chạy hiệu ứng câu gợi ý. Không tự bật bàn phím trên điện thoại.
+      fitToViewport();
+      log.scrollTop = log.scrollHeight;
+      animateSuggestions();
+      if (isDesktop()) input.focus();
+    }
 
-    // Nút Back / vuốt quay lại trên điện thoại đóng màn chat thay vì rời
-    // trang: lúc mở chat thêm một mốc vào lịch sử trình duyệt, Back là quay
-    // về mốc đó.
-    let pushedHistory = false;
-    window.addEventListener("popstate", () => {
-      if (pushedHistory && !panel.hidden) {
-        pushedHistory = false;
-        close();
-      }
-    });
+    if (toggle) {
+      // Nút mở chat hiện đủ chữ lúc mới vào, 5 giây sau thu lại thành nút
+      // tròn (chỉ thấy khác trên điện thoại — máy tính luôn hiện chữ).
+      window.setTimeout(() => toggle.classList.remove("is-peek"), 5000);
 
-    // Nút mở chat hiện đủ chữ lúc mới vào, 5 giây sau thu lại thành nút tròn
-    // (chỉ thấy khác trên điện thoại — máy tính luôn hiện chữ).
-    window.setTimeout(() => toggle.classList.remove("is-peek"), 5000);
-
-    toggle.addEventListener("click", () => (panel.hidden ? open() : close()));
+      toggle.addEventListener("click", () => {
+        if (!isDesktop()) {
+          // Quay về từ trang chat là về đúng chỗ đang đọc — việc đó do
+          // ScrollMemory.astro lo chung cho mọi trang.
+          location.href = CHAT_PAGE;
+          return;
+        }
+        panel.hidden ? open() : close();
+      });
+    }
     root.querySelector("[data-chat-new]")!.addEventListener("click", startNewChat);
     root.querySelector("[data-chat-close]")!.addEventListener("click", close);
     document.addEventListener("keydown", (e) => {
@@ -810,7 +865,15 @@ const cau_hinh = JSON.stringify({
     :global(body:has(.cta-noi:not(.an))) .chat-widget { bottom: calc(16px + 64px); }
 
     /* Khung chat phủ kín màn hình, như mở một ứng dụng nhắn tin. */
-    .is-open.chat-widget { inset: 0; }
+    /* Lớp nền kín phủ cả màn hình phía sau màn chat. Khung chat co theo phần
+       màn hình phía trên bàn phím, nhưng thanh công cụ ngay trên bàn phím
+       iPhone (các nút ^ ˅ ✓) trong suốt — không có lớp này thì nhìn xuyên
+       qua đó thấy trang web phía sau, thành một khe hở. Kéo dài xuống dưới
+       mép màn hình cho chắc, vì Safari đôi khi đẩy cả khung nhìn lên. */
+    .is-open.chat-widget {
+      inset: 0 0 -50vh 0;
+      background: var(--gray-bg);
+    }
     .chat-panel {
       position: fixed;
       inset: 0;
@@ -821,6 +884,22 @@ const cau_hinh = JSON.stringify({
       border-radius: 0;
     }
     .chat-note { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
-    :global(body.chat-open) { overflow: hidden; }
   }
+
+  /* Trang chat riêng /tro-ly: khung chat là cả trang, ở mọi khổ màn hình. */
+  .chat-widget--page {
+    inset: 0;
+    background: var(--gray-bg);
+  }
+  .chat-widget--page .chat-panel {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* Nền trang cùng màu nền chat: có bị kéo quá mép (cuộn nảy trên iPhone)
+     thì cũng chỉ thấy cùng một màu, không lộ gì khác. */
+  :global(body.chat-page) { background: var(--gray-bg); }
 </style>

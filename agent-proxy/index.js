@@ -169,6 +169,9 @@ const toContents = (history, message) => {
 const askGemini = async (contents, onText) => {
   const res = await fetch(GEMINI_URL, {
     method: "POST",
+    // Gemini treo quá 35 giây thì bỏ, trả lỗi để khung chat hiện câu báo
+    // bận kèm Zalo — không giữ người đọc chờ vô hạn.
+    signal: AbortSignal.timeout(35000),
     headers: await authHeaders(),
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },

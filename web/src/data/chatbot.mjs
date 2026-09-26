@@ -6,7 +6,7 @@
 //
 // BẢN NHÁP: toàn bộ chữ dưới đây là đề xuất, chờ chủ site duyệt.
 
-import { SO_ZALO } from "./thong-tin.mjs";
+import { SO_ZALO, ZALO } from "./thong-tin.mjs";
 
 export const CHATBOT = {
   /** Tên hiện trên đầu khung chat. */
@@ -19,7 +19,7 @@ export const CHATBOT = {
   /** Tin nhắn đầu tiên trợ lý tự gửi khi người đọc mở khung chat. */
   loi_chao:
     "Chào bạn! Mình là Lâm, trợ lý của bác sĩ Lê Trung Kiên. " +
-    "Bạn cần hỏi về điều trị, lịch khám, y tế sự kiện hay sản phẩm nào ạ?",
+    "Bạn đang muốn tư vấn điều trị, hợp tác cùng bác sĩ Kiên, hay sản phẩm, dịch vụ nào ạ?",
   /** Câu hiện cạnh ba chấm nhấp nháy trong lúc chờ trợ lý trả lời. */
   cho_tra_loi: "Bạn chờ mình xíu nhé",
   /** Câu hỏi gợi ý bấm một chạm. Ẩn đi sau khi người đọc gửi câu đầu tiên.
@@ -38,12 +38,12 @@ export const CHATBOT = {
   luu_y: "Trợ lý AI chỉ cung cấp thông tin tham khảo, không thay cho việc khám bệnh.",
   /** Trả lời khi gọi trợ lý bị lỗi (mất mạng, máy chủ trợ lý không phản hồi). */
   tra_loi_loi:
-    "Xin lỗi, trợ lý đang gặp trục trặc. Bạn nhắn Zalo " + SO_ZALO +
-    " để bác sĩ trả lời trực tiếp nhé.",
+    "Xin lỗi, mình đang bận chưa thể hỗ trợ bạn lúc này. Bạn có thể thử lại sau 10 giây hoặc liên hệ trực tiếp bác sĩ Kiên qua Zalo " + SO_ZALO +
+    " (" + ZALO + ") nhé ạ.",
   /** Trả lời tạm trong lúc chưa nối với trợ lý thật (dia_chi_agent để trống). */
   tra_loi_thu:
-    "Trợ lý AI đang trong giai đoạn thử nghiệm nên chưa trả lời được. " +
-    "Bạn nhắn Zalo " + SO_ZALO + " để bác sĩ trả lời trực tiếp nhé.",
+    "Xin lỗi, mình đang bận chưa thể hỗ trợ bạn lúc này. Bạn có thể thử lại sau 10 giây hoặc liên hệ trực tiếp bác sĩ Kiên qua Zalo " + SO_ZALO +
+    " (" + ZALO + ") nhé ạ.",
 
   /**
    * Địa chỉ để khung chat gửi câu hỏi tới. Để trống thì khung chat

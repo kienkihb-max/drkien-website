@@ -12,6 +12,7 @@ import BoIcon from "../components/BoIcon.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import ChatWidget from "../components/ChatWidget.astro";
+import ScrollMemory from "../components/ScrollMemory.astro";
 
 interface Props {
   /** Tiêu đề hiện trên tab và trên Google. Đã kèm sẵn " — Bác sĩ Lê Trung Kiên". */
@@ -51,6 +52,11 @@ interface Props {
   /** Thêm class cho <body>, ví dụ "subpage". */
   lop_body?: string;
   /**
+   * Trang trơn: không đầu trang, chân trang, không nút chat nổi — trang tự
+   * lo toàn bộ nội dung. Dùng cho trang chat riêng /tro-ly trên điện thoại.
+   */
+  bare?: boolean;
+  /**
    * Các file JS trong public/ mà riêng trang này cần, ví dụ ["lightbox.js"].
    * Header, footer và bộ icon đã dựng sẵn phía máy chủ nên KHÔNG khai ở đây.
    */
@@ -75,6 +81,7 @@ const {
   khong_lap_chi_muc = false,
   loai_trang,
   lop_body,
+  bare = false,
   scripts = [],
 } = Astro.props;
 
@@ -151,15 +158,17 @@ const tieu_de_day_du =
 <body class={lop_body}>
 
 <BoIcon />
-<Header trang={duong_dan} />
+{!bare && <Header trang={duong_dan} />}
 
 <main>
   <slot />
 </main>
 
-<Footer />
+{!bare && <Footer />}
 
-<ChatWidget />
+{!bare && <ChatWidget />}
+
+<ScrollMemory />
 
 {/* Mấy phần còn chạy phía trình duyệt, chưa chuyển thành component Astro.
     thong-tin.js điền các chỗ đánh dấu data-tt, seo-schema.js sinh dữ liệu

@@ -168,28 +168,69 @@ const toContents = (history, message) => {
 /**
  * Hỏi Gemini, gọi onText(đoạn chữ) mỗi khi có chữ mới về — để khung chat hiện
  * chữ dần, người đọc không phải nhìn ba chấm suốt cả câu trả lời.
+ *
+ * Trả về { text, complete }. complete = false nghĩa là câu trả lời bị ngắt
+ * giữa chừng (Gemini dừng vì trần token, hết giờ, đứt mạng…) — nơi gọi phải
+ * nối thêm lời nhắn, đừng để người đọc thấy câu đứt lửng không lời nào.
  */
+// Hẹn giờ chờ chữ đầu tiên của lần hỏi đầu và lần hỏi lại — xem chú thích
+// trong askGemini ngay dưới.
+const FIRST_WORD_MS = 16000;
+const RETRY_FIRST_WORD_MS = 15000;
+
 const askGemini = async (contents, onText) => {
   // Gemini thỉnh thoảng treo, không trả chữ nào (đã gặp khi chạy bộ câu thử:
-  // treo tới hết 35 giây). Thường chữ đầu tiên về sau 2–6 giây, nên quá 9
-  // giây chưa có chữ thì bỏ lần đó và hỏi lại ngay một lần — lần hai thường
-  // trôi. Đã gửi chữ cho người đọc rồi thì không hỏi lại (sẽ lặp chữ).
+  // treo tới hết 35 giây). Quá FIRST_WORD_MS chưa có chữ thì bỏ lần đó và hỏi
+  // lại ngay một lần — lần hai thường trôi. Đã gửi chữ cho người đọc rồi thì
+  // không hỏi lại (sẽ lặp chữ).
+  //
+  // Gemini nghĩ xong mới nhả chữ, nên chữ đầu tiên về muộn. Đo 26 câu trên
+  // máy (27/9/2026): trung vị 7 giây; câu hỏi dài về sản phẩm 9,4–13,3 giây;
+  // câu bình thường chậm nhất 13,5 giây; một câu treo thật 29,4 giây. Trước
+  // đây hẹn 9 giây, nên 42% số câu — gần như mọi câu hỏi dài — bị bỏ ngang
+  // rồi hỏi lại từ đầu: tốn gấp đôi, và chữ đầu tiên về tới giây 18–22, lúc
+  // khung chat đã bỏ cuộc và hiện câu báo bận. 16 giây: trên mức chậm nhất
+  // của câu bình thường, chỉ hỏi lại khi Gemini treo thật.
+  //
+  // Đổi hai số này thì sửa cả FIRST_WORD_MS / TOTAL_MS trong
+  // web/src/components/ChatWidget.astro — khung chat phải chờ LÂU HƠN máy chủ.
   let sent = false;
+  let partial = "";
   const relay = (text) => {
     sent = true;
+    partial += text;
     onText(text);
   };
+  // Đã gửi dở cho người đọc mà đứt (thường là hết 35 giây giữa chừng): không
+  // hỏi lại được nữa (sẽ lặp chữ), chỉ báo là câu bị ngắt. Trước đây lỗi này
+  // bị nuốt im lặng — người đọc thấy câu cụt mà không hiểu vì sao.
+  const cutShort = (err) => {
+    console.warn("Gemini đứt giữa chừng:", err.message);
+    return { text: partial, complete: false };
+  };
   try {
-    return await askGeminiOnce(MODEL, contents, relay, 9000);
+    return await askGeminiOnce(MODEL, contents, relay, FIRST_WORD_MS);
   } catch (err) {
-    if (sent) throw err;
+    if (sent) return cutShort(err);
     console.warn("Gemini chưa trả lời, hỏi lại một lần:", err.message);
     // Lỗi 429 "Resource exhausted": mẫu chính đang quá tải hoặc hết hạn mức
     // — hỏi lại mẫu đó thì dính tiếp, chuyển sang mẫu dự phòng.
     const model = /gemini 429/.test(err.message) ? FALLBACK_MODEL : MODEL;
-    return await askGeminiOnce(model, contents, relay, 15000);
+    try {
+      return await askGeminiOnce(model, contents, relay, RETRY_FIRST_WORD_MS);
+    } catch (retryErr) {
+      if (sent) return cutShort(retryErr);
+      throw retryErr;
+    }
   }
 };
+
+// Nối vào cuối khi câu trả lời bị ngắt giữa chừng, để người đọc biết là câu
+// chưa xong và có chỗ hỏi tiếp — thay vì thấy một câu đứt lửng kiểu "[Th".
+// Hai dòng trống đầu: tách khỏi đoạn cụt (có thể đang dở một dấu ** hay [).
+// Chữ này hiện ra cho người đọc: đổi câu chữ thì hỏi chủ site trước.
+const CUT_NOTICE =
+  "\n\n*(Câu trả lời hơi dài nên bị ngắt ở đây. Bạn hỏi lại ngắn hơn, hoặc nhắn Zalo 034 590 1772 (https://zalo.me/0345901772) để bác sĩ Kiên tư vấn đầy đủ nhé.)*";
 
 /** Một lần hỏi Gemini. Hẹn giờ: quá firstWordMs mà chưa có chữ, hoặc cả
  *  câu quá 35 giây, thì bỏ. */
@@ -215,7 +256,15 @@ const streamGemini = async (model, contents, onText, signal) => {
     generationConfig: {
       // Thấp để bám sát lời dặn, bớt bịa.
       temperature: 0.3,
-      maxOutputTokens: 2048,
+      // Trần này tính CHUNG cả phần "suy nghĩ" lẫn chữ hiện ra. Đo trên máy
+      // (27/9/2026): câu hỏi dài kiểu "chống chỉ định của từng sản phẩm" nghĩ
+      // tới 1.100–1.965 token, trả lời thêm 300–1.000 token. Trần cũ 2048 nên
+      // 2/5 câu dài bị Gemini ngắt (MAX_TOKENS) giữa chừng — người đọc thấy
+      // câu đứt lửng kiểu "[Th". Mức nghĩ MEDIUM đo được 1.860–3.080 token
+      // nghĩ + 260–450 token trả lời (tối đa ~3.400), nên 8192 vẫn dư gấp đôi
+      // nếu sau này nâng mức nghĩ. Nâng trần không làm câu thường tốn thêm: chỉ
+      // trả tiền cho token thật sự sinh ra; trần chỉ để chặn câu chạy vô hạn.
+      maxOutputTokens: 8192,
       // Nghĩ ít: câu hỏi của trang này đơn giản, nghĩ nhiều chỉ chậm thêm.
       thinkingConfig: { thinkingLevel: "LOW" },
     },
@@ -240,30 +289,55 @@ const streamGemini = async (model, contents, onText, signal) => {
   const decoder = new TextDecoder();
   let buffer = "";
   let total = "";
+  let finishReason = "";
+  let usage = null;
+  const handleLine = (raw) => {
+    const line = raw.trim();
+    if (!line.startsWith("data:")) return;
+    let event;
+    try {
+      event = JSON.parse(line.slice(5));
+    } catch {
+      return;
+    }
+    const candidate = event.candidates?.[0];
+    for (const part of candidate?.content?.parts || []) {
+      // part.thought là phần "suy nghĩ" nội bộ của mô hình, không cho người đọc thấy.
+      if (typeof part.text === "string" && part.text && !part.thought) {
+        total += part.text;
+        onText(part.text);
+      }
+    }
+    // Gemini chỉ ghi lý do dừng và số token ở mảnh cuối. Giữ lại để biết câu
+    // trả lời kết thúc tự nhiên (STOP) hay bị ngắt (MAX_TOKENS, SAFETY…).
+    if (candidate?.finishReason) finishReason = candidate.finishReason;
+    if (event.usageMetadata?.totalTokenCount) usage = event.usageMetadata;
+  };
   for await (const chunk of res.body) {
     buffer += decoder.decode(chunk, { stream: true });
     let nl;
     while ((nl = buffer.indexOf("\n")) >= 0) {
-      const line = buffer.slice(0, nl).trim();
+      handleLine(buffer.slice(0, nl));
       buffer = buffer.slice(nl + 1);
-      if (!line.startsWith("data:")) continue;
-      let event;
-      try {
-        event = JSON.parse(line.slice(5));
-      } catch {
-        continue;
-      }
-      for (const part of event.candidates?.[0]?.content?.parts || []) {
-        // part.thought là phần "suy nghĩ" nội bộ của mô hình, không cho người đọc thấy.
-        if (typeof part.text === "string" && part.text && !part.thought) {
-          total += part.text;
-          onText(part.text);
-        }
-      }
     }
   }
+  // Mảnh cuối có thể không kèm dấu xuống dòng — không đọc nốt thì mất đúng
+  // đoạn kết của câu trả lời.
+  handleLine(buffer + decoder.decode());
+
+  // Ghi vào log Cloud Run cho mỗi câu: lần sau có người báo câu bị cụt thì
+  // tra được ngay là do trần token, do hẹn giờ hay do mô hình tự dừng.
+  console.log(
+    JSON.stringify({
+      gemini: model,
+      finishReason: finishReason || "(không có)",
+      thoughtsTokens: usage?.thoughtsTokenCount || 0,
+      answerTokens: usage?.candidatesTokenCount || 0,
+      chars: total.length,
+    }),
+  );
   if (!total.trim()) throw new Error("Gemini không trả về chữ nào");
-  return total;
+  return { text: total, complete: finishReason === "STOP" };
 };
 
 // --- Nhận câu hỏi ---------------------------------------------------------------
@@ -302,8 +376,8 @@ functions.http("chat", async (req, res) => {
 
   if (req.body?.stream !== true) {
     try {
-      const reply = await askGemini(contents, () => {});
-      return res.json({ reply: reply.trim() });
+      const { text, complete } = await askGemini(contents, () => {});
+      return res.json({ reply: text.trim() + (complete ? "" : CUT_NOTICE) });
     } catch (err) {
       console.error(err);
       return res.status(502).json({ error: "Agent error" });
@@ -312,7 +386,7 @@ functions.http("chat", async (req, res) => {
 
   let started = false;
   try {
-    await askGemini(contents, (text) => {
+    const { complete } = await askGemini(contents, (text) => {
       if (!started) {
         started = true;
         res.status(200);
@@ -323,6 +397,7 @@ functions.http("chat", async (req, res) => {
       }
       res.write(text);
     });
+    if (!complete) res.write(CUT_NOTICE);
     res.end();
   } catch (err) {
     console.error(err);

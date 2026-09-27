@@ -284,10 +284,20 @@ const cau_hinh = JSON.stringify({
         return config.tra_loi_thu;
       }
       // Hẹn giờ: quá FIRST_WORD_MS mà chưa có chữ nào về, hoặc cả câu kéo quá
-      // TOTAL_MS, thì thôi chờ và hiện câu báo bận kèm Zalo. Thường câu trả
-      // lời bắt đầu hiện sau 2–6 giây; chờ hơn 15 giây là người đọc bỏ đi.
-      const FIRST_WORD_MS = 15000;
-      const TOTAL_MS = 40000;
+      // TOTAL_MS, thì thôi chờ và hiện câu báo bận kèm Zalo.
+      //
+      // Hai số này chỉ là LƯỚI AN TOÀN, phải dài hơn hẹn giờ của máy chủ
+      // (agent-proxy/index.js). Máy chủ mới là bên quyết định: Gemini treo thì
+      // nó tự hỏi lại, hỏng cả hai lần thì nó trả lỗi ngay và khung chat hiện
+      // câu báo bận luôn, không phải chờ tới đây. Để ngắn hơn máy chủ thì
+      // trình duyệt bỏ cuộc trước, đúng lúc lần hỏi lại sắp có chữ — trước đây
+      // đặt 15 giây nên câu hỏi dài nào cũng thành câu báo bận.
+      //
+      // Máy chủ im lặng lâu nhất 16 + 15 = 31 giây (chờ lần đầu + chờ lần hỏi
+      // lại), và kéo dài lâu nhất 16 + 35 = 51 giây. Câu bình thường có chữ
+      // đầu tiên sau 1–14 giây (đo 27/9/2026).
+      const FIRST_WORD_MS = 33000;
+      const TOTAL_MS = 55000;
       const ctrl = new AbortController();
       let firstTimer = window.setTimeout(() => ctrl.abort(), FIRST_WORD_MS);
       const totalTimer = window.setTimeout(() => ctrl.abort(), TOTAL_MS);

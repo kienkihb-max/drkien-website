@@ -53,8 +53,29 @@ import ServiceCardsRelated from "../components/ServiceCardsRelated.astro";
             <li>Sơ cấp cứu cơ bản, xử trí tai nạn thương tích tại nơi làm việc</li>
           </ul>
         </div>
+        <!-- Clip hướng dẫn băng ép cẳng tay, nhúng từ Facebook của bác sĩ.
+             Trước đây chỗ này là ảnh community-firstaid-demo.jpg; ảnh đó vẫn
+             dùng làm ảnh chia sẻ của trang (thuộc tính anh= ở trên), đừng xoá.
+
+             Link gốc: https://www.facebook.com/reel/1114262207798058
+             Đổi clip thì sửa số reel trong src bên dưới. Clip phải để chế độ
+             công khai, không thì khung này hiện trắng.
+
+             loading="lazy" để trình duyệt chỉ gọi sang Facebook khi người đọc
+             cuộn tới — đây là khung nhúng của bên thứ ba, nạp ngay từ đầu là
+             trang chậm đi và Facebook biết mọi lượt ghé trang. -->
         <div class="content-media-single">
-          <img src="/assets/img/community-firstaid-demo.jpg" alt="Bác sĩ Lê Trung Kiên hướng dẫn thực hành cố định nẹp cẳng tay khi sơ cứu" loading="lazy">
+          <div class="clip-doc">
+            <iframe
+              src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1114262207798058&show_text=false"
+              title="Bác sĩ Lê Trung Kiên hướng dẫn băng ép cẳng tay khi sơ cứu"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowfullscreen
+              scrolling="no"
+              frameborder="0"
+            ></iframe>
+          </div>
         </div>
       </div>
     </div>
@@ -97,3 +118,42 @@ import ServiceCardsRelated from "../components/ServiceCardsRelated.astro";
   {/* Khối tự suy ra nền xám của nó từ articlesAlt — xem ServiceCardsRelated */}
   <ServiceCardsRelated service="dien-gia-seminar" articlesAlt />
 </Trang>
+
+<style>
+  /* Hai cột lệch nhau: clip dọc 9:16 luôn cao hơn hẳn mấy dòng gạch đầu
+     dòng bên trái. Nếu để lưới kéo giãn (mặc định là stretch) thì ô chữ
+     bị bơm cao bằng clip và thừa ra một mảng trắng trống. Nên:
+     — căn giữa theo chiều dọc, ô chữ chỉ cao bằng nội dung thật của nó;
+     — chặn chiều cao clip, không chặn chiều rộng, để clip không vống lên. */
+  .content-media-grid {
+    align-items: center;
+  }
+
+  /* Khung clip dọc 9:16 (clip gốc 720x1280). Chặn cao 460px → rộng khoảng
+     260px, xấp xỉ chiều cao ô chữ bên cạnh. */
+  .clip-doc {
+    aspect-ratio: 9 / 16;
+    max-height: 460px;
+    margin: 0 auto;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    /* Nền đen để lúc clip chưa tải xong không phải một ô trắng trống. */
+    background: #000;
+  }
+  .clip-doc iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Điện thoại xếp một cột nên không còn chuyện lệch hai bên nữa —
+     thả chặn cao ra, cho clip rộng gần hết màn cho dễ xem. */
+  @media (max-width: 720px) {
+    .clip-doc {
+      max-height: none;
+      max-width: 340px;
+    }
+  }
+</style>

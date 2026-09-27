@@ -38,9 +38,14 @@ const MUC_DICH_VU = DICH_VU.map((d) => ({
 <header class="site-header" id={la_trang_chu ? "top" : undefined}>
   <div class="container header-inner">
     <a href={la_trang_chu ? "#top" : "/"} class="brand">
-      <!-- Bản rút gọn (không vòng chữ): ô logo chỉ 44px, ở cỡ đó vòng chữ
-           thành vệt mờ. Bản đầy đủ là assets/img/logo-bs-kien.svg. -->
-      <img class="brand-mark" src="/assets/img/logo-bs-kien-mark.svg" alt="Logo Chạy bộ cùng bác sĩ Kiên">
+      <!-- Logo thương hiệu bo tròn, cắt từ ảnh gốc chủ site gửi 27/9/2026.
+           Dùng chung ở header, chân trang và ảnh đại diện khung chat — đổi
+           logo thì đổi cả ba chỗ cho khớp.
+
+           Lưu ý cỡ hiển thị: ô logo ở header chỉ 44px, ở cỡ đó dòng chữ
+           trong ảnh không còn đọc được, chỉ còn nhận ra dáng người chạy và
+           hai mảng màu. -->
+      <img class="brand-mark" src="/assets/img/logo-tron.png" alt="Logo Chạy bộ cùng bác sĩ Kiên">
       <span class="brand-text">ThS.BS Lê Trung Kiên</span>
     </a>
     <button class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">

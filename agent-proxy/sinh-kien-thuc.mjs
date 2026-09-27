@@ -60,6 +60,20 @@ const layChu = (html) => {
     .join("\n");
 };
 
+/**
+ * Đường dẫn các trang sản phẩm, đọc từ chính trang /san-pham.
+ *
+ * Dò từ trang thay vì ghi cứng danh sách: chủ site thêm sản phẩm mới thì
+ * chỉ cần chạy lại lệnh này, không phải nhớ sửa thêm chỗ nào ở đây.
+ */
+const layTrangSanPham = (html) => {
+  const duong_dan = [];
+  for (const [, href] of html.matchAll(/<a[^>]*class="[^"]*product-card[^"]*"[^>]*href="([^"]+)"/gi)) {
+    if (!duong_dan.includes(href)) duong_dan.push(href);
+  }
+  return duong_dan;
+};
+
 /** Danh sách bài blog: tiêu đề + link, đọc từ trang /blog. */
 const layBaiBlog = (html) => {
   const bai = [];
@@ -87,6 +101,29 @@ const phan = [];
 for (const t of TRANG) {
   const chu = boCaBenh(layChu(await tai(t.duong_dan)));
   phan.push(`## ${t.tieu_de} — ${GOC}${t.duong_dan}\n${chu}`);
+}
+
+// Sản phẩm: trang danh sách rồi từng trang chi tiết. Nạp cả nội dung chi
+// tiết (thành phần, công dụng, cách dùng, chống chỉ định) vì chủ site đã
+// soạn xong phần này và muốn Lâm trả lời được thẳng, thay vì mọi câu hỏi
+// về sản phẩm đều đẩy sang Zalo.
+const html_san_pham = await tai("/san-pham");
+phan.push(`## Sản phẩm — ${GOC}/san-pham\n${layChu(html_san_pham)}`);
+
+const trang_san_pham = layTrangSanPham(html_san_pham);
+if (!trang_san_pham.length) {
+  throw new Error("Không đọc được sản phẩm nào ở /san-pham — cấu trúc trang có thể đã đổi.");
+}
+for (const duong_dan of trang_san_pham) {
+  const html = await tai(duong_dan);
+  const chu = layChu(html);
+  // Tên sản phẩm lấy thẳng từ <h1>. Đừng lấy dòng đầu của phần chữ: dòng đó
+  // là đường dẫn phân cấp ("› Sản phẩm › Bột tam thất"), ra tên méo mó.
+  const ten =
+    giaiMa(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1].replace(/<[^>]+>/g, "") ?? "")
+      .replace(/\s+/g, " ")
+      .trim() || duong_dan;
+  phan.push(`## Sản phẩm: ${ten} — ${GOC}${duong_dan}\n${chu}`);
 }
 
 const bai = layBaiBlog(await tai("/blog"));

@@ -30,8 +30,9 @@ Quá giới hạn thì khung chat hiện câu báo lỗi kèm số Zalo.
 Máy chủ gửi thẳng cho Gemini (gemini-3.5-flash) lời dặn gồm hai file:
 
 - `prompt-mvp1.md` — tính cách, giọng văn, quy tắc (không tư vấn bệnh…).
-- `kien-thuc-website.md` — nội dung website: hồ sơ bác sĩ, 3 dịch vụ, danh
-  sách bài blog. File này **sinh tự động**, đừng sửa tay.
+- `kien-thuc-website.md` — nội dung website: hồ sơ bác sĩ, 3 dịch vụ, 6
+  trang sản phẩm (đủ cả thành phần, công dụng, cách dùng) và danh sách bài
+  blog. File này **sinh tự động**, đừng sửa tay.
 
 Khi website đổi nội dung (đăng bài mới, đổi dịch vụ, thêm sự kiện…), chạy
 lần lượt ở gốc kho để Lâm biết:

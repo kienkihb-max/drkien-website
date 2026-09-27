@@ -1,4 +1,4 @@
-# KIẾN THỨC WEBSITE (sinh tự động ngày 2026-09-26 từ https://bacsikien.com — đừng sửa tay)
+# KIẾN THỨC WEBSITE (sinh tự động ngày 2026-09-27 từ https://bacsikien.com — đừng sửa tay)
 
 ## Hồ sơ bác sĩ — https://bacsikien.com/bac-si-le-trung-kien
 › Hồ sơ Bác sĩ Lê Trung Kiên — Thạc sĩ Y học cổ truyền
@@ -66,14 +66,14 @@ Giờ đón khách
 Tư vấn điều trị
 Đọc thêm
 Bài viết liên quan
+Đau cổ chân khi chạy bộ từ góc nhìn của Bác sĩ
+Đau cổ chân là vấn đề khá thường gặp ở người chạy bộ, đặc biệt khi bắt đầu tăng quãng đường, chạy địa hình dốc.
+Đọc bài viết
+Đau gối khi chạy bộ: Vì sao xảy ra
+Đau gối là một trong những vấn đề mình gặp khá thường xuyên ở người chạy bộ.
+Đọc bài viết
 Case study về bệnh nhân liệt VII
 Mình vừa xem lại hai tấm ảnh của một bạn bệnh nhân, chụp cách nhau đúng 23 ngày. Ngồi nhìn khá lâu, rồi muốn viết vài dòng.
-Đọc bài viết
-5 điều mình nghĩ bác sĩ cần biết khi điều trị chấn thương cho runner
-Chấn thương khi chạy bộ đang trở thành một vấn đề mình gặp ngày càng nhiều trong quá trình khám và điều trị.
-Đọc bài viết
-Đan sâm – Tam thất: Càng tìm hiểu càng thú vị
-Ở khoa Ngoại bệnh viện Y học cổ truyền, mình thường dùng cặp thuốc này khi gặp những trường hợp chấn thương phần mềm có bầm tím, sưng nề, với mục tiêu hoạt huyết, khứ ứ, giảm đau.
 Đọc bài viết
 Xem tất cả bài viết
 Xem thêm
@@ -92,19 +92,23 @@ Liên hệ hợp tác sự kiện
 Sự kiện đã tham gia
 Một số sự kiện đã đồng hành y tế
 Nổi bật
-Y tế SEA Games 31
-Đội trưởng đội đáp ứng Y tế tại SEA Games 31, Việt Nam, 2022.
+Khai mạc & bế mạc SEA Games 31
+Đội trưởng đội cấp cứu cơ động đảm bảo công tác Y tế tại Lễ khai mạc và Lễ bế mạc SEA Games 31 — Việt Nam, 2022.
 Nổi bật
 Đại hội Thể dục Thể thao Thủ đô lần thứ XI, 2025
-Đội y tế Lễ khai mạc Đại hội Thể dục Thể thao Thủ đô lần thứ XI năm 2025 — Hà Nội, 15/12/2025.
+Đội trưởng đội cấp cứu cơ động phục vụ Lễ khai mạc Đại hội Thể dục Thể thao Thủ đô lần thứ XI năm 2025 — Hà Nội, 15/12/2025.
+Y tế SEA Games 31
+Đội trưởng đội cấp cứu cơ động phục vụ Bộ môn Bơi, Lặn các đoàn thể thao tại SEA Games 31 — Việt Nam, 2022.
 Concert Anh Trai Say Hi 2025
-Hỗ trợ y tế, xử trí tại chỗ cho khán giả tại đêm diễn Anh Trai Say Hi 2025.
+Đội trưởng đội cấp cứu cơ động phục vụ đêm diễn Anh Trai Say Hi 2025.
+Concert Westlife 2024
+Đội trưởng đội cấp cứu cơ động phục vụ đêm nhạc Westlife The Hits Tour 2024.
 Giải Pickleball FSB Cup 2026
 Đảm bảo công tác Y tế tại giải Pickleball phong trào FSB Cup 2026.
 Giải chạy Run To Future
 Đảm bảo công tác Y tế tại giải chạy Run To Future — kỷ niệm thành lập Dasan Việt Nam, 12/4/2025.
 Trận địa pháo hoa Mỹ Đình
-Đảm bảo y tế tại trận địa bắn pháo hoa khu vực Mỹ Đình nhân dịp Tết Nguyên Đán.
+Đội trưởng đội cấp cứu cơ động phục vụ trận địa bắn pháo hoa khu vực Mỹ Đình dịp Tết Nguyên Đán.
 Roller Sports My Way 2026
 Đảm bảo công tác Y tế tại giải đua Roller Sports My Way 2026 — Câu lạc bộ Patin My Way.
 Giải bóng đá FSB Cup 2025
@@ -170,25 +174,237 @@ Thăm khám & điều trị
 Mình có thể giúp bạn giảm đau cơ xương khớp, phục hồi chấn thương bằng châm cứu và vật lý trị liệu.
 Tư vấn điều trị Xem thêm
 
+## Sản phẩm — https://bacsikien.com/san-pham
+› Sản phẩm Sản phẩm Y học cổ truyền mình cung cấp
+Ngoài việc thăm khám và điều trị, mình có bào chế một số chế phẩm quen dùng tại phòng khám, và một vài món dưỡng sinh dùng hằng ngày.
+Liên hệ tư vấn
+Tâm huyết của mình
+Bắt đầu từ trong gia đình
+“Mấy món này mình làm cho người nhà trước. Người nhà dùng thì không có chỗ cho hai chữ ‘tạm được’: dược liệu tự tay chọn, tự tay cân, làm từng mẻ nhỏ, mẻ nào cũng nhớ lấy ở đâu, đóng gói ngày nào. Rồi bạn bè hỏi mua, rồi người bệnh hỏi mua — mình vẫn làm y như hồi làm cho nhà mình, không bớt một bước. Đứng sau mỗi mẻ vẫn là thạc sĩ, bác sĩ, dược sĩ chuyên khoa Y học cổ truyền, đủ để mình biết đâu là giới hạn mà không hứa điều mình không chắc. Nên mình không nói đây là thứ thần kỳ. Chỉ là thứ mình yên tâm đưa cho người trong nhà dùng.”
+— ThS.BS Lê Trung Kiên
+Tự bào chế
+Chế phẩm mình tự bào chế
+Bán chạy Bột tam thất
+Bán chạy Bột ngâm chân
+Thuốc thang, thuốc sắc
+Cồn xoa bóp
+Thuốc ngâm rượu
+Sản phẩm dưỡng sinh
+Xem thêm
+Các dịch vụ khác
+Y tế sự kiện thể thao
+Mình có thể đồng hành y tế, sơ cứu chấn thương tại các giải chạy và giải đấu thể thao phong trào.
+Liên hệ hợp tác Xem thêm
+Diễn giả workshop
+Mình có thể đến chia sẻ chuyên môn tại workshop, seminar sức khỏe cho doanh nghiệp và trường học.
+Liên hệ hợp tác Xem thêm
+Thăm khám & điều trị
+Mình có thể giúp bạn giảm đau cơ xương khớp, phục hồi chấn thương bằng châm cứu và vật lý trị liệu.
+Tư vấn điều trị Xem thêm
+
+## Sản phẩm: Bột tam thất — https://bacsikien.com/san-pham/bot-tam-that
+› Sản phẩm › Bột tam thất Bột tam thất
+Thành phần
+Củ tam thất khô: chọn củ già, rửa sạch, sấy khô rồi nghiền mịn — không pha trộn thêm bột nào khác.
+Công dụng
+- Hỗ trợ giảm u, tiêu viêm
+- Bồi bổ sức khỏe, tăng sức đề kháng
+- Hỗ trợ điều hòa kinh nguyệt, giảm đau bụng kinh
+Cách dùng
+- Pha 1–2 thìa cà phê với nước ấm, có thể cho thêm mật ong. Uống 1–2 lần mỗi ngày.
+- Có thể nấu cùng thức ăn hoặc dùng làm mặt nạ dưỡng da.
+Đối tượng sử dụng
+- Người mới ốm dậy hoặc sau phẫu thuật, cần bồi bổ
+- Người hay bầm tím, tụ máu
+- Phụ nữ đau bụng kinh, kinh nguyệt không đều
+- Người muốn bồi bổ đều đặn hằng ngày
+Bảo quản
+- Để nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp
+- Làm theo mẻ nhỏ, mỗi túi có ghi ngày đóng gói
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột ngâm chân
+Thuốc thang, thuốc sắc
+Cồn xoa bóp
+Thuốc ngâm rượu
+Sản phẩm dưỡng sinh
+
+## Sản phẩm: Bột ngâm chân — https://bacsikien.com/san-pham/bot-ngam-chan
+› Sản phẩm › Bột ngâm chân Bột ngâm chân
+Thành phần
+Quế chi, địa liền, lá lốt, sinh khương, thiên niên kiện và một số thảo dược khác.
+Công dụng
+- Thông kinh hoạt lạc
+- Hoạt huyết hóa ứ
+- Tiêu viêm, giảm đau
+Cách dùng
+- Pha một túi với nước nóng, chờ bớt nóng rồi ngâm 15–20 phút
+- Đóng sẵn theo túi dùng một lần — không phải đun, không phải đong đếm gì thêm
+Đối tượng sử dụng
+- Người hay lạnh tay chân
+- Người đứng hoặc ngồi cả ngày, tối về mỏi chân
+- Người chạy bộ muốn thư giãn cơ sau buổi tập
+Chống chỉ định
+- Người đái tháo đường
+- Người giãn tĩnh mạch chi dưới
+- Người có vết thương hở ở chân
+- Trẻ em dưới 3 tuổi
+- Phụ nữ mang thai 3 tháng đầu
+Bảo quản
+- Hạn dùng 6 tháng kể từ ngày sản xuất
+- Để nơi khô ráo, thoáng mát
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột tam thất
+Thuốc thang, thuốc sắc
+Cồn xoa bóp
+Thuốc ngâm rượu
+Sản phẩm dưỡng sinh
+
+## Sản phẩm: Thuốc thang, thuốc sắc — https://bacsikien.com/san-pham/thuoc-thang-thuoc-sac
+› Sản phẩm › Thuốc thang, thuốc sắc Thuốc thang, thuốc sắc
+Quy trình
+- Thăm khám, điền form Thập vấn và gửi ảnh lưỡi
+- Bốc thuốc theo tình trạng bệnh, ưu tiên các bài thuốc cổ phương gia giảm
+- Nhận thuốc: đóng túi sắc sẵn 7–10 thang mỗi lần, hoặc lấy thuốc thô về tự sắc
+- Tái khám sau 7–10 ngày
+Công dụng
+- Dùng đúng bài thuốc bác sĩ kê cho từng người, theo từng đợt điều trị
+- Kết hợp cùng châm cứu, vật lý trị liệu trong các đợt điều trị cơ xương khớp
+Đối tượng sử dụng
+- Người đã khám và được bác sĩ kê đơn
+- Người bận, không có thời gian sắc thuốc ở nhà
+- Người ở xa, cần gửi thuốc theo từng đợt
+Quy cách
+- Túi sắc sẵn, 7–10 thang mỗi lần
+- Hoặc thuốc thô mang về tự sắc
+Bảo quản
+- Túi sắc sẵn để ngăn mát, hâm lại trước khi uống
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột tam thất
+Bán chạy Bột ngâm chân
+Cồn xoa bóp
+Thuốc ngâm rượu
+Sản phẩm dưỡng sinh
+
+## Sản phẩm: Cồn xoa bóp — https://bacsikien.com/san-pham/con-xoa-bop
+› Sản phẩm › Cồn xoa bóp Cồn xoa bóp
+Thành phần
+Mã tiền, huyết giác, ô đầu, long não, đại hồi, một dược, địa liền, nhũ hương, đinh hương, quế nhục, sinh khương — mỗi vị 1g; ethanol 70° 100ml.
+Công dụng
+- Hoạt huyết, giảm đau, tiêu viêm
+- Trừ phong thấp, thông kinh lạc
+Chỉ định
+- Sưng đau do chấn thương, tụ máu bầm tím
+- Đau nhức các khớp xương, đau mỏi cơ
+- Đau cổ gáy, đau thắt lưng
+Cách dùng
+- Xịt lên chỗ đau và vùng lân cận, xoa nhẹ
+- Ngày 3–4 lần
+Chống chỉ định
+- Phụ nữ có thai và trẻ em dưới 2 tuổi
+- Không xịt lên vết thương hở, mắt, mũi, miệng
+Quy cách
+- Lọ xịt 100ml
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột tam thất
+Bán chạy Bột ngâm chân
+Thuốc thang, thuốc sắc
+Thuốc ngâm rượu
+Sản phẩm dưỡng sinh
+
+## Sản phẩm: Thuốc ngâm rượu — https://bacsikien.com/san-pham/thuoc-ngam-ruou
+› Sản phẩm › Thuốc ngâm rượu Thuốc ngâm rượu
+Thành phần
+Thang cắt sẵn, cân đủ vị theo bài. Tuỳ bài có nhân sâm, kỷ tử, thục địa, hoàng kỳ, táo đỏ, hạt sen…
+Công dụng
+- Nâng cao chính khí
+- Bổ can thận
+- Bổ khí huyết
+Cách dùng
+- Đổ rượu theo tỉ lệ và ngâm đủ thời gian ghi kèm mỗi thang
+- Uống lượng nhỏ mỗi lần, theo hướng dẫn của bác sĩ
+Đối tượng sử dụng
+- Người cần bồi bổ theo bài đã được bác sĩ tư vấn
+- Người hay mệt mỏi, ăn ngủ kém
+- Người muốn tự ngâm để biết rõ trong bình có vị gì
+Chống chỉ định
+- Người có bệnh gan, bệnh dạ dày
+- Người đang uống thuốc tây — hỏi bác sĩ trước khi dùng
+- Phụ nữ có thai và đang cho con bú
+- Người không uống được rượu
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột tam thất
+Bán chạy Bột ngâm chân
+Thuốc thang, thuốc sắc
+Cồn xoa bóp
+Sản phẩm dưỡng sinh
+
+## Sản phẩm: Sản phẩm dưỡng sinh — https://bacsikien.com/san-pham/san-pham-duong-sinh
+› Sản phẩm › Sản phẩm dưỡng sinh Sản phẩm dưỡng sinh
+Các sản phẩm dưỡng sinh qua đường ăn uống và chăm sóc hằng ngày, dùng đều đặn tại nhà. Mỗi đợt mình làm một số món khác nhau, cần món gì thì nhắn hỏi mình.
+Thành phần
+- Hầm gà ngũ vị: đảng sâm, kỷ tử, đương quy, hạt sen, hồng táo
+- Trà dưỡng nhan: kỷ tử, hồng táo, cúc hoa
+Công dụng
+- Bồi bổ cơ thể, tăng sức đề kháng
+- Hỗ trợ phục hồi sức khỏe cho người mệt mỏi, suy nhược và người sau khi ốm dậy
+Cách dùng
+- Hầm gà ngũ vị: một gói với gà 1–1,5kg và 1,5–2 lít nước, hầm lửa nhỏ 45–60 phút
+- Trà dưỡng nhan: một gói hãm với 500ml nước sôi trong bình giữ nhiệt, uống trong ngày
+Đối tượng sử dụng
+- Người cần bồi bổ
+- Người lao động nặng
+- Người tập thể thao
+- Người mới ốm dậy
+Quy cách
+- Chia sẵn một gói cho một lần nấu
+Bảo quản
+- Để nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp
+Nhận tư vấn Liên hệ mua
+Đây là chế phẩm hỗ trợ, không thay thế cho việc khám và dùng thuốc theo chỉ định.
+Xem thêm
+Các sản phẩm khác
+Bán chạy Bột tam thất
+Bán chạy Bột ngâm chân
+Thuốc thang, thuốc sắc
+Cồn xoa bóp
+Thuốc ngâm rượu
+
 ## Bài viết trên blog — https://bacsikien.com/blog
 Tên bài chép đúng nguyên văn, link là link thật của bài:
 - Hơn Cả Chạy Bộ: Giải Mã Sức Mạnh Well-being Của Marathon — https://bacsikien.com/hon-ca-chay-bo-giai-ma-suc-manh-well-being-cua-marathon
 - Đau lưng dân văn phòng: đừng chờ đau mới khám — https://bacsikien.com/dau-cot-song-dan-van-phong-talkshow-tigren
+- Đau cổ chân khi chạy bộ từ góc nhìn của Bác sĩ — https://bacsikien.com/dau-co-chan-khi-chay-bo-tu-goc-nhin-cua-bac-si
+- Đau gối khi chạy bộ: Vì sao xảy ra — https://bacsikien.com/dau-goi-khi-chay-bo-vi-sao-xay-ra
 - Quay lại chạy bộ sau chấn thương: bắt đầu từ đâu? — https://bacsikien.com/quay-lai-chay-bo-sau-chan-thuong-bat-dau-tu-dau
 - Case study về bệnh nhân liệt VII — https://bacsikien.com/case-study-ve-benh-nhan-liet-vii
 - 5 điều mình nghĩ bác sĩ cần biết khi điều trị chấn thương cho runner — https://bacsikien.com/5-dieu-minh-nghi-bac-si-can-biet-khi-dieu-tri-chan-thuong-cho-runner
 - Đan sâm – Tam thất: Càng tìm hiểu càng thú vị — https://bacsikien.com/dan-sam-tam-that-cang-tim-hieu-cang-thu-vi
 - Tam thất dưới góc nhìn của một bác sĩ Y học cổ truyền — https://bacsikien.com/tam-that-duoi-goc-nhin-cua-mot-bac-si-y-hoc-co-truyen
 - Thoái hóa khớp gối: Những điều người bệnh nên biết — https://bacsikien.com/thoai-hoa-khop-goi-nhung-dieu-nguoi-benh-nen-biet
-- Đau thần kinh tọa: khi nào cần lo, khi nào chỉ cần kiên nhẫn — https://bacsikien.com/dau-lan-xuong-chan-do-re-than-kinh-that-lung
-- Câu chuyện về cứu ngải — https://bacsikien.com/cau-chuyen-ve-cuu-ngai
 - Công nghệ AI phân tích dáng chạy: Khi khoa học phòng lab bước ra đường chạy — https://bacsikien.com/cong-nghe-ai-phan-tich-dang-chay-khi-khoa-hoc-phong-lab-buoc
+- Câu chuyện về cứu ngải — https://bacsikien.com/cau-chuyen-ve-cuu-ngai
+- Đau thần kinh tọa: khi nào cần lo, khi nào chỉ cần kiên nhẫn — https://bacsikien.com/dau-lan-xuong-chan-do-re-than-kinh-that-lung
 - SEA Games 31 và một nhiệm vụ đặc biệt — https://bacsikien.com/sea-games-31-va-mot-nhiem-vu-dac-biet
 - Chuyện lạ trong phòng y tế sự kiện — https://bacsikien.com/cau-chuyen-hi-huu-y-te-su-kien
 - Vì sao tổn thương stress xương ghe đáng lo ngại? — https://bacsikien.com/vi-sao-ton-thuong-stress-xuong-ghe-dang-lo-ngai
 - Chuột rút khi chạy bộ: Chuối hay tập tạ? — https://bacsikien.com/chuot-rut-khi-chay-bo
 - Hiểu đúng về hội chứng quá tải thường gặp ở người chạy bộ — https://bacsikien.com/shin-splints-dau-xuong-chay
 - Chạy lại sau tái tạo dây chằng chéo trước — https://bacsikien.com/chuot-rut-khi-van-dong
-- 6 Sự thật về Thoát vị đĩa đệm — https://bacsikien.com/van-dong-phuc-hoi-cot-song
 - Đi làm cả ngày đã đủ vận động chưa? — https://bacsikien.com/xu-huong-phat-trien-yhct
+- 6 Sự thật về Thoát vị đĩa đệm — https://bacsikien.com/van-dong-phuc-hoi-cot-song
 - Những bài học mùa hè có thể theo các em nhiều năm sau — https://bacsikien.com/so-cuu-tre-em-tap-huan-mai-dich

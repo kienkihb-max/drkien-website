@@ -68,10 +68,33 @@
  *                                   phần chữ của trang chi tiết. Dùng cho
  *                                   món là cả một nhóm nhiều thứ nhỏ, nói
  *                                   chung thay vì liệt kê tên từng thứ.
- * @property {string[]} [diem_dac_biet] Mục "Điểm đặc biệt" — món này khác
- *                                     gì, làm ra sao, dùng tiện thế nào
- * @property {string[]} [cong_dung] Mục "Công dụng"
- * @property {string[]} [doi_tuong] Mục "Phù hợp với" — liệt kê đối tượng
+ * Các mục nội dung của trang chi tiết. TẤT CẢ đều không bắt buộc — món nào
+ * có gì thì khai nấy, mục để trống thì trang bỏ hẳn. Thứ tự hiện trên trang
+ * là thứ tự liệt kê dưới đây, khai lộn xộn trong dữ liệu cũng không sao.
+ *
+ * Khai bằng MẢNG thì trang in ra gạch đầu dòng; khai bằng MỘT CHUỖI thì
+ * trang in ra một đoạn văn liền.
+ *
+ * Đầu mục lấy đúng tên trên nhãn sản phẩm chứ không tự đặt: nhãn ghi
+ * "Thành phần" thì trang cũng ghi "Thành phần". Trước đây mọi món bị ép vào
+ * ba mục cố định (Điểm đặc biệt → Công dụng → Phù hợp với) nên thành phần
+ * bị nhét vào "Điểm đặc biệt" — sai chỗ, mà mục đó thành cái sọt đựng đủ
+ * thứ. Đừng quay lại lối đó.
+ *
+ * @property {string[]} [quy_trinh]      Các bước phải qua, cho món không
+ *                                       phải mua là xong (thuốc thang)
+ * @property {string} [thanh_phan]       MỘT ĐOẠN VĂN, không phải danh sách:
+ *                                       mỗi vị một dòng thì cột thuốc dài
+ *                                       cả chục dòng mà chẳng rõ hơn. Có
+ *                                       hàm lượng thì ghi đúng hàm lượng.
+ * @property {string[]} [cong_dung]      Nhãn có chỗ ghi là "Tác dụng"
+ * @property {string[]} [chi_dinh]       Dùng trong trường hợp nào
+ * @property {string[]} [cach_dung]      Nhãn có chỗ ghi "Hướng dẫn sử dụng"
+ * @property {string[]} [doi_tuong]      Ai nên dùng
+ * @property {string[]} [chong_chi_dinh] Ai KHÔNG được dùng. Có trên nhãn thì
+ *                                       BẮT BUỘC đưa lên trang, đừng bỏ.
+ * @property {string[]} [bao_quan]       Bảo quản, hạn dùng
+ * @property {string[]} [quy_cach]       Đóng gói: lọ 100ml, túi một lần…
  * @property {boolean} [ban_chay] Gắn nhãn "Bán chạy" lên góc ảnh. Chữ trên
  *                                nhãn sửa ở CHU_BAN_CHAY bên dưới.
  *
@@ -122,7 +145,7 @@ export const SAN_PHAM = [
     anh: "product-tam-that-tui-cu-am-tra.jpg",
     anh_alt: "Túi tam thất có nhãn đặt cạnh bộ ấm trà",
     mo_ta_seo:
-      "Bột tam thất do bác sĩ Lê Trung Kiên tự chọn củ và bào chế tại phòng khám. Xem ảnh sản phẩm, công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
+      "Bột tam thất do bác sĩ Lê Trung Kiên tự chọn củ và bào chế tại phòng khám. Xem thành phần, công dụng và cách dùng, nhắn Zalo để được tư vấn.",
     album: [
       {
         anh: "product-bot-tam-that-nb.jpg",
@@ -139,23 +162,28 @@ export const SAN_PHAM = [
       },
       { anh: "product-tam-that-tui-bot.jpg", alt: "Túi bột tam thất đã đóng gói, có nhãn" },
     ],
-    diem_dac_biet: [
-      "Chọn củ già, rửa sạch và sấy khô trước khi nghiền — không pha trộn thêm bột nào khác",
-      "Làm theo mẻ nhỏ, mỗi túi có ghi ngày đóng gói",
-      "Pha nước ấm uống, trộn mật ong, nấu cùng thức ăn hoặc dùng làm mặt nạ đều được",
-    ],
-    // Ba dòng này chép nguyên văn từ nhãn dán trên túi. Đổi nhãn thì sửa ở
-    // đây cho khớp, đừng để trang nói một đằng nhãn nói một nẻo.
+    // NGUỒN: nhãn dán trên túi. Đổi nhãn thì sửa ở đây cho khớp.
+    thanh_phan:
+      "Củ tam thất khô: chọn củ già, rửa sạch, sấy khô rồi nghiền mịn — không pha trộn thêm bột nào khác.",
     cong_dung: [
       "Hỗ trợ giảm u, tiêu viêm",
       "Bồi bổ sức khỏe, tăng sức đề kháng",
       "Hỗ trợ điều hòa kinh nguyệt, giảm đau bụng kinh",
     ],
+    cach_dung: [
+      "Pha 1–2 thìa cà phê với nước ấm, có thể cho thêm mật ong. Uống 1–2 lần mỗi ngày.",
+      "Có thể nấu cùng thức ăn hoặc dùng làm mặt nạ dưỡng da.",
+    ],
+    // Nhãn không có mục này — Claude soạn, chủ site đọc lại.
     doi_tuong: [
       "Người mới ốm dậy hoặc sau phẫu thuật, cần bồi bổ",
       "Người hay bầm tím, tụ máu",
       "Phụ nữ đau bụng kinh, kinh nguyệt không đều",
       "Người muốn bồi bổ đều đặn hằng ngày",
+    ],
+    bao_quan: [
+      "Để nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp",
+      "Làm theo mẻ nhỏ, mỗi túi có ghi ngày đóng gói",
     ],
   },
   {
@@ -166,23 +194,32 @@ export const SAN_PHAM = [
     anh: "product-bot-ngam-chan.jpg",
     anh_alt: "Túi bột ngâm chân thảo dược đóng gói sẵn",
     mo_ta_seo:
-      "Bột ngâm chân thảo dược do bác sĩ Lê Trung Kiên bào chế, đóng gói sẵn theo túi dùng một lần. Xem công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
+      "Bột ngâm chân thảo dược do bác sĩ Lê Trung Kiên bào chế, đóng theo túi dùng một lần. Xem thành phần, công dụng và chống chỉ định, nhắn Zalo để được tư vấn.",
     album: [],
-    diem_dac_biet: [
-      "Thảo dược làm ấm đã cắt sẵn, đóng theo túi dùng một lần",
+    // NGUỒN: nhãn dán trên túi. Đổi nhãn thì sửa ở đây cho khớp.
+    thanh_phan:
+      "Quế chi, địa liền, lá lốt, sinh khương, thiên niên kiện và một số thảo dược khác.",
+    cong_dung: ["Thông kinh hoạt lạc", "Hoạt huyết hóa ứ", "Tiêu viêm, giảm đau"],
+    cach_dung: [
       "Pha một túi với nước nóng, chờ bớt nóng rồi ngâm 15–20 phút",
-      "Không phải đun, không phải đong đếm gì thêm",
+      "Đóng sẵn theo túi dùng một lần — không phải đun, không phải đong đếm gì thêm",
     ],
-    cong_dung: [
-      "Hỗ trợ làm ấm cơ thể, thư giãn sau một ngày dài",
-      "Hỗ trợ lưu thông khí huyết vùng bàn chân, cẳng chân",
-      "Giúp dễ vào giấc hơn khi ngâm buổi tối",
-    ],
+    // Nhãn không có mục này — Claude soạn, chủ site đọc lại.
     doi_tuong: [
       "Người hay lạnh tay chân",
       "Người đứng hoặc ngồi cả ngày, tối về mỏi chân",
-      "Người khó ngủ, hay tỉnh giấc giữa đêm",
       "Người chạy bộ muốn thư giãn cơ sau buổi tập",
+    ],
+    chong_chi_dinh: [
+      "Người đái tháo đường",
+      "Người giãn tĩnh mạch chi dưới",
+      "Người có vết thương hở ở chân",
+      "Trẻ em dưới 3 tuổi",
+      "Phụ nữ mang thai 3 tháng đầu",
+    ],
+    bao_quan: [
+      "Hạn dùng 6 tháng kể từ ngày sản xuất",
+      "Để nơi khô ráo, thoáng mát",
     ],
   },
   {
@@ -192,7 +229,7 @@ export const SAN_PHAM = [
     anh: "product-thuoc-sac-nb.jpg",
     anh_alt: "Túi thuốc đã sắc sẵn, nước thuốc màu nâu",
     mo_ta_seo:
-      "Thuốc thang bốc theo đơn và thuốc sắc sẵn đóng túi của bác sĩ Lê Trung Kiên. Xem ảnh sản phẩm, nhắn Zalo để được tư vấn và đặt.",
+      "Thuốc thang bốc theo đơn và thuốc sắc sẵn đóng túi của bác sĩ Lê Trung Kiên. Xem quy trình thăm khám và bốc thuốc, nhắn Zalo để được tư vấn.",
     album: [
       { anh: "product-thang-goi-giay.jpg", alt: "Xấp thang thuốc gói giấy buộc dây" },
       {
@@ -200,10 +237,16 @@ export const SAN_PHAM = [
         alt: "Thùng thuốc sắc đóng túi chuẩn bị giao",
       },
     ],
-    diem_dac_biet: [
-      "Bốc theo đơn riêng của từng người sau khi khám, không có thang bán sẵn",
-      "Lấy thang về tự sắc, hoặc đặt sắc sẵn đóng túi cho tiện mang đi",
-      "Dược liệu mình tự chọn và cân, bốc tới đâu cân tới đó",
+    // Món duy nhất có mục "Quy trình": nó không phải hàng mua là xong mà là
+    // một đợt điều trị có các bước. Chủ site đọc cho, chép nguyên ý.
+    //
+    // KHÔNG có mục Thành phần: thuốc bốc theo đơn riêng của từng người, không
+    // có công thức cố định để ghi ra.
+    quy_trinh: [
+      "Thăm khám, điền form Thập vấn và gửi ảnh lưỡi",
+      "Bốc thuốc theo tình trạng bệnh, ưu tiên các bài thuốc cổ phương gia giảm",
+      "Nhận thuốc: đóng túi sắc sẵn 7–10 thang mỗi lần, hoặc lấy thuốc thô về tự sắc",
+      "Tái khám sau 7–10 ngày",
     ],
     cong_dung: [
       "Dùng đúng bài thuốc bác sĩ kê cho từng người, theo từng đợt điều trị",
@@ -214,6 +257,11 @@ export const SAN_PHAM = [
       "Người bận, không có thời gian sắc thuốc ở nhà",
       "Người ở xa, cần gửi thuốc theo từng đợt",
     ],
+    quy_cach: [
+      "Túi sắc sẵn, 7–10 thang mỗi lần",
+      "Hoặc thuốc thô mang về tự sắc",
+    ],
+    bao_quan: ["Túi sắc sẵn để ngăn mát, hâm lại trước khi uống"],
   },
   {
     slug: "con-xoa-bop",
@@ -222,23 +270,24 @@ export const SAN_PHAM = [
     anh: "product-con-xoa-bop.jpg",
     anh_alt: "Chai cồn xoa bóp dạng xịt do bác sĩ Lê Trung Kiên bào chế",
     mo_ta_seo:
-      "Cồn xoa bóp dạng xịt do bác sĩ Lê Trung Kiên bào chế tại phòng khám. Xem công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
+      "Cồn xoa bóp dạng xịt của bác sĩ Lê Trung Kiên. Xem thành phần đầy đủ, chỉ định và chống chỉ định, nhắn Zalo để được tư vấn.",
     album: [],
-    diem_dac_biet: [
-      "Dược liệu ngâm cồn theo bài, đóng chai xịt nhỏ đủ bỏ túi",
-      "Xịt ra tay rồi day nhẹ là thấm, không để lại cảm giác nhờn",
-      "Mang theo được khi đi tập, đi thi đấu hay đi công tác",
+    // NGUỒN: nhãn dán trên lọ. Đổi nhãn thì sửa ở đây cho khớp.
+    // Hàm lượng ghi đúng như nhãn, đừng làm tròn hay bỏ bớt vị.
+    thanh_phan:
+      "Mã tiền, huyết giác, ô đầu, long não, đại hồi, một dược, địa liền, nhũ hương, đinh hương, quế nhục, sinh khương — mỗi vị 1g; ethanol 70° 100ml.",
+    cong_dung: ["Hoạt huyết, giảm đau, tiêu viêm", "Trừ phong thấp, thông kinh lạc"],
+    chi_dinh: [
+      "Sưng đau do chấn thương, tụ máu bầm tím",
+      "Đau nhức các khớp xương, đau mỏi cơ",
+      "Đau cổ gáy, đau thắt lưng",
     ],
-    cong_dung: [
-      "Hỗ trợ làm nóng tại chỗ, giảm cảm giác mỏi cơ sau vận động",
-      "Hỗ trợ giảm đau mỏi vai gáy, thắt lưng do ngồi lâu một tư thế",
-      "Dùng kèm khi xoa bóp, day ấn tại nhà",
+    cach_dung: ["Xịt lên chỗ đau và vùng lân cận, xoa nhẹ", "Ngày 3–4 lần"],
+    chong_chi_dinh: [
+      "Phụ nữ có thai và trẻ em dưới 2 tuổi",
+      "Không xịt lên vết thương hở, mắt, mũi, miệng",
     ],
-    doi_tuong: [
-      "Người chạy bộ, tập thể thao hay mỏi cơ sau buổi tập",
-      "Dân văn phòng đau mỏi vai gáy",
-      "Người lao động nặng, hay đau lưng cuối ngày",
-    ],
+    quy_cach: ["Lọ xịt 100ml"],
   },
   {
     slug: "thuoc-ngam-ruou",
@@ -248,26 +297,40 @@ export const SAN_PHAM = [
     anh_alt:
       "Thang dược liệu ngâm rượu trải trong túi vải: nhân sâm, kỷ tử, thục địa, hoàng kỳ",
     mo_ta_seo:
-      "Thang dược liệu cắt sẵn theo bài để mang về ngâm rượu, do bác sĩ Lê Trung Kiên bốc. Xem công dụng và đối tượng phù hợp, nhắn Zalo để được tư vấn.",
+      "Thang dược liệu cắt sẵn theo bài để mang về ngâm rượu, do bác sĩ Lê Trung Kiên bốc. Nhắn Zalo để được tư vấn bài phù hợp.",
     album: [
       {
         anh: "product-duoc-lieu-tui-zip.jpg",
         alt: "Các túi dược liệu chia sẵn: kỷ tử, táo đỏ, hoàng kỳ, hạt sen",
       },
     ],
-    diem_dac_biet: [
-      "Thang cắt sẵn, cân đủ vị theo bài — mang về chỉ việc đổ rượu",
-      "Có bài ngâm để xoa bóp ngoài, có bài ngâm để uống; hỏi trước khi mua",
-      "Kèm hướng dẫn tỉ lệ rượu và thời gian ngâm",
-    ],
-    cong_dung: [
-      "Bài xoa bóp: hỗ trợ làm nóng, giảm đau mỏi cơ khớp khi day ấn ngoài da",
-      "Bài uống: hỗ trợ bồi bổ theo thể trạng, dùng lượng nhỏ mỗi lần",
+    // MÓN NÀY CHƯA CÓ NHÃN. Toàn bộ chữ dưới đây do Claude soạn theo ảnh
+    // sản phẩm và công năng cổ truyền của từng vị. Chủ site có nhãn hoặc
+    // đọc cho thì thay bằng chữ thật.
+    //
+    // ĐÂY LÀ THUỐC NGÂM RƯỢU ĐỂ UỐNG, không phải rượu xoa bóp ngoài da.
+    // Bản trước viết là có cả bài xoa bóp — sai, chủ site đã đính chính.
+    // Muốn nói tới xoa bóp ngoài da thì đó là món Cồn xoa bóp.
+    thanh_phan:
+      "Thang cắt sẵn, cân đủ vị theo bài. Tuỳ bài có nhân sâm, kỷ tử, thục địa, hoàng kỳ, táo đỏ, hạt sen…",
+    // Ba dòng này chủ site đọc cho, dùng nguyên thuật ngữ của bài thuốc —
+    // đừng diễn nôm thành "tăng sức đề kháng" cho dễ hiểu, vì đó là chữ
+    // khác nghĩa khác.
+    cong_dung: ["Nâng cao chính khí", "Bổ can thận", "Bổ khí huyết"],
+    cach_dung: [
+      "Đổ rượu theo tỉ lệ và ngâm đủ thời gian ghi kèm mỗi thang",
+      "Uống lượng nhỏ mỗi lần, theo hướng dẫn của bác sĩ",
     ],
     doi_tuong: [
-      "Người quen dùng rượu thuốc xoa bóp tại nhà",
       "Người cần bồi bổ theo bài đã được bác sĩ tư vấn",
+      "Người hay mệt mỏi, ăn ngủ kém",
       "Người muốn tự ngâm để biết rõ trong bình có vị gì",
+    ],
+    chong_chi_dinh: [
+      "Người có bệnh gan, bệnh dạ dày",
+      "Người đang uống thuốc tây — hỏi bác sĩ trước khi dùng",
+      "Phụ nữ có thai và đang cho con bú",
+      "Người không uống được rượu",
     ],
   },
   {
@@ -279,25 +342,36 @@ export const SAN_PHAM = [
     mo_ta_seo:
       "Các sản phẩm dưỡng sinh của bác sĩ Lê Trung Kiên, dùng qua đường ăn uống và chăm sóc hằng ngày. Nhắn Zalo để được tư vấn và đặt.",
     album: [],
-    // Không liệt kê tên từng món: chủ site chốt chỉ giới thiệu chung, vì
-    // mỗi đợt làm một số món khác nhau — ghi tên cụ thể ra là trang sai ngay
-    // đợt sau. Ai cần biết có gì thì nhắn Zalo hỏi.
+    // Không liệt kê tên từng món ở thẻ danh sách: chủ site chốt chỉ giới
+    // thiệu chung, vì mỗi đợt làm một số món khác nhau.
     gioi_thieu:
       "Các sản phẩm dưỡng sinh qua đường ăn uống và chăm sóc hằng ngày, dùng đều đặn tại nhà. Mỗi đợt mình làm một số món khác nhau, cần món gì thì nhắn hỏi mình.",
-    diem_dac_biet: [
-      "Làm theo đợt, mỗi đợt một số món nên lúc nào cũng mới",
-      "Dược liệu cắt sẵn, chia đúng liều một lần dùng",
-      "Đưa vào bữa ăn hoặc thói quen hằng ngày được ngay, không phải học cách dùng",
+    // NGUỒN: nhãn Hầm gà ngũ vị — món đang có trong ảnh bìa. Đợt sau làm món
+    // khác thì sửa lại cho khớp nhãn của món đó.
+    // Khai bằng MẢNG chứ không phải một chuỗi: đây là hai món khác nhau,
+    // mỗi món một dòng cho rõ. Đợt sau có thêm món thì thêm một dòng.
+    thanh_phan: [
+      "Hầm gà ngũ vị: đảng sâm, kỷ tử, đương quy, hạt sen, hồng táo",
+      "Trà dưỡng nhan: kỷ tử, hồng táo, cúc hoa",
     ],
     cong_dung: [
-      "Hỗ trợ bồi bổ, chăm sóc sức khỏe đều đặn tại nhà",
-      "Dành cho việc giữ sức khỏe hằng ngày chứ không phải để chữa bệnh",
+      "Bồi bổ cơ thể, tăng sức đề kháng",
+      "Hỗ trợ phục hồi sức khỏe cho người mệt mỏi, suy nhược và người sau khi ốm dậy",
+    ],
+    // Mỗi món một dòng, có tên món ở đầu: hai món nấu khác hẳn nhau, không
+    // ghi tên thì người đọc tưởng cách nào cũng dùng chung được.
+    cach_dung: [
+      "Hầm gà ngũ vị: một gói với gà 1–1,5kg và 1,5–2 lít nước, hầm lửa nhỏ 45–60 phút",
+      "Trà dưỡng nhan: một gói hãm với 500ml nước sôi trong bình giữ nhiệt, uống trong ngày",
     ],
     doi_tuong: [
-      "Người muốn giữ sức khỏe đều đặn chứ không đợi tới lúc ốm",
-      "Người cần bồi bổ sau ốm, sau sinh",
-      "Người tìm một món quà biếu thiết thực",
+      "Người cần bồi bổ",
+      "Người lao động nặng",
+      "Người tập thể thao",
+      "Người mới ốm dậy",
     ],
+    quy_cach: ["Chia sẵn một gói cho một lần nấu"],
+    bao_quan: ["Để nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp"],
   },
 ];
 

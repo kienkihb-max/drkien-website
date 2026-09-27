@@ -20,6 +20,16 @@ import {
   BottleWine,
   FlaskConical,
   Flower2,
+  // Icon cho từng mục nội dung bên dưới
+  ListChecks,
+  Sprout,
+  HeartPulse,
+  Target,
+  BookOpen,
+  Users,
+  TriangleAlert,
+  Package,
+  Thermometer,
 } from "@lucide/astro";
 
 // Khai từng icon một chứ không nhập cả bộ Lucide — nhập cả bộ là kéo hơn
@@ -68,13 +78,23 @@ const mo_ta_anh = moTaAnh(mon.ten);
 
 const banDayDu = (ten) => "/assets/img/" + ten.replace(/\.jpg$/i, "-full.jpg");
 
-// Các mục nội dung. Gom thành mảng để trang chỉ duyệt một vòng, thêm mục
-// mới chỉ phải thêm một dòng ở đây.
+// Các mục nội dung của trang, theo đúng thứ tự này. Món nào không khai mục
+// nào thì mục đó bị lọc đi ở dòng cuối — nên mỗi món hiện một bộ đầu mục
+// khác nhau, đúng những gì nó thật sự có.
+//
+// Đầu mục lấy đúng tên trên nhãn sản phẩm. Thêm mục mới thì thêm một dòng ở
+// đây và một dòng trong typedef của san-pham.mjs.
 const MUC = [
-  { tieu_de: "Điểm đặc biệt", icon: "ic-award", dong: mon.diem_dac_biet },
-  { tieu_de: "Công dụng", icon: "ic-activity", dong: mon.cong_dung },
-  { tieu_de: "Phù hợp với", icon: "ic-run", dong: mon.doi_tuong },
-].filter((m) => m.dong?.length > 0);
+  { tieu_de: "Quy trình", Icon: ListChecks, dong: mon.quy_trinh },
+  { tieu_de: "Thành phần", Icon: Sprout, dong: mon.thanh_phan },
+  { tieu_de: "Công dụng", Icon: HeartPulse, dong: mon.cong_dung },
+  { tieu_de: "Chỉ định", Icon: Target, dong: mon.chi_dinh },
+  { tieu_de: "Cách dùng", Icon: BookOpen, dong: mon.cach_dung },
+  { tieu_de: "Đối tượng sử dụng", Icon: Users, dong: mon.doi_tuong },
+  { tieu_de: "Chống chỉ định", Icon: TriangleAlert, dong: mon.chong_chi_dinh },
+  { tieu_de: "Quy cách", Icon: Package, dong: mon.quy_cach },
+  { tieu_de: "Bảo quản", Icon: Thermometer, dong: mon.bao_quan },
+].filter((m) => (typeof m.dong === 'string' ? m.dong.trim() : m.dong?.length > 0));
 
 // Các món khác, cho khối cuối trang. Loại chính món đang mở ra.
 const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
@@ -154,12 +174,19 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
 
         {MUC.map((m) => (
           <div class="muc">
-            <h2><svg class="icon icon-sm"><use href={"#" + m.icon}/></svg> {m.tieu_de}</h2>
-            {/* Dùng <ul> thường chứ không phải .list-check: chủ site chốt
-                gạch đầu dòng tròn đen bình thường, không phải chấm xanh. */}
-            <ul class="bullet-list">
-              {m.dong.map((d) => <li>{d}</li>)}
-            </ul>
+            <h2><m.Icon size={20} stroke-width={1.8} /> {m.tieu_de}</h2>
+            {/* Mục khai bằng một CHUỖI thì in ra một đoạn văn, khai bằng MẢNG
+                thì gạch đầu dòng. Thành phần để một đoạn vì mỗi vị một dòng
+                thì cột thuốc dài 12 dòng, đọc mệt mà chẳng rõ hơn.
+                Gạch đầu dòng dùng <ul> thường chứ không phải .list-check:
+                chủ site chốt chấm tròn đen, không phải chấm xanh. */}
+            {typeof m.dong === "string" ? (
+              <p class="muc-doan">{m.dong}</p>
+            ) : (
+              <ul class="bullet-list">
+                {m.dong.map((d) => <li>{d}</li>)}
+              </ul>
+            )}
           </div>
         ))}
 
@@ -362,12 +389,26 @@ const mon_khac = SAN_PHAM.filter((m) => m.slug !== mon.slug);
     color: #1f2937;
   }
 
+  /* Icon là component Lucide (thẻ <svg class="lucide">), không phải icon
+     sprite .icon nữa. Dùng flex thay vì vertical-align: tiêu đề dài xuống
+     hai dòng thì canh theo đường chữ làm icon trôi xuống giữa. */
   .muc h2 {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
     font-size: 1.25rem;
     color: var(--primary);
     margin-bottom: 14px;
   }
-  .muc h2 .icon { vertical-align: -0.15em; margin-right: 6px; }
+  .muc h2 svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--primary);
+  }
+
+  .muc-doan {
+    margin: 0;
+  }
 
   .chi-tiet-nut {
     display: flex;

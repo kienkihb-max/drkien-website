@@ -1,0 +1,27 @@
+---
+// Lớp phủ xem ảnh phóng to, cùng markup và lớp CSS với lightbox.js của site tĩnh
+// (id lightbox, lightboxClose/Prev/Next/Img/Caption). Dùng cho trang đến sau khi
+// tải trang mới có ảnh (admin) — lightbox.js quét <img> lúc tải nên không thấy được.
+// Chỉ đặt MỘT lần mỗi trang; lightbox.js chỉ dựng lớp phủ khi chưa có #lightbox
+// nên hai bên không xung đột id.
+//
+// Gọi: import { moLightbox } from "../lib/lightbox";
+//      moLightbox([{ src, alt, caption }, ...], vi_tri_bat_dau);
+// Icon vẽ thẳng trong nút vì trang admin không có bộ icon BoIcon.
+import "./lightbox.css";
+---
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Đóng">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Ảnh trước">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <figure class="lightbox-content">
+    <img id="lightboxImg" src="" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+  <button class="lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="Ảnh sau">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+</div>

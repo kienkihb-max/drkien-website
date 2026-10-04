@@ -205,6 +205,109 @@ function layThuMuc_() {
   return thu_muc;
 }
 
+// ---- Tạo sẵn cột ------------------------------------------------------------
+// DANH_SACH_CAU_HOI do web/apps-script/tao-danh-sach-cot.mjs sinh ra từ
+// data/phieu-thap-van.mjs (mã câu hỏi + "Tên phần | Câu hỏi", theo thứ tự trên
+// form). Chạy hàm khoiTaoCot() trong trình soạn Apps Script (chọn hàm → Run)
+// để Sheet có sẵn đủ cột đúng thứ tự TRƯỚC khi có phiếu đầu tiên. Chạy lại sau
+// khi sửa chữ câu hỏi thì dòng 2 tự cập nhật; câu mới thì thêm cột mới ở cuối;
+// KHÔNG xóa dữ liệu và không tạo dòng dữ liệu nào.
+// DANH_SACH_CAU_HOI:BAT_DAU
+const DANH_SACH_CAU_HOI = [
+  ["van_de", "Vấn đề | Bạn hãy mô tả chi tiết vấn đề của mình"],
+  ["thoi_gian", "Vấn đề | Bạn bị như vậy bao lâu rồi?"],
+  ["chuyen_khoa", "Vấn đề | Vấn đề chính của bạn thuộc nhóm nào?"],
+  ["cxk_vi_tri_dau", "Cơ Xương Khớp | Bạn đau ở đâu?"],
+  ["cxk_tinh_chat_dau", "Cơ Xương Khớp | Cơn đau của bạn như thế nào?"],
+  ["cxk_anh_huong_thoi_tiet", "Cơ Xương Khớp | Thời tiết ảnh hưởng đến cơn đau của bạn thế nào?"],
+  ["cxk_cho_dau_sung", "Cơ Xương Khớp | Chỗ đau của bạn có sưng không?"],
+  ["cxk_cung_khop_buoi_sang", "Cơ Xương Khớp | Buổi sáng ngủ dậy, bạn có bị cứng khớp không?"],
+  ["cxk_dau_ve_dem", "Cơ Xương Khớp | Cơn đau của bạn có tăng về đêm không?"],
+  ["cxk_muc_do_dau", "Cơ Xương Khớp | Mức đau của bạn hiện giờ là bao nhiêu?"],
+  ["cxk_te_bi_lan", "Cơ Xương Khớp | Bạn có bị tê bì lan xuống tay hoặc chân không?"],
+  ["cxk_khoi_phat_dau", "Cơ Xương Khớp | Cơn đau của bạn bắt đầu từ khi nào?"],
+  ["cxk_dau_hieu_nguy_hiem", "Cơ Xương Khớp | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["tk_trieu_chung_chinh", "Thần kinh | Bạn gặp triệu chứng chính nào?"],
+  ["tk_kieu_dau_dau", "Thần kinh | Nếu bạn bị đau đầu, cơn đau giống mô tả nào nhất?"],
+  ["tk_vi_tri_dau_dau", "Thần kinh | Bạn đau đầu ở vị trí nào?"],
+  ["tk_chong_mat_kem_theo", "Thần kinh | Bạn bị chóng mặt kèm theo triệu chứng nào?"],
+  ["tk_te_bi", "Thần kinh | Bạn có bị tê bì không?"],
+  ["tk_nang_hon_khi", "Thần kinh | Triệu chứng của bạn nặng hơn khi nào?"],
+  ["tk_dau_hieu_nguy_hiem", "Thần kinh | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["tn_van_de_gap_phai", "Tiết niệu | Bạn gặp những vấn đề nào?"],
+  ["tn_tieu_dem", "Tiết niệu | Ban đêm bạn dậy đi tiểu mấy lần?"],
+  ["tn_mau_nuoc_tieu", "Tiết niệu | Nước tiểu của bạn có màu gì?"],
+  ["tn_lung_goi", "Tiết niệu | Lưng và gối của bạn thế nào?"],
+  ["tn_thoi_diem_xuat_hien", "Tiết niệu | Triệu chứng của bạn xuất hiện như thế nào?"],
+  ["tn_dau_hieu_nguy_hiem", "Tiết niệu | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["th_van_de_gap_phai", "Tiêu hóa | Bạn gặp những vấn đề nào?"],
+  ["th_kieu_dau_bung", "Tiêu hóa | Cơn đau bụng của bạn giống mô tả nào nhất?"],
+  ["th_nang_hon_khi", "Tiêu hóa | Triệu chứng của bạn nặng hơn trong trường hợp nào?"],
+  ["th_tinh_chat_phan", "Tiêu hóa | Phân của bạn gần đây như thế nào?"],
+  ["th_noi_soi_da_day", "Tiêu hóa | Bạn đã từng nội soi dạ dày chưa?"],
+  ["th_dau_hieu_nguy_hiem", "Tiêu hóa | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["hh_van_de_gap_phai", "Hô hấp, Tai Mũi Họng | Bạn gặp những vấn đề nào?"],
+  ["hh_kieu_ho", "Hô hấp, Tai Mũi Họng | Nếu bạn bị ho, cơn ho của bạn như thế nào?"],
+  ["hh_mui", "Hô hấp, Tai Mũi Họng | Mũi của bạn thế nào?"],
+  ["hh_hong", "Hô hấp, Tai Mũi Họng | Họng của bạn thế nào?"],
+  ["hh_chiu_thoi_tiet", "Hô hấp, Tai Mũi Họng | Khả năng chịu thời tiết của bạn thế nào?"],
+  ["hh_dau_hieu_nguy_hiem", "Hô hấp, Tai Mũi Họng | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["tm_van_de_gap_phai", "Tim mạch, Huyết áp | Bạn gặp những vấn đề nào?"],
+  ["tm_huyet_ap", "Tim mạch, Huyết áp | Huyết áp của bạn thường ở mức nào?"],
+  ["tm_cam_giac_nguc", "Tim mạch, Huyết áp | Vùng ngực của bạn có cảm giác gì?"],
+  ["tm_phu_chan", "Tim mạch, Huyết áp | Chân của bạn có bị phù không?"],
+  ["tm_nang_hon_khi", "Tim mạch, Huyết áp | Triệu chứng của bạn nặng hơn khi nào?"],
+  ["tm_dau_hieu_nguy_hiem", "Tim mạch, Huyết áp | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["dl_bieu_hien_da", "Da liễu | Da của bạn đang có biểu hiện gì?"],
+  ["dl_vi_tri_ton_thuong", "Da liễu | Tổn thương xuất hiện ở vị trí nào trên cơ thể bạn?"],
+  ["dl_tinh_chat_ngua", "Da liễu | Bạn bị ngứa như thế nào?"],
+  ["dl_chay_dich", "Da liễu | Tổn thương trên da của bạn có chảy dịch không?"],
+  ["dl_nang_hon_khi", "Da liễu | Bạn thấy tình trạng nặng hơn khi nào?"],
+  ["dl_dau_hieu_nguy_hiem", "Da liễu | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["pk_tinh_trang", "Phụ khoa | Tình trạng hiện tại của bạn là gì?"],
+  ["pk_chu_ky_kinh", "Phụ khoa | Chu kỳ kinh của bạn thế nào?"],
+  ["pk_mau_luong_kinh", "Phụ khoa | Màu và lượng kinh của bạn thế nào?"],
+  ["pk_khi_hu", "Phụ khoa | Khí hư của bạn thế nào?"],
+  ["pk_dau_bung_kinh", "Phụ khoa | Bạn có bị đau bụng kinh không?"],
+  ["pk_dau_hieu_nguy_hiem", "Phụ khoa | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["nt_chan_doan_nghi_ngo", "Nội tiết, Chuyển hóa | Bạn đã được chẩn đoán hoặc nghi ngờ mắc bệnh nào?"],
+  ["nt_khat_doi_tieu_nhieu", "Nội tiết, Chuyển hóa | Bạn có bị khát, đói hoặc tiểu nhiều không?"],
+  ["nt_can_nang_6_thang", "Nội tiết, Chuyển hóa | Cân nặng của bạn 6 tháng gần đây thay đổi thế nào?"],
+  ["nt_cam_giac_co_the", "Nội tiết, Chuyển hóa | Bạn cảm thấy cơ thể mình thế nào?"],
+  ["nt_chi_so_xet_nghiem", "Nội tiết, Chuyển hóa | Chỉ số xét nghiệm gần nhất của bạn là bao nhiêu (nếu có)?"],
+  ["nt_dau_hieu_nguy_hiem", "Nội tiết, Chuyển hóa | Bạn có đang gặp một trong các dấu hiệu sau không?"],
+  ["tv_cam_giac_hang_ngay", "Thập vấn chung | Bạn thường cảm thấy cơ thể thế nào hằng ngày?"],
+  ["tv_mo_hoi", "Thập vấn chung | Mồ hôi của bạn thế nào?"],
+  ["tv_suc_khoe_chung", "Thập vấn chung | Sức khỏe chung của bạn thế nào?"],
+  ["tv_an_uong", "Thập vấn chung | Việc ăn uống của bạn thế nào?"],
+  ["tv_vi_mieng", "Thập vấn chung | Miệng của bạn có vị gì?"],
+  ["tv_khat_nuoc", "Thập vấn chung | Bạn có hay khát nước không?"],
+  ["tv_di_ngoai", "Thập vấn chung | Việc đi ngoài của bạn thế nào?"],
+  ["tv_nuoc_tieu", "Thập vấn chung | Nước tiểu của bạn thế nào?"],
+  ["tv_giac_ngu", "Thập vấn chung | Giấc ngủ của bạn thế nào?"],
+  ["tv_tinh_than", "Thập vấn chung | Tinh thần của bạn thế nào?"],
+  ["tv_benh_dang_co", "Thập vấn chung | Bạn đang có bệnh nào?"],
+  ["tv_thuoc_dang_dung", "Thập vấn chung | Bạn đang dùng thuốc gì (nếu có)?"],
+  ["gioi_tinh", "Thập vấn chung | Giới tính của bạn là gì?"],
+  ["kn_tinh_trang", "Kinh nguyệt | Tình trạng hiện tại của bạn là gì?"],
+  ["kn_mau_luong_kinh", "Kinh nguyệt | Màu và lượng kinh của bạn thế nào?"],
+  ["kn_dau_bung_kinh", "Kinh nguyệt | Bạn có bị đau bụng kinh không?"],
+  ["luoi_anh", "Ảnh lưỡi | Bạn hãy tải ảnh lưỡi lên (1–3 ảnh)"],
+  ["luoi_an_uong_mau", "Ảnh lưỡi | 30 phút trước khi chụp, bạn có ăn uống đồ có màu không?"],
+  ["luoi_ghi_chu", "Ảnh lưỡi | Bạn muốn nói thêm điều gì với bác sĩ?"],
+  ["ho_ten", "Thông tin | Họ và tên của bạn là gì?"],
+  ["nam_sinh", "Thông tin | Bạn sinh năm bao nhiêu?"],
+  ["sdt", "Thông tin | Số điện thoại / Zalo của bạn là gì?"],
+];
+// DANH_SACH_CAU_HOI:KET_THUC
+
+function khoiTaoCot() {
+  const cot_khai = [{ ma: MA_GIO_GUI, tieu_de: "Thời gian gửi" }].concat(
+    DANH_SACH_CAU_HOI.map(function (c) { return { ma: c[0], tieu_de: c[1] }; })
+  );
+  capNhatCot_(laySheet_(), cot_khai);
+}
+
 // ---- Tiện ích --------------------------------------------------------------
 function json_(doi_tuong) {
   return ContentService.createTextOutput(JSON.stringify(doi_tuong)).setMimeType(ContentService.MimeType.JSON);

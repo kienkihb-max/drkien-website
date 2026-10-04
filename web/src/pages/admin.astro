@@ -11,6 +11,7 @@
 //
 // Dùng lại nguyên admin.css của trang cũ để giao diện không lệch.
 import VetLoi from "../components/VetLoi.astro";
+import AdminChonMuc from "../components/AdminChonMuc.astro";
 ---
 
 <!DOCTYPE html>
@@ -46,6 +47,7 @@ import VetLoi from "../components/VetLoi.astro";
 <div id="man-chinh" hidden>
   <header class="qt-dau">
     <div class="qt-dau-trai">
+      <AdminChonMuc current="/admin" />
       <strong>Quản trị blog</strong>
       <span class="qt-kho" id="nhan-tai-khoan"></span>
     </div>

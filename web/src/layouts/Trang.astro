@@ -13,6 +13,8 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import ChatWidget from "../components/ChatWidget.astro";
 import ScrollMemory from "../components/ScrollMemory.astro";
+// Giao diện lightbox tách khỏi style.css để trang admin dùng chung (xem Lightbox.astro).
+import "../components/lightbox.css";
 
 interface Props {
   /** Tiêu đề hiện trên tab và trên Google. Đã kèm sẵn " — Bác sĩ Lê Trung Kiên". */

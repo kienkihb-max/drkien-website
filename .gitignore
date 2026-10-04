@@ -21,3 +21,7 @@ web/.env
 
 # Thư viện của máy chủ trung gian chatbot — Cloud Run tự cài lại khi deploy.
 agent-proxy/node_modules/
+
+# Quy tắc chấm điểm phân thể: BÍ MẬT, kho code này công khai trên GitHub nên KHÔNG được commit.
+# Bảng điểm chỉ nằm trong Supabase (bảng cham_diem_*, chỉ admin đọc được) và trong thư mục này.
+web/supabase/rieng/

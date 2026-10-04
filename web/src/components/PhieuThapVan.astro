@@ -23,11 +23,27 @@ import {
   DA_GUI,
 } from "../data/phieu-thap-van.mjs";
 import PhieuCauHoi from "./PhieuCauHoi.astro";
+// Giao diện dùng chung với trang admin xem lại phiếu (chế độ chỉ đọc): sửa ở file
+// CSS này là đổi cả hai nơi.
+import "./phieu-giao-dien.css";
 
 // Địa chỉ Google Apps Script nhận phiếu (xem web/apps-script/HUONG-DAN.md).
 // Địa chỉ này công khai được: nó chỉ nhận dữ liệu gửi vào, không có đường
 // nào đọc ngược ra. Chưa đặt thì form báo lỗi khi gửi chứ không giả vờ đã gửi.
 const diem_nhan = import.meta.env.PUBLIC_PHIEU_URL ?? "";
+
+// Hai nơi dùng chung form này:
+//  - "benh-nhan" (mặc định): trang /sang-loc-benh, bệnh nhân tự điền.
+//  - "admin": nằm trong panel của trang quản trị để bác sĩ nhập hộ. Khác ở
+//    chỗ: không chống bot (người đã đăng nhập), không đụng history của trình
+//    duyệt (form chỉ là một khung trên trang), không lưu nháp (máy bác sĩ,
+//    dữ liệu bệnh nhân người khác), gửi xong thì báo cho trang cha qua sự kiện,
+//    và phát "phieu:thay-doi" mỗi lần đổi câu để trang cha chấm điểm realtime.
+interface Props {
+  che_do?: "benh-nhan" | "admin";
+}
+const { che_do = "benh-nhan" } = Astro.props;
+const la_admin = che_do === "admin";
 
 const NAM_NAY = new Date().getFullYear();
 ---
@@ -35,6 +51,7 @@ const NAM_NAY = new Date().getFullYear();
 <div
   class="phieu"
   id="phieu"
+  data-che-do={che_do}
   data-diem-nhan={diem_nhan}
   data-bo-phu-khoa={BO_PHU_KHOA}
   data-nu={GIOI_TINH_NU}
@@ -45,9 +62,11 @@ const NAM_NAY = new Date().getFullYear();
   <form id="phieuForm" novalidate autocomplete="off">
     <!-- Ô bẫy bot: người thật không thấy nên không điền, bot điền hết mọi ô
          thấy được. Có chữ trong đây là bỏ phiếu. -->
-    <div class="phieu-bay" aria-hidden="true">
-      <label>Để trống ô này <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
-    </div>
+    {!la_admin && (
+      <div class="phieu-bay" aria-hidden="true">
+        <label>Để trống ô này <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+    )}
 
     <!-- Phần 1 · Vấn đề + chuyên khoa -->
     <section class="phan" data-phan="vande" data-ten={PHAN_VAN_DE.ten}>
@@ -126,7 +145,7 @@ const NAM_NAY = new Date().getFullYear();
       <div class="the the-xong" role="status">
         <h2 id="xongTieuDe"></h2>
         <p id="xongNoiDung"></p>
-        <button type="button" class="btn btn-outline" id="lamLai">Làm lại phiếu</button>
+        {!la_admin && <button type="button" class="btn btn-outline" id="lamLai">Làm lại phiếu</button>}
       </div>
     </section>
 
@@ -148,148 +167,9 @@ const NAM_NAY = new Date().getFullYear();
   </div>
 </div>
 
-<style is:global>
-  /* ---- Màu và cỡ chữ của phiếu -------------------------------------------
-     Dùng đúng bảng màu và font của site (khai ở style.css :root) — đừng tự
-     đặt màu riêng cho phiếu, kẻo trang này lệch hẳn phần còn lại của web.
-     Chữ tối thiểu 16px, vùng bấm tối thiểu 44px vì nhiều bệnh nhân lớn tuổi.
-     Chỉ giữ riêng màu đỏ cho lỗi và cảnh báo, site chưa có màu này. */
-  .phieu {
-    --p-the: var(--white);
-    --p-chu: var(--text-dark);
-    --p-chu-nhat: var(--text-body);
-    --p-vien: #d8e2ec;
-    --p-chinh: var(--primary-2);
-    --p-chinh-dam: var(--primary);
-    --p-chinh-nhat: var(--primary-soft);
-    --p-do: #c0392b;
-    --p-do-nhat: #fdecea;
-    color: var(--p-chu);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    line-height: 1.55;
-    max-width: 680px;
-    margin: 0 auto;
-  }
-  .phieu *, .phieu *::before, .phieu *::after { box-sizing: border-box; }
-  .phieu [hidden] { display: none !important; }
-
-  /* Thanh dính ở đáy màn hình, gồm tiến độ và nút điều hướng. Nền xám đặc
-     phủ tràn hai bên ra hết bề ngang màn hình, cắt đúng mép trên và dưới của
-     thanh: nếu nền chỉ rộng bằng cột form thì bóng đổ của các thẻ cuộn bên
-     dưới tràn ra ngoài cột, lộ thành một dải tối cạnh thanh. */
-  .phieu-chan {
-    position: sticky;
-    bottom: 0;
-    z-index: 50;
-    margin-top: 8px;
-    padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
-    background: var(--gray-bg);
-    border-top: 1px solid var(--p-vien);
-    box-shadow: 0 0 0 100vmax var(--gray-bg);
-    clip-path: inset(0 -100vmax);
-  }
-  .phieu-tien-do { margin: 0 0 10px; }
-  .phieu-tien-do-chu { margin: 0 0 6px; font-size: 1rem; font-weight: 600; color: var(--p-chu-nhat); }
-  .phieu-tien-do-nen { height: 8px; background: var(--p-vien); border-radius: 99px; overflow: hidden; }
-  .phieu-tien-do-thanh { height: 100%; width: 0; background: var(--p-chinh); border-radius: 99px; transition: width .25s ease; }
-
-  .phieu-bay { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-
-  /* Thẻ trắng bo góc đổ bóng như .info-card của site, trên nền xám nhạt của .section-alt. */
-  .phieu .the, .phieu .q {
-    background: var(--p-the);
-    border: 1px solid transparent;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-card);
-    padding: 18px 16px;
-    margin-bottom: 12px;
-  }
-  .phieu .the-dau { border-top: 8px solid var(--p-chinh); }
-  .phieu h2 { margin: 0 0 6px; font-family: var(--font-heading); font-size: 1.5rem; line-height: 1.3; color: var(--p-chu); }
-  .phieu h3 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 1.125rem; color: var(--p-chu); }
-  .phieu .the p { margin: 0; color: var(--p-chu-nhat); }
-
-  .phieu .q-nhan { margin: 0 0 4px; font-weight: 600; font-size: 1.0625rem; color: var(--p-chu); }
-  .phieu .q-sao { color: var(--p-do); }
-  .phieu .q-chu-thich { margin: 0 0 8px; font-size: 1rem; color: var(--p-chu-nhat); }
-  .phieu .q-loi { margin: 10px 0 0; color: var(--p-do); font-weight: 600; font-size: 1rem; }
-  .phieu .q.q-thieu { border-color: var(--p-do); box-shadow: 0 0 0 1px var(--p-do); }
-
-  /* Đáp án: cả dòng là vùng bấm, cao tối thiểu 44px. */
-  .phieu .q-lua-chon { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-  .phieu .lua-chon {
-    display: flex; align-items: flex-start; gap: 12px;
-    min-height: 44px; padding: 10px 12px;
-    border: 1px solid var(--p-vien); border-radius: 10px; cursor: pointer;
-  }
-  .phieu .lua-chon:has(input:checked) { border-color: var(--p-chinh); background: var(--p-chinh-nhat); }
-  .phieu .lua-chon input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--p-chinh); }
-  .phieu .lua-chon-chu { display: flex; flex-direction: column; color: var(--p-chu); }
-  .phieu .lua-chon-chu small { font-size: 1rem; color: var(--p-chu-nhat); margin-top: 2px; }
-
-  .phieu .q-o {
-    width: 100%; min-height: 44px; margin-top: 8px; padding: 10px 12px;
-    font: inherit; color: var(--p-chu); background: var(--p-the);
-    border: 1px solid var(--p-vien); border-radius: 10px;
-  }
-  .phieu .q-o:focus { outline: 2px solid var(--p-chinh); outline-offset: 1px; }
-  .phieu textarea.q-o { resize: vertical; min-height: 96px; }
-
-  /* Thang 0–10: mười một nút, tự xuống dòng khi màn hẹp. */
-  .phieu .q-thang { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; margin-top: 8px; }
-  .phieu .thang-so { position: relative; display: block; }
-  .phieu .thang-so input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-  .phieu .thang-so span {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 44px; border: 1px solid var(--p-vien); border-radius: 10px; font-weight: 600; color: var(--p-chu);
-  }
-  .phieu .thang-so input:checked + span { background: var(--p-chinh); border-color: var(--p-chinh); color: #fff; }
-  .phieu .thang-so input:focus-visible + span { outline: 2px solid var(--p-chinh); outline-offset: 2px; }
-  .phieu .q-thang-nhan { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 1rem; color: var(--p-chu-nhat); }
-
-  /* Ảnh lưỡi */
-  .phieu .q-anh-nut {
-    display: flex; align-items: center; justify-content: center; text-align: center;
-    min-height: 56px; margin-top: 8px; padding: 10px 14px; cursor: pointer;
-    border: 2px dashed var(--p-chinh); border-radius: 10px; color: var(--p-chinh-dam); font-weight: 600;
-  }
-  .phieu .q-anh-nut input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-  .phieu .q-anh-nut:focus-within { outline: 2px solid var(--p-chinh); outline-offset: 2px; }
-  .phieu .q-anh-ds { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  .phieu .q-anh-ds li { display: flex; align-items: center; gap: 12px; padding: 8px; border: 1px solid var(--p-vien); border-radius: 10px; }
-  .phieu .q-anh-ds img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex: none; }
-  .phieu .q-anh-ds .anh-ten { flex: 1; min-width: 0; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--p-chu); }
-  .phieu .q-anh-ds button {
-    min-height: 44px; padding: 0 14px; font: inherit; font-weight: 600; cursor: pointer;
-    color: var(--p-do); background: transparent; border: 1px solid var(--p-do); border-radius: 10px;
-  }
-
-  .phieu .huong-dan ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-  .phieu .huong-dan li { display: flex; gap: 10px; align-items: flex-start; color: var(--p-chu); }
-  .phieu .huong-dan-nhan { flex: none; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; }
-  .phieu .huong-dan-nhan.nen { background: #d8efe0; color: #1d5a37; }
-  .phieu .huong-dan-nhan.khong { background: #fbdcd8; color: #9b2c20; }
-
-  .phieu .the-canh-bao { background: var(--p-do-nhat); border-color: var(--p-do); }
-  .phieu .the-canh-bao h2 { color: var(--p-do); }
-  .phieu .the-canh-bao .canh-bao-nho { font-weight: 700; color: var(--p-chu); margin-bottom: 10px; }
-  .phieu .the-canh-bao ul { margin: 0; padding-left: 20px; color: var(--p-chu); }
-  .phieu .the-canh-bao li { margin-bottom: 6px; }
-
-  .phieu .the-xong { text-align: center; padding: 28px 16px; }
-
-  .phieu-loi-gui { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: var(--p-do-nhat); color: var(--p-do); font-weight: 600; border: 1px solid var(--p-do); }
-
-  .phieu-dieu-huong { display: flex; justify-content: space-between; gap: 12px; }
-  .phieu-dieu-huong #nutTiep { margin-left: auto; }
-  .phieu .the-xong .btn { margin-top: 18px; }
-  /* Hình dáng nút lấy từ .btn của site; ở đây chỉ nới cho đủ vùng bấm 44px. */
-  .phieu .btn { min-height: 48px; justify-content: center; font-size: 1rem; }
-  .phieu .btn:disabled { opacity: .6; cursor: progress; }
-</style>
-
 <script>
+  import { nenAnh, blobSangBase64, guiVaoSupabase } from "../lib/gui-phieu";
+
   // ---- Phần chạy phía trình duyệt ------------------------------------------
   // Trang này không biết gì về thể bệnh: chỉ (1) quyết định phần nào hiện
   // tiếp theo, (2) chặn khi còn câu bắt buộc chưa trả lời, (3) gom câu trả
@@ -307,9 +187,25 @@ const NAM_NAY = new Date().getFullYear();
   const GIOI_NU = goc.dataset.nu!;
   const NAM_NAY = Number(goc.dataset.namNay);
   const DIEM_NHAN = goc.dataset.diemNhan ?? "";
+  // Đọc từ data-che-do chứ không đoán theo URL: cùng một form, hai nơi dùng.
+  const LA_ADMIN = goc.dataset.cheDo === "admin";
 
   // Header cố định phía trên: các lần cuộn tự động phải chừa chỗ cho nó.
   const header = document.querySelector<HTMLElement>(".site-header");
+
+  // Ở chế độ admin form nằm trong hộp thoại có thanh cuộn riêng; window không
+  // cuộn được gì. Tìm tổ tiên đang cuộn để đưa nó về đầu.
+  // Trang cha có thể chỉ định thẳng bộ chứa cuộn bằng data-bo-cuon (panel của trang
+  // admin): chắc hơn đoán, vì khi nội dung chưa tràn thì không tổ tiên nào "đang cuộn".
+  function boChuaCuon(): HTMLElement | null {
+    const chi_dinh = goc.closest<HTMLElement>("[data-bo-cuon]");
+    if (chi_dinh) return chi_dinh;
+    for (let e = goc.parentElement; e; e = e.parentElement) {
+      const oy = getComputedStyle(e).overflowY;
+      if ((oy === "auto" || oy === "scroll") && e.scrollHeight > e.clientHeight) return e;
+    }
+    return null;
+  }
 
   const phanEl = (ma: string) => form.querySelector<HTMLElement>(`[data-phan="${ma}"]`)!;
   // Đáp án "Khác" ghi kèm chữ bệnh nhân gõ: "Khác: đau mông". Chưa gõ gì thì
@@ -379,7 +275,10 @@ const NAM_NAY = new Date().getFullYear();
       tieu_de.tabIndex = -1;
       tieu_de.focus({ preventScroll: true });
     }
-    if (cuon) {
+    if (cuon && LA_ADMIN) {
+      const bo = boChuaCuon();
+      if (bo) bo.scrollTop = 0;
+    } else if (cuon) {
       // Cuộn về đầu phiếu, chừa chỗ cho header cố định phía trên.
       const chua = header?.offsetHeight ?? 84;
       const y = goc.getBoundingClientRect().top + window.scrollY - chua;
@@ -524,30 +423,6 @@ const NAM_NAY = new Date().getFullYear();
     }
   });
 
-  // Nén ảnh trước khi gửi: ảnh điện thoại 5–10MB, ba tấm là gần 30MB, quá
-  // sức Apps Script. Thu về cạnh dài 1600px là đủ rõ để bác sĩ xem màu và
-  // lớp rêu lưỡi, mỗi tấm còn chừng 300–500KB.
-  function nenAnh(f: File): Promise<string> {
-    return new Promise((xong, loi) => {
-      const url = URL.createObjectURL(f);
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const he_so = Math.min(1, 1600 / Math.max(img.width, img.height));
-        const c = document.createElement("canvas");
-        c.width = Math.round(img.width * he_so);
-        c.height = Math.round(img.height * he_so);
-        c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
-        xong(c.toDataURL("image/jpeg", 0.82).split(",")[1]);
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        loi(new Error("Vui lòng chọn ảnh khác, không đọc được ảnh " + f.name));
-      };
-      img.src = url;
-    });
-  }
-
   // ---- Gửi phiếu ----
   const thoiDiemMo = Date.now();
 
@@ -567,44 +442,117 @@ const NAM_NAY = new Date().getFullYear();
     return cot;
   }
 
+  // ---- Báo thay đổi cho trang cha (chỉ chế độ admin) ----
+  // Trang admin nghe để chấm điểm realtime theo từng lần bấm. Dùng lại đúng
+  // gomCauTraLoi/duongDi nên dạng dữ liệu y hệt lúc gửi lên Supabase (không có
+  // câu ảnh). Gom 150ms vì gõ chữ phát input liên tục, chấm điểm mỗi phím là phí.
+  let hen_bao: number | undefined;
+  function baoThayDoi() {
+    if (!LA_ADMIN) return;
+    clearTimeout(hen_bao);
+    hen_bao = window.setTimeout(() => {
+      const chuyen_khoa =
+        form.querySelector<HTMLInputElement>('input[name="chuyen_khoa"]:checked')?.value ?? null;
+      const cau_tra_loi = gomCauTraLoi(duongDi()).filter((c) => c.ma !== qAnh.dataset.id);
+      goc.dispatchEvent(new CustomEvent("phieu:thay-doi", { bubbles: true, detail: { chuyen_khoa, cau_tra_loi } }));
+    }, 150);
+  }
+  if (LA_ADMIN) {
+    form.addEventListener("input", baoThayDoi);
+    form.addEventListener("change", baoThayDoi);
+  }
+
   async function guiPhieu() {
     // Ô bẫy bị điền, hoặc phiếu "điền xong" trong vài giây: là bot. Giả vờ
     // thành công để bot không biết đường mà né.
-    const bay = form.querySelector<HTMLInputElement>('input[name="website"]')!.value;
-    if (bay || Date.now() - thoiDiemMo < 8000) return hienXong();
-
-    if (!DIEM_NHAN) {
-      throw new Error("Vui lòng nhắn Zalo cho bác sĩ, trang chưa được nối với nơi nhận phiếu.");
+    // Chế độ admin: người đã đăng nhập nhập hộ, không có ô bẫy và không bị
+    // chặn "điền quá nhanh".
+    if (!LA_ADMIN) {
+      const bay = form.querySelector<HTMLInputElement>('input[name="website"]')!.value;
+      if (bay || Date.now() - thoiDiemMo < 8000) return hienXong();
     }
-    const anh = await Promise.all(
-      dsAnh.map(async (f, i) => ({
-        ma: qAnh.dataset.id!,
-        ten: `anh-luoi-${i + 1}.jpg`,
-        mime: "image/jpeg",
-        du_lieu: await nenAnh(f),
-      })),
-    );
-    const goi = {
-      cot: gomCauTraLoi(duongDi()),
-      anh,
-      // Họ tên và năm sinh gửi riêng để script đặt tên file ảnh; không dựa vào chữ câu hỏi
-      // (chữ này sẽ đổi khi chủ site sửa câu hỏi).
-      ho_ten: form.querySelector<HTMLInputElement>('[name="ho_ten"]')!.value.trim(),
-      nam_sinh: form.querySelector<HTMLInputElement>('[name="nam_sinh"]')!.value.trim(),
+
+    const ho_ten = form.querySelector<HTMLInputElement>('[name="ho_ten"]')!.value.trim();
+    const nam_sinh = form.querySelector<HTMLInputElement>('[name="nam_sinh"]')!.value.trim();
+    const sdt = form.querySelector<HTMLInputElement>('[name="sdt"]')!.value.trim();
+    const cot = gomCauTraLoi(duongDi());
+
+    // Nén một lần, dùng cho cả hai nơi nhận. Lỗi nén (ảnh hỏng) báo thẳng
+    // cho bệnh nhân chọn ảnh khác, không đem đi thử nơi nhận phụ.
+    const anh = await Promise.all(dsAnh.map(nenAnh));
+
+    // Nơi lưu chính: Supabase. Ảnh đã nằm trong kho riêng nên không đưa lại
+    // vào câu trả lời; câu ảnh bỏ khỏi cau_tra_loi.
+    const phieu = {
+      id: crypto.randomUUID(),
+      ho_ten,
+      nam_sinh: /^\d+$/.test(nam_sinh) ? Number(nam_sinh) : null,
+      sdt,
+      // Chữ đáp án chuyên khoa nguyên văn (value của ô radio đang chọn).
+      chuyen_khoa:
+        form.querySelector<HTMLInputElement>('input[name="chuyen_khoa"]:checked')?.value ?? null,
+      cau_tra_loi: cot.filter((c) => c.ma !== qAnh.dataset.id),
     };
-    // text/plain để là "yêu cầu đơn giản": Apps Script không trả lời được
-    // bước hỏi dò (preflight) của trình duyệt, gửi application/json là hỏng.
-    const tra_loi = await fetch(DIEM_NHAN, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(goi),
-    });
-    const kq = await tra_loi.json();
-    if (!kq.ok) throw new Error("Vui lòng thử lại, không gửi được phiếu.");
-    hienXong();
+    try {
+      await guiVaoSupabase(phieu, anh);
+    } catch {
+      // Supabase hỏng (mạng, DB chưa dựng...): thử đường cũ. Apps Script nhận
+      // được thì bác sĩ vẫn thấy phiếu ở Google Sheet nên coi là đã gửi.
+      if (!(await guiApps(cot, anh, ho_ten, nam_sinh))) {
+        throw new Error("Vui lòng thử lại hoặc nhắn Zalo cho bác sĩ, chưa gửi được phiếu.");
+      }
+      // Chỉ lưu được ở Google Sheet: không có id trong Supabase để báo ra.
+      return hienXong();
+    }
+
+    // Đã lưu xong: hiện màn "Đã gửi" ngay, bản sao Google Sheet chạy nền,
+    // không chờ và nuốt lỗi (nếu hỏng thì bản chính vẫn nằm ở Supabase).
+    void guiApps(cot, anh, ho_ten, nam_sinh);
+    hienXong(phieu.id);
   }
 
-  function hienXong() {
+  // Gửi sang Google Apps Script. Trả true khi script báo ok; mọi lỗi (chưa
+  // đặt địa chỉ, mạng, trả lời lạ) đều thành false chứ không ném ra.
+  async function guiApps(
+    cot: { ma: string; tieu_de: string; gia_tri: string }[],
+    anh_nen: Blob[],
+    ho_ten: string,
+    nam_sinh: string,
+  ): Promise<boolean> {
+    if (!DIEM_NHAN) return false;
+    try {
+      const anh = await Promise.all(
+        anh_nen.map(async (b, i) => ({
+          ma: qAnh.dataset.id!,
+          ten: `anh-luoi-${i + 1}.jpg`,
+          mime: "image/jpeg",
+          du_lieu: await blobSangBase64(b),
+        })),
+      );
+      // Họ tên và năm sinh gửi riêng để script đặt tên file ảnh; không dựa vào
+      // chữ câu hỏi (chữ này sẽ đổi khi chủ site sửa câu hỏi).
+      const goi = { cot, anh, ho_ten, nam_sinh };
+      // text/plain để là "yêu cầu đơn giản": Apps Script không trả lời được
+      // bước hỏi dò (preflight) của trình duyệt, gửi application/json là hỏng.
+      const tra_loi = await fetch(DIEM_NHAN, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(goi),
+      });
+      const kq = await tra_loi.json();
+      return kq?.ok === true;
+    } catch {
+      return false;
+    }
+  }
+
+  function hienXong(id?: string) {
+    // Chế độ admin: không có màn "Đã gửi" cho bệnh nhân; báo cho trang cha
+    // (nó đóng hộp thoại, nạp lại danh sách rồi gửi "phieu:dat-lai" để xóa form).
+    if (LA_ADMIN) {
+      goc.dispatchEvent(new CustomEvent("phieu:da-gui", { bubbles: true, detail: { id: id ?? null } }));
+      return;
+    }
     const ten = form.querySelector<HTMLInputElement>('[name="ho_ten"]')!.value.trim();
     const sdt = form.querySelector<HTMLInputElement>('[name="sdt"]')!.value.trim();
     document.getElementById("xongTieuDe")!.textContent = goc.dataset.daGuiTieuDe!;
@@ -628,9 +576,12 @@ const NAM_NAY = new Date().getFullYear();
     if (ke) {
       hienPhan(ke);
       // Mỗi phần là một mục trong lịch sử trình duyệt: nút Back của điện
-      // thoại lùi về phần trước thay vì thoát khỏi phiếu.
-      buoc += 1;
-      history.pushState({ phan: ke, i: buoc }, "");
+      // thoại lùi về phần trước thay vì thoát khỏi phiếu. Chế độ admin không
+      // đụng history: form chỉ là hộp thoại, Back phải rời trang admin như thường.
+      if (!LA_ADMIN) {
+        buoc += 1;
+        history.pushState({ phan: ke, i: buoc }, "");
+      }
       luuNhap();
       return;
     }
@@ -663,11 +614,11 @@ const NAM_NAY = new Date().getFullYear();
     if (i > 0) {
       hienPhan(duong[i - 1]);
       // Mục lịch sử hiện tại phải đổi theo, kẻo Back sau này quay về phần cũ.
-      history.replaceState({ phan: duong[i - 1], i: 0 }, "");
+      if (!LA_ADMIN) history.replaceState({ phan: duong[i - 1], i: 0 }, "");
     }
   });
 
-  window.addEventListener("popstate", (e) => {
+  if (!LA_ADMIN) window.addEventListener("popstate", (e) => {
     if (hienTai === "xong") return;
     hoanLuu(); // nháp nhớ phần đang xem sau khi lùi/tiến bằng nút Back
     buoc = e.state?.i ?? 0;
@@ -680,7 +631,7 @@ const NAM_NAY = new Date().getFullYear();
     if (i > 0) hienPhan(duong[i - 1]);
   });
 
-  document.getElementById("lamLai")!.addEventListener("click", () => {
+  function datLaiPhieu() {
     form.reset();
     form.querySelectorAll<HTMLElement>(".q-khac").forEach((o) => (o.hidden = true));
     dsAnh.length = 0;
@@ -689,9 +640,17 @@ const NAM_NAY = new Date().getFullYear();
     form.querySelectorAll<HTMLElement>(".q-loi").forEach((e) => (e.hidden = true));
     xoaNhap();
     buoc = 0;
-    history.replaceState({ phan: "vande", i: 0 }, "");
+    if (!LA_ADMIN) history.replaceState({ phan: "vande", i: 0 }, "");
     hienPhan("vande");
-  });
+    // Gửi xong ở chế độ admin nút còn dòng "Đang gửi…": đưa về chữ đầu.
+    nutTiep.disabled = false;
+    nutLui.disabled = false;
+    // Form đã trắng: trang cha phải xóa bảng điểm theo.
+    baoThayDoi();
+  }
+  document.getElementById("lamLai")?.addEventListener("click", datLaiPhieu);
+  // Trang admin gọi khi đóng hộp thoại (hoặc đã gửi xong) để lần mở sau là phiếu trắng.
+  goc.addEventListener("phieu:dat-lai", datLaiPhieu);
 
   // ---- Lưu nháp 24 giờ ----------------------------------------------------
   // Bệnh nhân điền dở rồi chuyển trang, tải lại hay thoát ra thì quay lại
@@ -704,12 +663,14 @@ const NAM_NAY = new Date().getFullYear();
   const KHONG_LUU = ["ho_ten", "nam_sinh", "sdt", "website"];
   let buoc = 0;
 
+  // Chế độ admin tắt hẳn nháp: máy của bác sĩ, dữ liệu bệnh nhân người khác.
   function xoaNhap() {
+    if (LA_ADMIN) return;
     try { localStorage.removeItem(KHOA_NHAP); } catch { /* trình duyệt chặn lưu trữ: bỏ qua */ }
   }
 
   function luuNhap() {
-    if (hienTai === "xong") return;
+    if (LA_ADMIN || hienTai === "xong") return;
     try {
       const tra_loi: Record<string, string | string[]> = {};
       form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]").forEach((o) => {
@@ -728,6 +689,7 @@ const NAM_NAY = new Date().getFullYear();
   }
 
   function khoiPhucNhap(): string | null {
+    if (LA_ADMIN) return null;
     try {
       const tho = localStorage.getItem(KHOA_NHAP);
       if (!tho) return null;
@@ -766,5 +728,5 @@ const NAM_NAY = new Date().getFullYear();
   } else {
     hienPhan("vande", false);
   }
-  history.replaceState({ phan: hienTai, i: 0 }, "");
+  if (!LA_ADMIN) history.replaceState({ phan: hienTai, i: 0 }, "");
 </script>

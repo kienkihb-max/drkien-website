@@ -804,60 +804,8 @@ main img.zoomable { cursor: zoom-in; }
   .shots-grid { gap: 14px; margin-right: 14px; }
 }
 
-/* Lightbox */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 16, 30, 0.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 90px;
-  z-index: 200;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .25s ease;
-}
-.lightbox.open { opacity: 1; visibility: visible; }
-.lightbox-content { display: flex; flex-direction: column; align-items: center; max-width: 100%; }
-.lightbox-content img {
-  max-width: min(820px, 84vw);
-  max-height: 74vh;
-  width: auto;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  background: #fff;
-}
-.lightbox-content figcaption {
-  color: rgba(255,255,255,0.9);
-  margin-top: 18px;
-  font-size: var(--fs-xs);
-  text-align: center;
-  max-width: 600px;
-}
-.lightbox-close, .lightbox-nav {
-  position: absolute;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background .2s ease;
-}
-.lightbox-close:hover, .lightbox-nav:hover { background: rgba(255,255,255,0.22); }
-.lightbox-close { top: 24px; right: 24px; width: 44px; height: 44px; }
-.lightbox-nav { top: 50%; transform: translateY(-50%); width: 52px; height: 52px; }
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
-
-@media (max-width: 720px) {
-  .lightbox { padding: 90px 16px 40px; }
-  .lightbox-nav { width: 42px; height: 42px; }
-  .lightbox-prev { left: 8px; }
-  .lightbox-next { right: 8px; }
-  .lightbox-close { top: 14px; right: 14px; }
-}
+/* Lightbox: giao diện đã chuyển sang web/src/components/lightbox.css (import ở
+   layouts/Trang.astro) để trang admin dùng chung — đừng chép lại ở đây. */
 
 .case-study {
   display: grid;

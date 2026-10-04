@@ -1,0 +1,30 @@
+---
+// Dropdown chuyển mục ở đầu mọi trang quản trị: "Blog" hay "Sàng lọc bệnh".
+// Làm thành component để thêm mục mới chỉ sửa ở đây, mọi trang admin cùng đổi.
+interface Props {
+  /** Địa chỉ trang đang đứng, để dropdown hiện đúng mục. */
+  current: "/admin" | "/admin/phieu";
+}
+const { current } = Astro.props;
+const MUC = [
+  { duong_dan: "/admin", ten: "Blog" },
+  { duong_dan: "/admin/phieu", ten: "Sàng lọc bệnh" },
+];
+---
+
+<select class="qt-o qt-chon-muc" data-chon-muc aria-label="Chọn mục quản trị">
+  {MUC.map((m) => (
+    <option value={m.duong_dan} selected={m.duong_dan === current}>{m.ten}</option>
+  ))}
+</select>
+
+<style is:global>
+  .qt-chon-muc { width: auto; padding: 6px 10px; font-weight: 600; }
+</style>
+
+<script>
+  // Chọn xong là đi luôn, khỏi cần nút "Đi".
+  document.querySelectorAll<HTMLSelectElement>("[data-chon-muc]").forEach((s) =>
+    s.addEventListener("change", () => { window.location.href = s.value; }),
+  );
+</script>

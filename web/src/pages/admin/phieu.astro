@@ -1,0 +1,835 @@
+---
+// Trang quản trị "Sàng lọc bệnh": bác sĩ xem phiếu thập vấn bệnh nhân gửi từ
+// /sang-loc-benh. Dữ liệu nằm trong bảng phieu_sang_loc (web/supabase/phieu-sang-loc.sql).
+//
+// Bố cục hai cột: bảng phiếu bên trái, bấm một dòng thì bên phải hiện bản GỌN của
+// phiếu: tên phần → câu hỏi → câu trả lời. Dựng thẳng từ cau_tra_loi đã lưu (chữ
+// câu hỏi là chữ bệnh nhân đã thấy lúc điền), không dựng lại form, nên câu cũ hay
+// đã xóa khỏi form vẫn đọc được.
+//
+// Mọi chữ do bệnh nhân gõ chỉ đi qua textContent, không bao giờ innerHTML:
+// họ tên hay câu trả lời có thể chứa <script>.
+import VetLoi from "../../components/VetLoi.astro";
+import AdminChonMuc from "../../components/AdminChonMuc.astro";
+import PhieuThapVan from "../../components/PhieuThapVan.astro";
+import Lightbox from "../../components/Lightbox.astro";
+import "../../components/phieu-giao-dien.css";
+---
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sàng lọc bệnh — Bác sĩ Lê Trung Kiên</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<VetLoi />
+
+<section class="qt-vao" id="man-vao" hidden>
+  <div class="qt-vao-hop">
+    <h1>Sàng lọc bệnh</h1>
+    <p class="qt-phu">Đăng nhập bằng tài khoản GitHub của bạn.</p>
+    <p class="qt-loi" id="loi-vao" hidden></p>
+    <button class="qt-nut qt-nut-chinh qt-nut-rong" type="button" id="nut-github">
+      Đăng nhập bằng GitHub
+    </button>
+  </div>
+</section>
+
+<div id="man-chinh" hidden>
+  <header class="qt-dau">
+    <div class="qt-dau-trai">
+      <AdminChonMuc current="/admin/phieu" />
+      <span class="qt-kho" id="nhan-tai-khoan"></span>
+    </div>
+    <div class="qt-dau-phai">
+      <button class="qt-nut qt-nut-nhe" type="button" id="nut-ra">Đăng xuất</button>
+    </div>
+  </header>
+
+  <main class="pc-than">
+    <div class="pc-cot-bang">
+      <div class="qt-hang-tieu-de">
+        <div>
+          <h2>Phiếu thập vấn</h2>
+          <p class="qt-phu" id="tom-tat"></p>
+        </div>
+      </div>
+      <div class="pc-loc">
+        <button class="qt-nut qt-nut-chinh" type="button" id="nut-them">+ Thêm bệnh nhân</button>
+        <select class="qt-o" id="loc-trang-thai" aria-label="Lọc theo trạng thái">
+          <option value="">Mọi trạng thái</option>
+          <option value="moi">Mới</option>
+          <option value="da_xem">Đã xem</option>
+          <option value="da_lien_he">Đã liên hệ</option>
+        </select>
+        <input class="qt-o" id="o-tim" type="search" placeholder="Tìm tên hoặc SĐT" aria-label="Tìm phiếu">
+      </div>
+      <div id="ds-phieu"><p class="qt-phu">Đang tải…</p></div>
+    </div>
+
+    <!-- data-bo-cuon: panel là bộ chứa cuộn của form thêm bệnh nhân (component
+         PhieuThapVan cuộn về đầu phần mới đúng vào đây). -->
+    <aside class="pc-panel" id="panel" hidden data-bo-cuon aria-label="Chi tiết phiếu">
+      <div class="pc-panel-dau">
+        <button class="qt-nut qt-nut-nhe" type="button" id="nut-dong">✕ Đóng</button>
+      </div>
+      <div id="noi-dung-panel"></div>
+
+      <!-- Chế độ thêm bệnh nhân: form nhập nằm đúng chỗ cột câu trả lời, bảng điểm
+           realtime nằm đúng chỗ bảng điểm. Dùng chung component PhieuThapVan (chế độ
+           admin), dựng MỘT lần lúc build. -->
+      <div id="che-do-them" hidden>
+        <div class="pc-dau-dinh pc-dau-them">
+          <h2 class="pc-ten-lon">Thêm bệnh nhân</h2>
+          <button class="qt-nut qt-nut-nhe" type="button" id="nut-huy-them">Hủy</button>
+        </div>
+        <div class="pc-hai-cot pc-hai-cot-them">
+          <div class="pc-tra-loi"><PhieuThapVan che_do="admin" /></div>
+          <div class="pc-bang-diem" id="khoi-diem-them" hidden></div>
+        </div>
+      </div>
+    </aside>
+    <p class="qt-phu pc-chua-chon" id="chua-chon">Chọn một phiếu ở bảng để xem.</p>
+  </main>
+</div>
+
+<!-- Phóng to ảnh lưỡi: dùng component lightbox chung của site. -->
+<Lightbox />
+
+<div class="qt-lop qt-lop-cho" id="man-cho">
+  <p class="qt-phu">Đang kiểm tra đăng nhập…</p>
+</div>
+
+<style is:global>
+  /* Trang admin không nạp style.css của site; các biến màu/font đã có giá trị
+     dự phòng ngay trong phieu-giao-dien.css nên không cần khai lại ở đây. */
+  /* ——— Bố cục hai cột ——— */
+  .pc-than { display: flex; gap: 20px; align-items: flex-start; max-width: 1400px; margin: 0 auto; padding: 24px 20px 80px; }
+  .pc-cot-bang { flex: 1 1 0; min-width: 0; }
+  .pc-panel { flex: 0 0 min(820px, 60%); min-width: 0; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; background: var(--qt-nen); border-radius: var(--qt-bo-goc); }
+  .pc-chua-chon { flex: 0 0 min(560px, 46%); margin-top: 60px; text-align: center; }
+  .pc-panel:not([hidden]) ~ .pc-chua-chon { display: none; }
+  .pc-panel-dau { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .pc-panel-trong { padding: 0 0 20px; }
+
+  /* Màn rộng: cả trang đứng yên, KHÔNG cuộn. Bảng danh sách cuộn trong khung của nó
+     (hàng tiêu đề bảng dính ở đỉnh), panel bên phải cuộn trong khung riêng, nên
+     khối đầu panel dính đúng chỗ và không có khe hở. */
+  @media (min-width: 900px) {
+    #man-chinh:not([hidden]) { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+    #man-chinh .qt-dau { flex: none; }
+    .pc-than { flex: 1 1 0; min-height: 0; width: 100%; align-items: stretch; padding: 16px 20px; overflow: hidden; box-sizing: border-box; }
+    .pc-cot-bang { display: flex; flex-direction: column; min-height: 0; }
+    .pc-cot-bang > * { flex: none; }
+    .pc-cot-bang > #ds-phieu { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+    #ds-phieu .pc-cuon { flex: 0 1 auto; min-height: 0; overflow: auto; }
+    #ds-phieu .pc-bang thead th { position: sticky; top: 0; z-index: 2; }
+    .pc-panel { position: static; height: 100%; max-height: none; min-height: 0; overflow: auto; }
+  }
+
+  /* Điện thoại / màn hẹp: panel mở thành lớp phủ toàn màn hình. */
+  /* Trên màn rộng panel luôn nằm cạnh bảng (tự mở phiếu đầu) nên không cần nút Đóng;
+     trên điện thoại panel phủ kín màn hình nên vẫn phải có. */
+  @media (min-width: 900px) { .pc-panel-dau { display: none; } }
+  /* Đường kẻ dọc ngăn danh sách phiếu với thông tin bệnh nhân bên phải. */
+  @media (min-width: 900px) { .pc-panel { border-left: 2px solid #c3cddd; padding-left: 20px; border-radius: 0; } }
+  @media (max-width: 899px) {
+    .pc-than { padding: 16px 12px 80px; }
+    .pc-panel { position: fixed; inset: 0; z-index: 40; flex: none; max-height: none; border-radius: 0; padding: 12px; }
+    .pc-chua-chon { display: none; }
+  }
+
+  /* ——— Chế độ thêm bệnh nhân (trong chính panel) ——— */
+  .pc-dau-them { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .pc-dau-them .pc-ten-lon { margin: 0; }
+  /* Hủy đã nằm ở khối đầu dính; nút Đóng của lớp phủ điện thoại thừa. */
+  .pc-panel.pc-dang-them .pc-panel-dau { display: none; }
+  /* Thanh tiến độ/nút Tiếp dính đáy panel (bộ chứa cuộn). Bản gốc dùng bóng đổ
+     tràn ngang để che nền; trong panel nó sẽ đè lên cột bảng điểm, nên chỉ để nền
+     đặc cùng màu panel. */
+  .pc-hai-cot-them .phieu-chan { background: var(--qt-nen); box-shadow: none; clip-path: none; }
+  .pc-hai-cot-them .phieu { margin: 0; max-width: none; }
+  /* Điện thoại: panel có đệm 12px quanh nên "bottom: 0" dính cao hơn mép màn hình
+     12px và để lộ chữ chạy qua khe; kéo thanh xuống đúng bằng đệm. */
+  @media (max-width: 899px) { .pc-hai-cot-them .phieu-chan { bottom: -12px; } }
+  /* Màn hẹp xếp dọc: form lên trước (đang nhập), bảng điểm xuống dưới. */
+  @media (max-width: 1199px) {
+    .pc-hai-cot.pc-hai-cot-them .pc-tra-loi { grid-row: 1; }
+    .pc-hai-cot.pc-hai-cot-them .pc-bang-diem { grid-row: 2; }
+  }
+
+  /* ——— Bảng ——— */
+  /* Nút, bộ lọc và ô tìm kiếm nằm chung một hàng cho đỡ tốn chỗ; màn hẹp thì tự xuống dòng. */
+  .pc-loc { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .pc-loc .qt-nut { flex: none; white-space: nowrap; }
+  .pc-loc select.qt-o { width: auto; flex: 0 0 auto; }
+  .pc-loc input.qt-o { width: auto; flex: 1 1 8rem; min-width: 0; }
+  .pc-cuon { overflow-x: auto; background: #fff; border: 1px solid var(--qt-vien); border-radius: var(--qt-bo-goc); }
+  .pc-bang { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .pc-bang th { text-align: left; padding: 10px 12px; background: #f2f5fa; color: var(--qt-chu-mo); font-weight: 600; white-space: nowrap; }
+  .pc-bang td { padding: 10px 12px; border-top: 1px solid var(--qt-vien); vertical-align: top; }
+  .pc-bang tbody tr { cursor: pointer; }
+  .pc-bang tbody tr:hover, .pc-bang tbody tr:focus-visible { background: #f6f9ff; outline: none; }
+  .pc-bang tr.pc-dong-chon { background: #e8f0ff; }
+  .pc-bang tr.pc-moi td:nth-child(2) { font-weight: 700; }
+  .pc-nowrap { white-space: nowrap; }
+
+  /* ——— Phần bác sĩ ——— */
+  .pc-ten-lon { margin: 0 0 4px; }
+  .qt-nhan-moi { background: #e8f0ff; color: #2450b8; }
+  .qt-nhan-lh { background: #e7f6ec; color: #1e7e34; }
+  .pc-ai { background: #fff; border: 1px solid var(--qt-vien); border-radius: 8px; padding: 10px 12px; font-size: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+
+  /* ——— Danh sách trả lời gọn ——— */
+  .pc-bang-diem[hidden] { display: none; }
+  .pc-bang-diem { margin: 12px 0; padding: 12px 16px; background: #fff; border: 1px solid var(--qt-vien); border-radius: var(--qt-bo-goc); }
+  .pc-bd-ten { margin: 0; font-size: 1.05rem; font-weight: 700; }
+  .pc-bd-ghi-chu { margin: 2px 0 10px; font-size: 0.8rem; color: var(--qt-chu-mo); }
+  /* Cảnh báo dấu hiệu nguy hiểm: đỏ nhạt như trang Cảnh báo của phiếu bệnh nhân. */
+  .pc-canh-bao { margin: 0 0 10px; padding: 10px 12px; background: #fdecea; color: #c0392b; border: 1px solid #c0392b; border-radius: 8px; font-weight: 700; }
+  /* Hộp kết luận xanh để nổi bật: tiêu đề nhỏ ở trên, giá trị đậm ở dưới. */
+  .pc-bd-hop { display: grid; gap: 10px; margin: 0 0 4px; padding: 10px 12px; background: #e8f0ff; border: 1px solid #b9cdf5; border-radius: 8px; }
+  .pc-bd-muc { display: grid; gap: 1px; }
+  .pc-bd-muc-ten { font-size: 0.8rem; font-weight: 600; color: #2450b8; }
+  .pc-bd-muc-gt { font-size: 1.05rem; font-weight: 700; color: var(--qt-chu, #222); }
+  .pc-bd-nho { margin: 10px 0 4px; font-size: 0.875rem; font-weight: 600; color: var(--qt-chu-mo); }
+  /* Mỗi thể hai dòng: tên + điểm ở trên, thanh trọn bề ngang ở dưới. */
+  .pc-bd-the { padding: 7px 0; font-size: 0.95rem; }
+  .pc-bd-dong { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 5px; }
+  .pc-bd-diem { white-space: nowrap; font-weight: 400; }
+  .pc-bd-diem b { font-weight: 700; }
+  .pc-bd-pt { font-weight: 400; color: var(--qt-chu-mo); }
+  .pc-bd-thanh { height: 8px; background: #e8edf5; border-radius: 99px; overflow: hidden; }
+  .pc-bd-thanh > i { display: block; height: 100%; background: #8fb0f0; }
+  .pc-bd-cao .pc-bd-ten-the { font-weight: 700; color: var(--qt-chinh, #3364db); }
+  .pc-bd-cao .pc-bd-thanh > i { background: var(--qt-chinh, #3364db); }
+  .pc-bd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pc-bd-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; background: #eef2f8; border: 1px solid var(--qt-vien); border-radius: 99px; font-size: 0.9rem; }
+  .pc-bd-chip-so { min-width: 1.4rem; padding: 0 6px; text-align: center; background: #fff; border-radius: 99px; font-weight: 700; }
+  .pc-bd-chip-cao { background: #e8f0ff; border-color: #b9cdf5; color: #2450b8; font-weight: 600; }
+  .pc-bd-chip-cao .pc-bd-chip-so { background: var(--qt-chinh, #3364db); color: #fff; }
+  /* Hai cột trong panel: câu trả lời bên trái, bảng điểm bên phải (dính ở đầu
+     panel khi cuộn). Panel hẹp hoặc phủ kín màn hình điện thoại thì xếp dọc,
+     bảng điểm lên trên để bác sĩ thấy gợi ý trước. */
+  /* Khối đầu panel (tên + thông tin) dính ở đỉnh khi cuộn. Nền đặc cùng màu panel;
+     đổ bóng 1px dưới cùng làm đường kẻ để cuộn qua không thấy khe. */
+  .pc-dau-dinh { position: sticky; top: 0; z-index: 10; background: var(--qt-nen); padding: 12px 0 10px; }
+  .pc-dau-dinh .pc-ten-lon { margin-top: 0; }
+  .pc-dau-dinh .qt-phu { margin-bottom: 0; }
+  .pc-hai-cot { margin-top: 12px; }
+  .pc-hai-cot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 12px; align-items: start; }
+  .pc-hai-cot .pc-tra-loi { grid-column: 1; grid-row: 1; }
+  .pc-hai-cot .pc-bang-diem { grid-column: 2; grid-row: 1; position: sticky; top: var(--pc-dau-cao, 70px); }
+  @media (max-width: 1199px) {
+    .pc-panel { flex-basis: min(560px, 46%); }
+    .pc-hai-cot { grid-template-columns: minmax(0, 1fr); }
+    .pc-hai-cot .pc-tra-loi { grid-column: 1; grid-row: 2; }
+    .pc-hai-cot .pc-bang-diem { grid-column: 1; grid-row: 1; position: static; }
+  }
+  /* Điện thoại: panel có đệm 12px quanh; khối đầu tràn hết bề ngang đệm đó. */
+  @media (max-width: 899px) { .pc-dau-dinh { margin: 0 -12px; padding-left: 12px; padding-right: 12px; } }
+  .pc-tra-loi { margin-top: 12px; }
+  .pc-phan { margin: 0 0 12px; padding: 12px 16px 6px; background: #fff; border: 1px solid var(--qt-vien); border-radius: var(--qt-bo-goc); }
+  .pc-phan-ten { margin: 0 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--qt-vien); font-size: 1.05rem; font-weight: 700; }
+  .pc-cau { margin: 0 0 8px; }
+  .pc-hoi { margin: 0; font-size: 0.875rem; color: var(--qt-chu-mo); }
+  .pc-dap { margin: 1px 0 0; }
+  .pc-dap-dong { margin: 0; font-size: 0.95rem; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pc-anh-luoi { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .pc-anh-luoi button { padding: 0; border: 1px solid var(--qt-vien); border-radius: 10px; background: #fff; cursor: zoom-in; overflow: hidden; }
+  .pc-anh-luoi img { display: block; width: 140px; height: 140px; object-fit: cover; }
+</style>
+
+<script>
+  import { supabase } from "../../lib/supabase";
+  import { moLightbox } from "../../lib/lightbox";
+  import { docBangChamDiem, chamDiem, type BangChamDiem } from "../../lib/cham-diem";
+
+  type TrangThai = "moi" | "da_xem" | "da_lien_he";
+
+  interface Phieu {
+    id: string;
+    tao_luc: string;
+    ho_ten: string;
+    nam_sinh: number | null;
+    sdt: string;
+    chuyen_khoa: string | null;
+    anh: string[];
+    trang_thai: TrangThai;
+  }
+  interface CauTraLoi { ma?: string; tieu_de?: string; gia_tri?: unknown }
+
+  const NHAN_TT: Record<TrangThai, string> = {
+    moi: "Mới", da_xem: "Đã xem", da_lien_he: "Đã liên hệ",
+  };
+  const LOP_TT: Record<TrangThai, string> = {
+    moi: "qt-nhan-moi", da_xem: "qt-nhan-an", da_lien_he: "qt-nhan-lh",
+  };
+
+  let ds: Phieu[] = [];
+  let dang_chon = "";
+  let che_do_them = false; // panel đang ở chế độ thêm bệnh nhân (form + điểm realtime)
+
+  const o = (id: string) => document.getElementById(id) as HTMLElement;
+  const hien = (id: string, co: boolean) => { o(id).hidden = !co; };
+
+  /** Dựng phần tử bằng textContent — cách duy nhất đưa chữ bệnh nhân lên trang. */
+  function tao<K extends keyof HTMLElementTagNameMap>(
+    the: K, lop?: string, chu?: string,
+  ): HTMLElementTagNameMap[K] {
+    const e = document.createElement(the);
+    if (lop) e.className = lop;
+    if (chu !== undefined) e.textContent = chu;
+    return e;
+  }
+
+  function gioVN(iso: string) {
+    return new Date(iso).toLocaleString("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh", hour12: false,
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  }
+
+  const nhanTrangThai = (tt: TrangThai) =>
+    tao("span", "qt-nhan-nho " + (LOP_TT[tt] ?? "qt-nhan-an"), NHAN_TT[tt] ?? String(tt));
+
+  /** SĐT bấm được sang Zalo. Chỉ giữ chữ số để không lọt ký tự lạ vào URL. */
+  function lienKetZalo(sdt: string) {
+    const so = sdt.replace(/\D/g, "");
+    if (!so) return tao("span", "", sdt);
+    const a = tao("a", "", sdt);
+    a.href = "https://zalo.me/" + so;
+    a.target = "_blank";
+    a.rel = "noopener";
+    // Bấm số trong bảng không được kích hoạt luôn việc mở phiếu.
+    a.addEventListener("click", (e) => e.stopPropagation());
+    return a;
+  }
+
+  // ——— Đăng nhập / đăng xuất ———
+  o("nut-github").addEventListener("click", async () => {
+    const loi = o("loi-vao");
+    loi.hidden = true;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: window.location.origin + "/admin/phieu" },
+    });
+    if (error) {
+      loi.textContent = "Không đăng nhập được: " + error.message;
+      loi.hidden = false;
+    }
+  });
+  o("nut-ra").addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/admin/phieu";
+  });
+
+  // ——— Bảng ———
+  /** uu_tien: id phiếu cần mở sau khi nạp (phiếu vừa thêm), nếu có trong danh sách. */
+  async function taiDanhSach(uu_tien?: string) {
+    // Không đọc cau_tra_loi ở đây: mỗi phiếu có thể nặng tới ~60KB, bảng chỉ
+    // cần vài cột. Câu trả lời tải khi mở từng phiếu.
+    const { data, error } = await supabase
+      .from("phieu_sang_loc")
+      .select("id, tao_luc, ho_ten, nam_sinh, sdt, chuyen_khoa, anh, trang_thai")
+      .order("tao_luc", { ascending: false });
+    if (error) {
+      o("ds-phieu").replaceChildren(
+        tao("p", "qt-loi", "Không đọc được danh sách phiếu: " + error.message),
+        tao("p", "qt-phu",
+          "Nếu đây là lần đầu, kiểm tra đã chạy file web/supabase/phieu-sang-loc.sql " +
+          "và tài khoản GitHub này có tên trong bảng nguoi_viet chưa."),
+      );
+      return;
+    }
+    ds = (data ?? []) as Phieu[];
+    veBang();
+    // Vào màn là tự mở bệnh nhân đầu bảng (mới nhất) cho khỏi thấy panel trống.
+    // Chỉ làm trên màn rộng, nơi panel nằm cạnh bảng; trên điện thoại panel phủ
+    // kín màn hình nên mở sẵn sẽ che mất danh sách.
+    // Đang thêm bệnh nhân thì tuyệt đối không tự mở phiếu nào: nạp lại danh sách còn
+    // xảy ra khi token đăng nhập được làm mới, sẽ phá form đang nhập.
+    if (che_do_them) return;
+    if (uu_tien && ds.some((p) => p.id === uu_tien)) {
+      // Phiếu vừa thêm: mở tự động nên không đổi "Mới" thành "Đã xem".
+      void moPhieu(uu_tien, true);
+    } else if (!dang_chon && ds.length && window.matchMedia("(min-width: 900px)").matches) {
+      void moPhieu(ds[0].id, true);
+    }
+  }
+
+  function veBang() {
+    const khung = o("ds-phieu");
+    const moi = ds.filter((p) => p.trang_thai === "moi").length;
+    o("tom-tat").textContent = ds.length ? moi + " phiếu mới, tổng " + ds.length + " phiếu." : "";
+
+    const tt = (o("loc-trang-thai") as HTMLSelectElement).value;
+    const tu = (o("o-tim") as HTMLInputElement).value.trim().toLowerCase();
+    const tu_so = tu.replace(/\D/g, "");
+    const loc = ds.filter((p) => {
+      if (tt && p.trang_thai !== tt) return false;
+      if (!tu) return true;
+      return p.ho_ten.toLowerCase().includes(tu) ||
+        (tu_so !== "" && p.sdt.replace(/\D/g, "").includes(tu_so));
+    });
+
+    if (!loc.length) {
+      khung.replaceChildren(tao("p", "qt-phu", ds.length ? "Không có phiếu nào khớp." : "Chưa có phiếu nào."));
+      return;
+    }
+
+    const bang = tao("table", "pc-bang");
+    const dau = tao("tr");
+    ["Thời gian gửi", "Họ tên", "SĐT", "Chuyên khoa", "Trạng thái"].forEach((t) =>
+      dau.append(tao("th", "", t)));
+    const thead = tao("thead");
+    thead.append(dau);
+    bang.append(thead);
+    const than = tao("tbody");
+    for (const p of loc) {
+      const tr = tao("tr",
+        (p.trang_thai === "moi" ? "pc-moi " : "") + (p.id === dang_chon ? "pc-dong-chon" : ""));
+      tr.tabIndex = 0;
+      tr.dataset.id = p.id;
+      const td_sdt = tao("td", "pc-nowrap");
+      td_sdt.append(lienKetZalo(p.sdt));
+      const td_tt = tao("td");
+      td_tt.append(nhanTrangThai(p.trang_thai));
+      tr.append(
+        tao("td", "pc-nowrap", gioVN(p.tao_luc)),
+        tao("td", "", p.ho_ten),
+        td_sdt,
+        tao("td", "", p.chuyen_khoa ?? ""),
+        td_tt,
+      );
+      tr.addEventListener("click", () => moPhieu(p.id));
+      tr.addEventListener("keydown", (e) => { if (e.key === "Enter") moPhieu(p.id); });
+      than.append(tr);
+    }
+    bang.append(than);
+    const cuon = tao("div", "pc-cuon");
+    cuon.append(bang);
+    const cu = khung.querySelector<HTMLElement>(".pc-cuon");
+    const [trai, tren] = cu ? [cu.scrollLeft, cu.scrollTop] : [0, 0];
+    khung.replaceChildren(cuon);
+    cuon.scrollLeft = trai;
+    cuon.scrollTop = tren;
+  }
+
+  /**
+   * Đổi dòng đang chọn và nhãn trạng thái NGAY TRÊN bảng đang có, không vẽ lại. Vẽ
+   * lại bảng mỗi lần bấm làm thanh cuộn ngang và vị trí cuộn của bảng nhảy về đầu.
+   */
+  function capNhatDongTaiCho() {
+    const khung = o("ds-phieu");
+    khung.querySelectorAll<HTMLElement>("tbody tr").forEach((tr) => {
+      const p = ds.find((x) => x.id === tr.dataset.id);
+      if (!p) return;
+      tr.classList.toggle("pc-dong-chon", p.id === dang_chon);
+      tr.classList.toggle("pc-moi", p.trang_thai === "moi");
+      const td_tt = tr.lastElementChild;
+      if (td_tt) td_tt.replaceChildren(nhanTrangThai(p.trang_thai));
+    });
+  }
+
+  o("loc-trang-thai").addEventListener("change", veBang);
+  o("o-tim").addEventListener("input", veBang);
+
+  // ——— Panel chi tiết ———
+  function dongPanel() {
+    hien("panel", false);
+    dang_chon = "";
+    document.body.style.overflow = "";
+    veBang();
+  }
+  o("nut-dong").addEventListener("click", dongPanel);
+
+  /** tu_dong: do trang tự mở (không phải bác sĩ bấm) thì KHÔNG đổi sang "Đã xem". */
+  async function moPhieu(id: string, tu_dong = false) {
+    if (che_do_them) {
+      // Việc tự động không được chen vào lúc đang nhập; bác sĩ bấm một phiếu khác
+      // thì thoát chế độ thêm (hỏi trước nếu đã nhập dở).
+      if (tu_dong || !roiKhoiThem()) return;
+    }
+    dang_chon = id;
+    hien("panel", true);
+    // Trên điện thoại panel phủ kín màn hình: khoá cuộn trang nền phía sau.
+    if (window.matchMedia("(max-width: 899px)").matches) document.body.style.overflow = "hidden";
+    const nd = o("noi-dung-panel");
+    // Giữ nguyên nội dung phiếu cũ trong lúc tải phiếu mới (chỉ làm mờ) để panel
+    // không co lại rồi giãn ra gây nhảy giao diện. Chỉ lần mở đầu tiên mới chưa có gì.
+    if (nd.childElementCount) nd.style.opacity = "0.55";
+    else nd.replaceChildren(tao("p", "qt-phu", "Đang tải…"));
+    capNhatDongTaiCho();
+
+    const { data, error } = await supabase
+      .from("phieu_sang_loc").select("*").eq("id", id).single();
+    // Người dùng đã bấm phiếu khác trong lúc chờ: bỏ kết quả cũ.
+    if (dang_chon !== id) return;
+    nd.style.opacity = "";
+    if (error || !data) {
+      nd.replaceChildren(tao("p", "qt-loi", "Không mở được phiếu: " + (error?.message ?? "không tìm thấy")));
+      return;
+    }
+    // Bác sĩ bấm mở phiếu mới là coi như đã xem. Trang tự mở thì không tính, kẻo
+    // phiếu mới nhất bị mất nhãn "Mới" chỉ vì bác sĩ vừa vào trang. Lỗi ghi thì
+    // thôi, không chặn việc đọc.
+    if (data.trang_thai === "moi" && !tu_dong) {
+      const { error: e2 } = await supabase
+        .from("phieu_sang_loc").update({ trang_thai: "da_xem" }).eq("id", id);
+      if (!e2) {
+        data.trang_thai = "da_xem";
+        const p = ds.find((x) => x.id === id);
+        if (p) p.trang_thai = "da_xem";
+        capNhatDongTaiCho();
+      }
+    }
+    if (dang_chon === id) {
+      vePhieu(data);
+      const dd = nd.querySelector<HTMLElement>(".pc-dau-dinh");
+      if (dd) nd.style.setProperty("--pc-dau-cao", dd.offsetHeight + "px");
+      (o("panel") as HTMLElement).scrollTop = 0;
+    }
+  }
+
+  /** Tách "Tên phần | Chữ câu hỏi" (tieu_de đã lưu lúc bệnh nhân điền). */
+  function tachTieuDe(tieu_de: string, ma: string): [string, string] {
+    const i = tieu_de.indexOf(" | ");
+    if (i < 0) return ["Khác", tieu_de || ma];
+    return [tieu_de.slice(0, i), tieu_de.slice(i + 3) || ma];
+  }
+
+  /**
+   * Câu nhiều đáp án nối bằng " | " (xem gomCauTraLoi ở PhieuThapVan.astro). Chữ
+   * "Khác: ..." do bệnh nhân gõ có thể chứa chính " | ": nối ngược vào đáp án Khác.
+   */
+  function tachDapAn(gia_tri: string): string[] {
+    const kq: string[] = [];
+    for (const x of gia_tri.split(" | ")) {
+      if (kq.length && /^Khác(: |$)/.test(kq[kq.length - 1]) && !/^Khác(: |$)/.test(x)) {
+        kq[kq.length - 1] += " | " + x;
+      } else kq.push(x);
+    }
+    return kq;
+  }
+
+  /** Dựng khối ảnh lưỡi (link tạm 1 giờ vì bucket riêng tư). */
+  function veAnh(duong_dan: string[]) {
+    const luoi = tao("div", "pc-anh-luoi");
+    supabase.storage.from("phieu-anh").createSignedUrls(duong_dan, 3600).then(({ data, error }) => {
+      if (error || !data) {
+        luoi.append(tao("p", "qt-loi", "Không tải được ảnh: " + (error?.message ?? "")));
+        return;
+      }
+      // Cả bộ ảnh của phiếu đưa vào lightbox để chuyển qua lại giữa các ảnh.
+      const ds = data.flatMap((m) => (m.signedUrl ? [{ src: m.signedUrl, alt: "Ảnh lưỡi", caption: "Ảnh lưỡi" }] : []));
+      for (const m of data) {
+        if (!m.signedUrl) continue;
+        const b = tao("button");
+        b.type = "button";
+        const im = tao("img");
+        im.src = m.signedUrl;
+        im.alt = "Ảnh lưỡi";
+        im.loading = "lazy";
+        b.append(im);
+        b.addEventListener("click", () => {
+          moLightbox(ds, ds.findIndex((a) => a.src === m.signedUrl));
+        });
+        luoi.append(b);
+      }
+    });
+    return luoi;
+  }
+
+  // ——— Bảng điểm phân thể ———
+  // Bảng nhãn và hệ số nằm trong Supabase (RLS chỉ cho admin đọc) và được nạp một
+  // lần sau khi đăng nhập. Trang không mang theo con số nào của bảng điểm; mã
+  // tính điểm ở lib/cham-diem.ts chỉ là logic thuần. Kết quả chỉ là gợi ý.
+  let bang_diem: BangChamDiem | null = null;
+  let loi_bang_diem = "";
+  let dang_nap_bang: Promise<void> | null = null;
+  function napBangDiem(): Promise<void> {
+    if (bang_diem) return Promise.resolve();
+    dang_nap_bang ??= docBangChamDiem(supabase)
+      .then((b) => { bang_diem = b; loi_bang_diem = ""; })
+      .catch((e) => { loi_bang_diem = e instanceof Error ? e.message : String(e); })
+      .finally(() => { dang_nap_bang = null; });
+    return dang_nap_bang;
+  }
+
+  /** Một mục trong hộp kết luận: tiêu đề nhỏ ở trên, giá trị đậm ở dưới. */
+  function mucKetLuan(tieu_de: string, gia_tri: string, phan_tram?: number): HTMLElement {
+    const m = tao("div", "pc-bd-muc");
+    const gt = tao("b", "pc-bd-muc-gt", gia_tri);
+    // Tỷ lệ % xám ngay sau điểm, cùng kiểu các dòng điểm bên dưới.
+    if (phan_tram !== undefined) gt.append(" ", tao("span", "pc-bd-pt", "(" + phan_tram + "%)"));
+    m.append(tao("span", "pc-bd-muc-ten", tieu_de), gt);
+    return m;
+  }
+
+  function veBangDiem(khoi: HTMLElement, p: any) {
+    khoi.replaceChildren();
+    khoi.hidden = false;
+    if (!bang_diem) {
+      khoi.append(tao("p", "qt-phu",
+        "Chưa đọc được bảng điểm" + (loi_bang_diem ? ": " + loi_bang_diem : ".") +
+        " Kiểm tra đã chạy cham-diem.sql và nạp dữ liệu bảng điểm chưa."));
+      return;
+    }
+    const kq = chamDiem(Array.isArray(p.cau_tra_loi) ? p.cau_tra_loi : [], p.chuyen_khoa, bang_diem);
+    khoi.append(tao("h3", "pc-bd-ten", "Bảng điểm phân thể"), tao("p", "pc-bd-ghi-chu", kq.ghiChu));
+
+    if (kq.canhBao) {
+      const cb = tao("p", "pc-canh-bao", kq.canhBao);
+      cb.setAttribute("role", "alert");
+      khoi.append(cb);
+    }
+
+    if (kq.ketLuan === "chinh" && kq.theChinh) {
+      const ten = kq.theChinh.ngangDiem ? kq.theChinh.cacTheNgang.join(" / ") + " (ngang điểm)" : kq.theChinh.ten;
+      const hop = tao("div", "pc-bd-hop");
+      const tyLe = (diem: number) => (kq.tong > 0 ? Math.round((diem / kq.tong) * 100) : 0);
+      hop.append(mucKetLuan("Thể chính", ten + " · " + kq.theChinh.diem + " điểm", tyLe(kq.theChinh.diem)));
+      if (kq.thePhoiHop) hop.append(mucKetLuan("Thể phối hợp", kq.thePhoiHop.ten + " · " + kq.thePhoiHop.diem + " điểm", tyLe(kq.thePhoiHop.diem)));
+      khoi.append(hop);
+    } else if (kq.ketLuan === "chua_du") {
+      khoi.append(tao("p", "", "Chưa đủ dữ kiện, bác sĩ hỏi thêm."));
+    } else {
+      khoi.append(tao("p", "", "Chưa chọn chuyên khoa riêng nên chỉ có nhãn từ phần Thập vấn chung."));
+    }
+
+    if (kq.the.length) {
+      khoi.append(tao("p", "pc-bd-nho", "Điểm và tỷ lệ các thể"));
+      const cao = Math.max(1, ...kq.the.map((t) => t.diem));
+      for (const t of kq.the) {
+        // Thể cao điểm nhất (thể chính) được nhấn màu; thể 0 điểm chỉ còn thanh nền.
+        const la_chinh = t.diem > 0 && t.diem === cao;
+        const hang = tao("div", "pc-bd-the" + (la_chinh ? " pc-bd-cao" : ""));
+        const thanh = tao("div", "pc-bd-thanh");
+        const vach = document.createElement("i");
+        vach.style.width = Math.round((t.diem / cao) * 100) + "%";
+        thanh.append(vach);
+        const phan_tram = kq.tong > 0 ? Math.round((t.diem / kq.tong) * 100) : 0;
+        // Dòng trên: tên thể | "22 điểm (63%)"; dòng dưới: thanh chiếm trọn bề ngang.
+        const o_diem = tao("span", "pc-bd-diem");
+        o_diem.append(tao("b", "", String(t.diem)), " điểm ", tao("span", "pc-bd-pt", "(" + phan_tram + "%)"));
+        const dong = tao("div", "pc-bd-dong");
+        dong.append(tao("span", "pc-bd-ten-the", t.ten), o_diem);
+        hang.append(dong, thanh);
+        khoi.append(hang);
+      }
+    }
+
+    if (kq.topNhan.length) {
+      // Mỗi nhãn là một thẻ nhỏ kèm số lần; nhãn nhiều nhất được nhấn màu. Dễ lướt
+      // mắt hơn một dòng chữ nối bằng dấu chấm.
+      khoi.append(tao("p", "pc-bd-nho", "Nhãn nổi bật"));
+      const the_nhan = tao("div", "pc-bd-chips");
+      kq.topNhan.forEach((n, i) => {
+        const chip = tao("span", "pc-bd-chip" + (i === 0 ? " pc-bd-chip-cao" : ""));
+        chip.append(tao("span", "", n.ten), tao("b", "pc-bd-chip-so", String(n.so)));
+        the_nhan.append(chip);
+      });
+      khoi.append(the_nhan);
+    }
+  }
+
+  function vePhieu(p: any) {
+    const nd = o("noi-dung-panel");
+    const goc = tao("div", "pc-panel-trong");
+
+    // ——— Đầu phiếu ———
+    // Khối đầu dính ở đỉnh panel khi cuộn. Nền đặc và phủ kín bề ngang của vùng
+    // cuộn để câu trả lời cuộn bên dưới không lọt ra ở mép nào.
+    const dau_dinh = tao("div", "pc-dau-dinh");
+    dau_dinh.append(tao("h2", "pc-ten-lon", p.ho_ten));
+    const phu = tao("p", "qt-phu");
+    phu.append(gioVN(p.tao_luc) + " · ", lienKetZalo(p.sdt),
+      (p.nam_sinh ? " · sinh " + p.nam_sinh : "") + (p.chuyen_khoa ? " · " + p.chuyen_khoa : ""));
+    dau_dinh.append(phu);
+    goc.append(dau_dinh);
+
+    // (Đổi trạng thái thủ công và ghi chú bác sĩ tạm bỏ theo ý chủ site; cột DB giữ nguyên.)
+
+    // Gợi ý của AI: chỉ hiện nếu đã có.
+    if (p.ket_qua_ai) {
+      goc.append(tao("h3", "", "Gợi ý của AI"),
+        tao("pre", "pc-ai", JSON.stringify(p.ket_qua_ai, null, 2)));
+    }
+
+    // Chỗ dành cho khối "Bảng điểm" (thêm sau). Để trống, ẩn khi chưa có gì: nơi
+    // khác chỉ cần tìm #khoi-bang-diem trong panel rồi append vào.
+    const khoi_diem = tao("div", "pc-bang-diem");
+    khoi_diem.id = "khoi-bang-diem";
+    khoi_diem.hidden = true;
+    const hai_cot = tao("div", "pc-hai-cot");
+    // Tính sau khi panel đã gắn vào trang (bảng điểm có thể chưa nạp xong).
+    void napBangDiem().then(() => { if (khoi_diem.isConnected) veBangDiem(khoi_diem, p); });
+
+    // ——— Danh sách trả lời gọn: phần → câu hỏi → đáp án ———
+    // Hiện thẳng từ dữ liệu đã lưu (tieu_de là chữ bệnh nhân đã thấy lúc điền),
+    // nên câu cũ/đã xóa khỏi form vẫn đọc được, không cần đối chiếu với data hiện tại.
+    const cau: CauTraLoi[] = Array.isArray(p.cau_tra_loi) ? p.cau_tra_loi : [];
+    const nhom = new Map<string, { hoi: string; dap: string[] }[]>();
+    // Họ tên, năm sinh, SĐT đã có ở đầu panel và trong bảng nên không lặp lại ở
+    // phần "Thông tin" (chủ site đã chốt bỏ).
+    const MA_DA_CO_O_DAU = ["ho_ten", "nam_sinh", "sdt"];
+    for (const c of cau) {
+      const gt = String(c.gia_tri ?? "").trim();
+      if (!gt || MA_DA_CO_O_DAU.includes(String(c.ma))) continue;
+      const [ten_phan, hoi] = tachTieuDe(String(c.tieu_de ?? ""), String(c.ma ?? ""));
+      if (!nhom.has(ten_phan)) nhom.set(ten_phan, []);
+      nhom.get(ten_phan)!.push({ hoi, dap: tachDapAn(gt) });
+    }
+    // Ảnh lưỡi nằm đúng phần "Ảnh lưỡi"; không có ảnh thì không hiện. Nếu phiếu
+    // chưa có câu nào thuộc phần ấy thì tạo phần mới ở cuối.
+    const co_anh = Array.isArray(p.anh) && p.anh.length > 0;
+    const ten_anh = [...nhom.keys()].find((k) => k.toLowerCase().includes("ảnh lưỡi")) ?? "Ảnh lưỡi";
+    if (co_anh && !nhom.has(ten_anh)) nhom.set(ten_anh, []);
+
+    const ds_tl = tao("div", "pc-tra-loi");
+    for (const [ten_phan, cac_cau] of nhom) {
+      const phan = tao("section", "pc-phan");
+      phan.append(tao("h3", "pc-phan-ten", ten_phan));
+      for (const c of cac_cau) {
+        const khoi = tao("div", "pc-cau");
+        khoi.append(tao("p", "pc-hoi", c.hoi));
+        const dap = tao("div", "pc-dap");
+        for (const d of c.dap) dap.append(tao("p", "pc-dap-dong", d));
+        khoi.append(dap);
+        phan.append(khoi);
+      }
+      if (co_anh && ten_phan === ten_anh) phan.append(veAnh(p.anh));
+      ds_tl.append(phan);
+    }
+    hai_cot.append(ds_tl, khoi_diem);
+    goc.append(hai_cot);
+    if (!nhom.size) goc.append(tao("p", "qt-phu", "Phiếu không có câu trả lời nào."));
+
+    nd.replaceChildren(goc);
+  }
+
+  // ——— Thêm bệnh nhân (chế độ của chính panel, form là PhieuThapVan chế độ admin) ———
+  // Bấm "+ Thêm bệnh nhân": panel đổi sang form nhập ở cột trái, bảng điểm realtime
+  // ở cột phải. Form tự gửi lên Supabase (gui-phieu.ts); trang này chỉ chuyển chế độ
+  // và chấm điểm theo sự kiện "phieu:thay-doi".
+  const cheDoThem = o("che-do-them");
+  const phieuNhap = cheDoThem.querySelector<HTMLElement>(".phieu")!;
+  const khoiDiemThem = o("khoi-diem-them");
+  let nhap_do = false; // đã gõ/chọn gì đó trong form chưa
+  let phieu_truoc = ""; // phiếu đang xem trước khi bấm Thêm, để Hủy quay về
+
+  phieuNhap.addEventListener("input", () => { nhap_do = true; });
+  phieuNhap.addEventListener("change", () => { nhap_do = true; });
+
+  /** Vẽ bảng điểm cho dữ liệu form đang nhập; dùng chung veBangDiem với phiếu đã lưu. */
+  async function veDiemThoiGianThuc(chuyen_khoa: string | null, cau_tra_loi: CauTraLoi[]) {
+    await napBangDiem(); // lần đầu bảng điểm có thể chưa kịp nạp
+    if (!che_do_them) return;
+    if (!cau_tra_loi.some((c) => String(c.gia_tri ?? "").trim() !== "")) {
+      khoiDiemThem.hidden = false;
+      khoiDiemThem.replaceChildren(tao("p", "qt-phu", "Chưa có câu trả lời để chấm điểm."));
+      return;
+    }
+    veBangDiem(khoiDiemThem, { chuyen_khoa, cau_tra_loi });
+  }
+  phieuNhap.addEventListener("phieu:thay-doi", (e) => {
+    if (!che_do_them) return;
+    const { chuyen_khoa, cau_tra_loi } = (e as CustomEvent).detail;
+    void veDiemThoiGianThuc(chuyen_khoa, cau_tra_loi);
+  });
+
+  function batDauThem() {
+    phieu_truoc = dang_chon;
+    che_do_them = true;
+    dang_chon = "";
+    capNhatDongTaiCho(); // bỏ tô sáng dòng đang chọn
+    nhap_do = false;
+    phieuNhap.dispatchEvent(new CustomEvent("phieu:dat-lai")); // chắc chắn form trắng
+    o("noi-dung-panel").hidden = true;
+    cheDoThem.hidden = false;
+    o("panel").classList.add("pc-dang-them");
+    hien("panel", true);
+    if (window.matchMedia("(max-width: 899px)").matches) document.body.style.overflow = "hidden";
+    cheDoThem.style.setProperty("--pc-dau-cao", cheDoThem.querySelector<HTMLElement>(".pc-dau-dinh")!.offsetHeight + "px");
+    (o("panel") as HTMLElement).scrollTop = 0;
+    void veDiemThoiGianThuc(null, []);
+  }
+
+  /** Rời chế độ thêm (không đụng việc chọn phiếu nào sau đó). */
+  function thoatThem() {
+    che_do_them = false;
+    nhap_do = false;
+    cheDoThem.hidden = true;
+    o("noi-dung-panel").hidden = false;
+    o("panel").classList.remove("pc-dang-them");
+    khoiDiemThem.hidden = true;
+    // Xóa trắng form để lần thêm sau là phiếu mới (component tự lo việc xóa).
+    phieuNhap.dispatchEvent(new CustomEvent("phieu:dat-lai"));
+  }
+
+  /** Hỏi xác nhận nếu đã nhập dở; true = đã thoát. */
+  function roiKhoiThem(): boolean {
+    if (nhap_do && !confirm("Phiếu đang nhập dở. Bỏ phiếu này?")) return false;
+    thoatThem();
+    return true;
+  }
+
+  o("nut-them").addEventListener("click", () => { if (!che_do_them) batDauThem(); });
+
+  o("nut-huy-them").addEventListener("click", () => {
+    if (!roiKhoiThem()) return;
+    // Về phiếu đang xem trước đó; chưa có (điện thoại) thì đóng lớp phủ; màn rộng
+    // thì lấy phiếu đầu bảng cho khỏi để panel trống.
+    if (phieu_truoc && ds.some((p) => p.id === phieu_truoc)) void moPhieu(phieu_truoc, true);
+    else if (ds.length && window.matchMedia("(min-width: 900px)").matches) void moPhieu(ds[0].id, true);
+    else dongPanel();
+  });
+
+  // Gửi xong: về chế độ xem, nạp lại bảng và mở đúng phiếu vừa thêm. Phiếu mới ở
+  // trạng thái "Mới"; mở tự động (tu_dong) nên không bị đổi sang "Đã xem".
+  phieuNhap.addEventListener("phieu:da-gui", (e) => {
+    const id: string | null = (e as CustomEvent).detail?.id ?? null;
+    thoatThem();
+    dongPanel();
+    void taiDanhSach(id ?? undefined);
+  });
+
+  // Esc khi lightbox đang mở do lib/lightbox.ts xử lý (nó chặn sự kiện ở pha capture),
+  // nên ở đây chỉ còn Esc đóng panel / hủy thêm.
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (che_do_them) { o("nut-huy-them").click(); return; }
+    if (!o("panel").hidden) dongPanel();
+  });
+
+  // ——— Quyết định hiện màn nào ———
+  async function dungTrang() {
+    const { data } = await supabase.auth.getSession();
+    const phien = data.session;
+    hien("man-cho", false);
+    if (!phien) {
+      hien("man-vao", true);
+      hien("man-chinh", false);
+      return;
+    }
+    o("nhan-tai-khoan").textContent = String(phien.user.user_metadata?.user_name ?? phien.user.email ?? "");
+    hien("man-vao", false);
+    hien("man-chinh", true);
+    void napBangDiem();
+    await taiDanhSach();
+  }
+
+  supabase.auth.onAuthStateChange(() => { dungTrang(); });
+  dungTrang();
+</script>
+
+</body>
+</html>

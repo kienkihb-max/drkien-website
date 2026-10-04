@@ -410,10 +410,10 @@ const NAM_NAY = new Date().getFullYear();
   function loiDinhDang(q: HTMLElement): string {
     const id = q.dataset.id;
     const khac = q.querySelector<HTMLInputElement>("input[data-khac]:checked");
-    if (khac && !q.querySelector<HTMLInputElement>(".q-khac")!.value.trim()) return "Bạn hãy ghi rõ vào ô Khác";
+    if (khac && !q.querySelector<HTMLInputElement>(".q-khac")!.value.trim()) return "Vui lòng điền ô Khác";
     const v = (q.querySelector<HTMLInputElement>("input")?.value ?? "").trim();
-    if (id === "nam_sinh" && !(Number(v) >= 1900 && Number(v) <= NAM_NAY)) return "Năm sinh gồm 4 chữ số, ví dụ 1985";
-    if (id === "sdt" && !/^\d{9,11}$/.test(v)) return "Số điện thoại gồm 9–11 chữ số";
+    if (id === "nam_sinh" && !(Number(v) >= 1900 && Number(v) <= NAM_NAY)) return "Vui lòng nhập năm sinh gồm 4 chữ số, ví dụ 1985";
+    if (id === "sdt" && !/^\d{9,11}$/.test(v)) return "Vui lòng nhập số điện thoại gồm 9–11 chữ số";
     return "";
   }
 
@@ -510,9 +510,9 @@ const NAM_NAY = new Date().getFullYear();
   oFile.addEventListener("change", () => {
     let loi = "";
     for (const f of oFile.files ?? []) {
-      if (!f.type.startsWith("image/")) loi = "Chỉ nhận tệp ảnh";
-      else if (f.size > MB_TOI_DA * 1024 * 1024) loi = `Mỗi ảnh tối đa ${MB_TOI_DA}MB`;
-      else if (dsAnh.length >= TOI_DA) loi = `Tối đa ${TOI_DA} ảnh`;
+      if (!f.type.startsWith("image/")) loi = "Vui lòng chọn tệp ảnh";
+      else if (f.size > MB_TOI_DA * 1024 * 1024) loi = `Vui lòng chọn ảnh nhỏ hơn ${MB_TOI_DA}MB`;
+      else if (dsAnh.length >= TOI_DA) loi = `Vui lòng chỉ chọn tối đa ${TOI_DA} ảnh`;
       else dsAnh.push(f);
     }
     oFile.value = ""; // cho phép chọn lại đúng tệp vừa xóa
@@ -542,7 +542,7 @@ const NAM_NAY = new Date().getFullYear();
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
-        loi(new Error("Không đọc được ảnh " + f.name + ". Bạn thử chọn ảnh khác."));
+        loi(new Error("Vui lòng chọn ảnh khác, không đọc được ảnh " + f.name));
       };
       img.src = url;
     });
@@ -552,7 +552,7 @@ const NAM_NAY = new Date().getFullYear();
   const thoiDiemMo = Date.now();
 
   function gomCauTraLoi(duong: string[]) {
-    const cot: { tieu_de: string; gia_tri: string }[] = [];
+    const cot: { ma: string; tieu_de: string; gia_tri: string }[] = [];
     for (const ma of duong) {
       phanEl(ma).querySelectorAll<HTMLElement>(".q").forEach((q) => {
         const loai = q.dataset.loai;
@@ -561,7 +561,7 @@ const NAM_NAY = new Date().getFullYear();
         else if (loai === "chon1" || loai === "chon_nhieu" || loai === "thang")
           gia_tri = giaTriChon(q.dataset.id!).join(" | ");
         else gia_tri = q.querySelector<HTMLInputElement>("input,textarea")!.value.trim();
-        cot.push({ tieu_de: q.dataset.cot!, gia_tri });
+        cot.push({ ma: q.dataset.id!, tieu_de: q.dataset.cot!, gia_tri });
       });
     }
     return cot;
@@ -574,11 +574,11 @@ const NAM_NAY = new Date().getFullYear();
     if (bay || Date.now() - thoiDiemMo < 8000) return hienXong();
 
     if (!DIEM_NHAN) {
-      throw new Error("Trang chưa được nối với nơi nhận phiếu. Bạn vui lòng nhắn Zalo cho bác sĩ.");
+      throw new Error("Vui lòng nhắn Zalo cho bác sĩ, trang chưa được nối với nơi nhận phiếu.");
     }
     const anh = await Promise.all(
       dsAnh.map(async (f, i) => ({
-        cot: qAnh.dataset.cot!,
+        ma: qAnh.dataset.id!,
         ten: `anh-luoi-${i + 1}.jpg`,
         mime: "image/jpeg",
         du_lieu: await nenAnh(f),
@@ -587,9 +587,10 @@ const NAM_NAY = new Date().getFullYear();
     const goi = {
       cot: gomCauTraLoi(duongDi()),
       anh,
-      // Họ tên gửi riêng để script đặt tên file ảnh; không dựa vào chữ câu hỏi
+      // Họ tên và năm sinh gửi riêng để script đặt tên file ảnh; không dựa vào chữ câu hỏi
       // (chữ này sẽ đổi khi chủ site sửa câu hỏi).
       ho_ten: form.querySelector<HTMLInputElement>('[name="ho_ten"]')!.value.trim(),
+      nam_sinh: form.querySelector<HTMLInputElement>('[name="nam_sinh"]')!.value.trim(),
     };
     // text/plain để là "yêu cầu đơn giản": Apps Script không trả lời được
     // bước hỏi dò (preflight) của trình duyệt, gửi application/json là hỏng.
@@ -599,7 +600,7 @@ const NAM_NAY = new Date().getFullYear();
       body: JSON.stringify(goi),
     });
     const kq = await tra_loi.json();
-    if (!kq.ok) throw new Error("Không gửi được phiếu. Bạn vui lòng thử lại.");
+    if (!kq.ok) throw new Error("Vui lòng thử lại, không gửi được phiếu.");
     hienXong();
   }
 
@@ -644,7 +645,7 @@ const NAM_NAY = new Date().getFullYear();
     } catch (e) {
       // Không in dữ liệu bệnh nhân ra console; chỉ báo lỗi cho người dùng.
       loiGui.textContent =
-        e instanceof Error && e.message ? e.message : "Không gửi được phiếu. Bạn kiểm tra mạng rồi thử lại.";
+        e instanceof Error && e.message ? e.message : "Vui lòng kiểm tra mạng rồi thử lại.";
       loiGui.hidden = false;
       nutTiep.textContent = "Gửi phiếu";
     } finally {

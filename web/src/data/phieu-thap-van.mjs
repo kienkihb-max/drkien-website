@@ -18,6 +18,12 @@
 // `co_khac: true` (tự thêm, xem CAU_CO_O_KHAC) là câu có lựa chọn "Khác (tự ghi)".
 // `bat_buoc: true` là câu có dấu * đỏ. `nguy_hiem: true` là câu "dấu hiệu
 // nguy hiểm": chọn "Có" thì hiện trang Cảnh báo.
+// MÃ CÂU HỎI (`id`) là khóa cố định giữa trang web và Google Sheet: Sheet gom dữ
+// liệu theo mã này chứ không theo chữ câu hỏi. Vì vậy chữ `nhan` đổi thoải mái
+// (Sheet tự cập nhật tên cột, dữ liệu cũ giữ nguyên) và đổi thứ tự câu cũng
+// không lệch cột. CHỈ KHÔNG ĐƯỢC đổi `id` của câu đã có người trả lời: đổi mã
+// là Sheet coi như một câu mới và mở cột mới. Câu mới thì đặt mã mới, không
+// trùng mã nào khác (trùng hay thiếu mã thì dựng trang báo lỗi ngay).
 // Đáp án là chữ trơn, hoặc { ten, mo_ta } khi có dòng mô tả nhỏ bên dưới.
 
 const CO_KHONG = ["Có", "Không"];
@@ -29,27 +35,31 @@ const CO_KHONG = ["Có", "Không"];
 // thêm ở câu mà danh sách đáp án khó đủ (vị trí đau, triệu chứng, bệnh nền…).
 // Câu rẽ nhánh (chuyên khoa, giới tính) và câu "dấu hiệu nguy hiểm" thì KHÔNG
 // thêm, vì đáp án của chúng quyết định đường đi của phiếu. Muốn thêm hay bớt
-// một câu, sửa danh sách này (id = mã bộ + số thứ tự câu trong bộ).
+// một câu, sửa danh sách này (id = mã câu hỏi, xem phần chú thích về MÃ CÂU HỎI bên dưới).
 const CAU_CO_O_KHAC = new Set([
-  "cxk_1", "cxk_2", "cxk_9",
-  "tk_1", "tk_6",
-  "tn_1",
-  "th_1", "th_3",
-  "hh_1",
-  "tm_1", "tm_5",
-  "dl_1", "dl_2", "dl_5",
-  "nt_1",
-  "tv_3", "tv_10", "tv_11",
+  "cxk_vi_tri_dau", "cxk_tinh_chat_dau", "cxk_khoi_phat_dau",
+  "tk_trieu_chung_chinh", "tk_nang_hon_khi",
+  "tn_van_de_gap_phai",
+  "th_van_de_gap_phai", "th_nang_hon_khi",
+  "hh_van_de_gap_phai",
+  "tm_van_de_gap_phai", "tm_nang_hon_khi",
+  "dl_bieu_hien_da", "dl_vi_tri_ton_thuong", "dl_nang_hon_khi",
+  "nt_chan_doan_nghi_ngo",
+  "tv_suc_khoe_chung", "tv_tinh_than", "tv_benh_dang_co",
 ]);
 
+const MA_DA_DUNG = new Set();
 const danhSo = (ma, ds) =>
-  ds.map((c, i) => {
-    const id = c.id ?? `${ma}_${i + 1}`;
-    return { id, ...c, ...(CAU_CO_O_KHAC.has(id) ? { co_khac: true } : {}) };
+  ds.map((c) => {
+    if (!c.id) throw new Error("Câu hỏi thiếu mã (id): " + c.nhan);
+    if (MA_DA_DUNG.has(c.id)) throw new Error("Trùng mã câu hỏi: " + c.id);
+    MA_DA_DUNG.add(c.id);
+    return { ...c, ...(CAU_CO_O_KHAC.has(c.id) ? { co_khac: true } : {}) };
   });
 
 // Câu "dấu hiệu nguy hiểm" cuối mỗi bộ chuyên khoa.
-const nguyHiem = (chu_thich) => ({
+const nguyHiem = (id, chu_thich) => ({
+  id,
   loai: "chon1",
   bat_buoc: true,
   nguy_hiem: true,
@@ -120,12 +130,14 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh cơ xương khớp",
     cau_hoi: danhSo("cxk", [
       {
+        id: "cxk_vi_tri_dau",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn đau ở đâu?",
         dap_an: ["Cổ vai gáy", "Vai", "Lưng trên", "Thắt lưng", "Háng", "Gối", "Cổ chân, bàn chân", "Khớp nhỏ bàn tay"],
       },
       {
+        id: "cxk_tinh_chat_dau",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Cơn đau của bạn như thế nào?",
@@ -139,24 +151,28 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "cxk_anh_huong_thoi_tiet",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Thời tiết ảnh hưởng đến cơn đau của bạn thế nào?",
         dap_an: ["Tăng khi trời lạnh, ẩm", "Tăng khi trời nóng", "Không ảnh hưởng"],
       },
       {
+        id: "cxk_cho_dau_sung",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Chỗ đau của bạn có sưng không?",
         dap_an: ["Không sưng", "Sưng, không nóng đỏ", "Sưng, nóng, đỏ"],
       },
       {
+        id: "cxk_cung_khop_buoi_sang",
         loai: "chon1",
         nhan: "Buổi sáng ngủ dậy, bạn có bị cứng khớp không?",
         dap_an: ["Không", "Có, dưới 30 phút", "Có, trên 30 phút"],
       },
-      { loai: "chon1", nhan: "Cơn đau của bạn có tăng về đêm không?", dap_an: ["Không", "Có"] },
+      { id: "cxk_dau_ve_dem", loai: "chon1", nhan: "Cơn đau của bạn có tăng về đêm không?", dap_an: ["Không", "Có"] },
       {
+        id: "cxk_muc_do_dau",
         loai: "thang",
         bat_buoc: true,
         nhan: "Mức đau của bạn hiện giờ là bao nhiêu?",
@@ -164,11 +180,13 @@ export const BO_CHUYEN_KHOA = {
         nhan_phai: "10 · Đau không chịu nổi",
       },
       {
+        id: "cxk_te_bi_lan",
         loai: "chon1",
         nhan: "Bạn có bị tê bì lan xuống tay hoặc chân không?",
         dap_an: ["Không", "Lan xuống tay", "Lan xuống chân"],
       },
       {
+        id: "cxk_khoi_phat_dau",
         loai: "chon1",
         nhan: "Cơn đau của bạn bắt đầu từ khi nào?",
         dap_an: [
@@ -178,7 +196,7 @@ export const BO_CHUYEN_KHOA = {
           "Không rõ",
         ],
       },
-      nguyHiem("Sốt kèm khớp sưng nóng · Đau sau té ngã hoặc va đập mạnh · Sụt cân không rõ lý do"),
+      nguyHiem("cxk_dau_hieu_nguy_hiem", "Sốt kèm khớp sưng nóng · Đau sau té ngã hoặc va đập mạnh · Sụt cân không rõ lý do"),
     ]),
   },
 
@@ -187,12 +205,14 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh thần kinh",
     cau_hoi: danhSo("tk", [
       {
+        id: "tk_trieu_chung_chinh",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn gặp triệu chứng chính nào?",
         dap_an: ["Đau đầu", "Chóng mặt", "Mất ngủ", "Tê bì tay chân", "Run tay", "Hay quên"],
       },
       {
+        id: "tk_kieu_dau_dau",
         loai: "chon1",
         nhan: "Nếu bạn bị đau đầu, cơn đau giống mô tả nào nhất?",
         dap_an: [
@@ -204,22 +224,25 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "tk_vi_tri_dau_dau",
         loai: "chon_nhieu",
         nhan: "Bạn đau đầu ở vị trí nào?",
         dap_an: ["Trán", "Hai bên thái dương", "Đỉnh đầu", "Gáy", "Cả đầu"],
       },
       {
+        id: "tk_chong_mat_kem_theo",
         loai: "chon1",
         nhan: "Bạn bị chóng mặt kèm theo triệu chứng nào?",
         dap_an: ["Không chóng mặt", "Mặt đỏ, dễ cáu", "Buồn nôn, nặng đầu", "Khi đứng dậy, kèm mệt"],
       },
-      { loai: "chon1", nhan: "Bạn có bị tê bì không?", dap_an: ["Không", "Tê kèm mỏi yếu", "Tê kèm đau nhói"] },
+      { id: "tk_te_bi", loai: "chon1", nhan: "Bạn có bị tê bì không?", dap_an: ["Không", "Tê kèm mỏi yếu", "Tê kèm đau nhói"] },
       {
+        id: "tk_nang_hon_khi",
         loai: "chon_nhieu",
         nhan: "Triệu chứng của bạn nặng hơn khi nào?",
         dap_an: ["Căng thẳng", "Thiếu ngủ, làm việc nhiều", "Trời ẩm", "Không rõ"],
       },
-      nguyHiem("Đột ngột yếu hoặc tê nửa người · Méo miệng, nói khó · Đau đầu dữ dội đột ngột, chưa từng bị"),
+      nguyHiem("tk_dau_hieu_nguy_hiem", "Đột ngột yếu hoặc tê nửa người · Méo miệng, nói khó · Đau đầu dữ dội đột ngột, chưa từng bị"),
     ]),
   },
 
@@ -228,6 +251,7 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh tiết niệu",
     cau_hoi: danhSo("tn", [
       {
+        id: "tn_van_de_gap_phai",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn gặp những vấn đề nào?",
@@ -240,28 +264,32 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "tn_tieu_dem",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Ban đêm bạn dậy đi tiểu mấy lần?",
         dap_an: ["0 lần", "1 lần", "2 lần", "Từ 3 lần trở lên"],
       },
       {
+        id: "tn_mau_nuoc_tieu",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Nước tiểu của bạn có màu gì?",
         dap_an: ["Trong", "Vàng nhạt", "Vàng sẫm", "Đục"],
       },
       {
+        id: "tn_lung_goi",
         loai: "chon1",
         nhan: "Lưng và gối của bạn thế nào?",
         dap_an: ["Bình thường", "Mỏi, lạnh, thích chườm ấm", "Mỏi, nóng trong người, khô miệng"],
       },
       {
+        id: "tn_thoi_diem_xuat_hien",
         loai: "chon1",
         nhan: "Triệu chứng của bạn xuất hiện như thế nào?",
         dap_an: ["Đột ngột vài ngày nay", "Kéo dài nhiều tháng"],
       },
-      nguyHiem("Tiểu ra máu · Sốt kèm đau hông lưng · Không tiểu được"),
+      nguyHiem("tn_dau_hieu_nguy_hiem", "Tiểu ra máu · Sốt kèm đau hông lưng · Không tiểu được"),
     ]),
   },
 
@@ -270,6 +298,7 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh tiêu hóa",
     cau_hoi: danhSo("th", [
       {
+        id: "th_van_de_gap_phai",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn gặp những vấn đề nào?",
@@ -283,6 +312,7 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "th_kieu_dau_bung",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Cơn đau bụng của bạn giống mô tả nào nhất?",
@@ -295,6 +325,7 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "th_nang_hon_khi",
         loai: "chon1",
         nhan: "Triệu chứng của bạn nặng hơn trong trường hợp nào?",
         dap_an: [
@@ -306,6 +337,7 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "th_tinh_chat_phan",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Phân của bạn gần đây như thế nào?",
@@ -319,11 +351,12 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "th_noi_soi_da_day",
         loai: "chon1",
         nhan: "Bạn đã từng nội soi dạ dày chưa?",
         dap_an: ["Chưa", "Có, bình thường", "Có, viêm hoặc loét", "Có, nhiễm vi khuẩn HP"],
       },
-      nguyHiem("Nôn ra máu · Đi ngoài phân đen hoặc có máu · Sụt cân nhanh không rõ lý do · Khó nuốt"),
+      nguyHiem("th_dau_hieu_nguy_hiem", "Nôn ra máu · Đi ngoài phân đen hoặc có máu · Sụt cân nhanh không rõ lý do · Khó nuốt"),
     ]),
   },
 
@@ -332,12 +365,14 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh hô hấp, tai mũi họng",
     cau_hoi: danhSo("hh", [
       {
+        id: "hh_van_de_gap_phai",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn gặp những vấn đề nào?",
         dap_an: ["Ho", "Khạc đờm", "Khò khè, khó thở", "Nghẹt mũi, sổ mũi", "Đau, rát họng", "Ù tai, nghẹt tai"],
       },
       {
+        id: "hh_kieu_ho",
         loai: "chon1",
         nhan: "Nếu bạn bị ho, cơn ho của bạn như thế nào?",
         dap_an: [
@@ -349,6 +384,7 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "hh_mui",
         loai: "chon1",
         nhan: "Mũi của bạn thế nào?",
         dap_an: [
@@ -359,11 +395,13 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "hh_hong",
         loai: "chon1",
         nhan: "Họng của bạn thế nào?",
         dap_an: ["Bình thường", "Đỏ, đau rát", "Vướng như có dị vật, không đau", "Khô họng nhiều về đêm"],
       },
       {
+        id: "hh_chiu_thoi_tiet",
         loai: "chon1",
         nhan: "Khả năng chịu thời tiết của bạn thế nào?",
         dap_an: [
@@ -372,7 +410,7 @@ export const BO_CHUYEN_KHOA = {
           "Không bị ảnh hưởng",
         ],
       },
-      nguyHiem("Khó thở khi nghỉ · Ho ra máu · Sốt cao trên 3 ngày · Môi tím"),
+      nguyHiem("hh_dau_hieu_nguy_hiem", "Khó thở khi nghỉ · Ho ra máu · Sốt cao trên 3 ngày · Môi tím"),
     ]),
   },
 
@@ -381,6 +419,7 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh tim mạch, huyết áp",
     cau_hoi: danhSo("tm", [
       {
+        id: "tm_van_de_gap_phai",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn gặp những vấn đề nào?",
@@ -394,18 +433,21 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "tm_huyet_ap",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Huyết áp của bạn thường ở mức nào?",
         dap_an: ["Cao, trên 140/90", "Bình thường", "Thấp, dưới 90/60", "Chưa đo"],
       },
       {
+        id: "tm_cam_giac_nguc",
         loai: "chon1",
         nhan: "Vùng ngực của bạn có cảm giác gì?",
         dap_an: ["Bình thường", "Tức nặng như bị đè", "Nhói từng cơn vùng tim", "Hồi hộp, hay lo, hay quên"],
       },
-      { loai: "chon1", nhan: "Chân của bạn có bị phù không?", dap_an: ["Không", "Phù buổi chiều, ấn lõm"] },
+      { id: "tm_phu_chan", loai: "chon1", nhan: "Chân của bạn có bị phù không?", dap_an: ["Không", "Phù buổi chiều, ấn lõm"] },
       {
+        id: "tm_nang_hon_khi",
         loai: "chon_nhieu",
         nhan: "Triệu chứng của bạn nặng hơn khi nào?",
         dap_an: [
@@ -416,7 +458,7 @@ export const BO_CHUYEN_KHOA = {
           "Không rõ",
         ],
       },
-      nguyHiem("Đau ngực dữ dội lan tay hoặc hàm · Khó thở khi nghỉ · Ngất · Huyết áp trên 180/110"),
+      nguyHiem("tm_dau_hieu_nguy_hiem", "Đau ngực dữ dội lan tay hoặc hàm · Khó thở khi nghỉ · Ngất · Huyết áp trên 180/110"),
     ]),
   },
 
@@ -425,34 +467,39 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh da liễu",
     cau_hoi: danhSo("dl", [
       {
+        id: "dl_bieu_hien_da",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Da của bạn đang có biểu hiện gì?",
         dap_an: ["Mẩn đỏ", "Ngứa", "Mụn", "Nổi mề đay", "Khô da, bong tróc", "Chàm, rỉ dịch"],
       },
       {
+        id: "dl_vi_tri_ton_thuong",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Tổn thương xuất hiện ở vị trí nào trên cơ thể bạn?",
         dap_an: ["Mặt", "Thân mình", "Tay chân", "Nếp gấp", "Da đầu", "Toàn thân"],
       },
       {
+        id: "dl_tinh_chat_ngua",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Bạn bị ngứa như thế nào?",
         dap_an: ["Không ngứa", "Tăng khi nóng, ra mồ hôi", "Tăng khi gặp gió, lạnh", "Ngứa về đêm, da khô"],
       },
       {
+        id: "dl_chay_dich",
         loai: "chon1",
         nhan: "Tổn thương trên da của bạn có chảy dịch không?",
         dap_an: ["Không", "Dịch trong", "Có mủ vàng"],
       },
       {
+        id: "dl_nang_hon_khi",
         loai: "chon_nhieu",
         nhan: "Bạn thấy tình trạng nặng hơn khi nào?",
         dap_an: ["Ăn hải sản, đồ cay", "Căng thẳng", "Thay đổi thời tiết", "Dùng mỹ phẩm, hóa chất", "Không rõ"],
       },
-      nguyHiem("Sưng môi, mặt kèm khó thở · Phát ban toàn thân kèm sốt · Vết loét lan nhanh"),
+      nguyHiem("dl_dau_hieu_nguy_hiem", "Sưng môi, mặt kèm khó thở · Phát ban toàn thân kèm sốt · Vết loét lan nhanh"),
     ]),
   },
 
@@ -461,32 +508,37 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh phụ khoa",
     cau_hoi: danhSo("pk", [
       {
+        id: "pk_tinh_trang",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Tình trạng hiện tại của bạn là gì?",
         dap_an: ["Còn kinh", "Đã mãn kinh hoặc tiền mãn kinh", "Đang mang thai", "Đang cho con bú"],
       },
       {
+        id: "pk_chu_ky_kinh",
         loai: "chon1",
         nhan: "Chu kỳ kinh của bạn thế nào?",
         dap_an: ["Đều", "Đến sớm", "Đến muộn", "Lúc sớm lúc muộn"],
       },
       {
+        id: "pk_mau_luong_kinh",
         loai: "chon_nhieu",
         nhan: "Màu và lượng kinh của bạn thế nào?",
         dap_an: ["Bình thường", "Nhạt màu, ít", "Đỏ sẫm, có máu cục", "Đỏ tươi, nhiều"],
       },
       {
+        id: "pk_khi_hu",
         loai: "chon1",
         nhan: "Khí hư của bạn thế nào?",
         dap_an: ["Bình thường", "Nhiều, trắng loãng", "Vàng, có mùi, ngứa", "Ít, khô"],
       },
       {
+        id: "pk_dau_bung_kinh",
         loai: "chon1",
         nhan: "Bạn có bị đau bụng kinh không?",
         dap_an: ["Không", "Đau trước kỳ, tức ngực", "Đau trong kỳ, đỡ khi chườm ấm", "Đau âm ỉ sau kỳ"],
       },
-      nguyHiem(
+      nguyHiem("pk_dau_hieu_nguy_hiem", 
         "Đang mang thai kèm ra máu, đau bụng · Ra huyết thấm hơn 1 băng mỗi giờ · Đau bụng dưới dữ dội kèm sốt",
       ),
     ]),
@@ -497,6 +549,7 @@ export const BO_CHUYEN_KHOA = {
     tieu_de: "Mô tả triệu chứng bệnh nội tiết, chuyển hóa",
     cau_hoi: danhSo("nt", [
       {
+        id: "nt_chan_doan_nghi_ngo",
         loai: "chon_nhieu",
         bat_buoc: true,
         nhan: "Bạn đã được chẩn đoán hoặc nghi ngờ mắc bệnh nào?",
@@ -510,17 +563,20 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "nt_khat_doi_tieu_nhieu",
         loai: "chon1",
         bat_buoc: true,
         nhan: "Bạn có bị khát, đói hoặc tiểu nhiều không?",
         dap_an: ["Không", "Khát nhiều, uống nhiều, tiểu nhiều", "Hay đói, ăn nhiều"],
       },
       {
+        id: "nt_can_nang_6_thang",
         loai: "chon1",
         nhan: "Cân nặng của bạn 6 tháng gần đây thay đổi thế nào?",
         dap_an: ["Ổn định", "Tăng, người nặng nề, nhiều đờm", "Sụt cân dù ăn nhiều"],
       },
       {
+        id: "nt_cam_giac_co_the",
         loai: "chon1",
         nhan: "Bạn cảm thấy cơ thể mình thế nào?",
         dap_an: [
@@ -531,11 +587,12 @@ export const BO_CHUYEN_KHOA = {
         ],
       },
       {
+        id: "nt_chi_so_xet_nghiem",
         loai: "doan",
         nhan: "Chỉ số xét nghiệm gần nhất của bạn là bao nhiêu (nếu có)?",
         chu_thich: "Ví dụ: đường huyết đói, HbA1c, cholesterol, TSH.",
       },
-      nguyHiem("Khát nhiều kèm lơ mơ, thở nhanh · Đường huyết trên 300 mg/dL · Sụt cân nhanh không rõ lý do"),
+      nguyHiem("nt_dau_hieu_nguy_hiem", "Khát nhiều kèm lơ mơ, thở nhanh · Đường huyết trên 300 mg/dL · Sụt cân nhanh không rõ lý do"),
     ]),
   },
 };
@@ -561,6 +618,7 @@ export const PHAN_THAP_VAN = {
   tieu_de: "Cơ thể bạn thường ngày thế nào?",
   cau_hoi: danhSo("tv", [
     {
+      id: "tv_cam_giac_hang_ngay",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Bạn thường cảm thấy cơ thể thế nào hằng ngày?",
@@ -573,24 +631,28 @@ export const PHAN_THAP_VAN = {
       ],
     },
     {
+      id: "tv_mo_hoi",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Mồ hôi của bạn thế nào?",
       dap_an: ["Bình thường", "Ra nhiều dù không vận động", "Ra khi ngủ, tỉnh dậy thì hết", "Ít hoặc không ra mồ hôi"],
     },
     {
+      id: "tv_suc_khoe_chung",
       loai: "chon_nhieu",
       nhan: "Sức khỏe chung của bạn thế nào?",
       dap_an: ["Bình thường", "Hay mệt, hụt hơi", "Nói nhỏ, ngại nói", "Người nặng nề", "Lưng gối mỏi yếu"],
     },
     {
+      id: "tv_an_uong",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Việc ăn uống của bạn thế nào?",
       dap_an: ["Ngon miệng", "Chán ăn", "Ăn nhiều, mau đói", "Ăn xong đầy bụng, khó tiêu"],
     },
-    { loai: "chon1", nhan: "Miệng của bạn có vị gì?", dap_an: ["Bình thường", "Đắng", "Nhạt", "Dính, nhớt"] },
+    { id: "tv_vi_mieng", loai: "chon1", nhan: "Miệng của bạn có vị gì?", dap_an: ["Bình thường", "Đắng", "Nhạt", "Dính, nhớt"] },
     {
+      id: "tv_khat_nuoc",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Bạn có hay khát nước không?",
@@ -603,30 +665,34 @@ export const PHAN_THAP_VAN = {
       ],
     },
     {
+      id: "tv_di_ngoai",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Việc đi ngoài của bạn thế nào?",
       dap_an: ["Bình thường", "Táo, phân khô", "Phân nát, không thành khuôn", "Đi lỏng vào sáng sớm"],
     },
-    { loai: "chon1", nhan: "Nước tiểu của bạn thế nào?", dap_an: ["Trong, nhiều", "Vàng nhạt", "Vàng sẫm", "Đục"] },
+    { id: "tv_nuoc_tieu", loai: "chon1", nhan: "Nước tiểu của bạn thế nào?", dap_an: ["Trong, nhiều", "Vàng nhạt", "Vàng sẫm", "Đục"] },
     {
+      id: "tv_giac_ngu",
       loai: "chon_nhieu",
       bat_buoc: true,
       nhan: "Giấc ngủ của bạn thế nào?",
       dap_an: ["Ngủ tốt", "Khó vào giấc", "Hay tỉnh giấc", "Mơ nhiều", "Ngủ nhiều vẫn mệt"],
     },
     {
+      id: "tv_tinh_than",
       loai: "chon_nhieu",
       nhan: "Tinh thần của bạn thế nào?",
       dap_an: ["Bình thường", "Hay cáu gắt", "Lo âu", "Hay quên", "Uể oải"],
     },
     {
+      id: "tv_benh_dang_co",
       loai: "chon_nhieu",
       bat_buoc: true,
       nhan: "Bạn đang có bệnh nào?",
       dap_an: ["Không có", "Tăng huyết áp", "Tiểu đường", "Mỡ máu", "Dạ dày", "Gan", "Thận", "Tim mạch"],
     },
-    { loai: "doan", nhan: "Bạn đang dùng thuốc gì (nếu có)?" },
+    { id: "tv_thuoc_dang_dung", loai: "doan", nhan: "Bạn đang dùng thuốc gì (nếu có)?" },
     {
       id: "gioi_tinh",
       loai: "chon1",
@@ -643,18 +709,21 @@ export const PHAN_KINH_NGUYET = {
   tieu_de: "Kinh nguyệt của bạn thế nào?",
   cau_hoi: danhSo("kn", [
     {
+      id: "kn_tinh_trang",
       loai: "chon1",
       bat_buoc: true,
       nhan: "Tình trạng hiện tại của bạn là gì?",
       dap_an: ["Kinh đều", "Kinh không đều", "Đã mãn kinh", "Đang mang thai", "Đang cho con bú"],
     },
     {
+      id: "kn_mau_luong_kinh",
       loai: "chon_nhieu",
       nhan: "Màu và lượng kinh của bạn thế nào?",
       chu_thich: "Bỏ qua nếu đã mãn kinh.",
       dap_an: ["Bình thường", "Nhạt màu, ít", "Đỏ sẫm, có máu cục", "Đỏ tươi, nhiều"],
     },
     {
+      id: "kn_dau_bung_kinh",
       loai: "chon1",
       nhan: "Bạn có bị đau bụng kinh không?",
       dap_an: ["Không", "Nhẹ", "Nặng, đỡ khi chườm ấm"],
@@ -676,17 +745,19 @@ export const PHAN_ANH_LUOI = {
   ],
   cau_hoi: danhSo("luoi", [
     {
+      id: "luoi_anh",
       loai: "anh",
       nhan: "Bạn hãy tải ảnh lưỡi lên (1–3 ảnh)",
       toi_da: 3,
       mb_toi_da: 10,
     },
     {
+      id: "luoi_an_uong_mau",
       loai: "chon1",
       nhan: "30 phút trước khi chụp, bạn có ăn uống đồ có màu không?",
       dap_an: ["Không", "Có"],
     },
-    { loai: "doan", nhan: "Bạn muốn nói thêm điều gì với bác sĩ?" },
+    { id: "luoi_ghi_chu", loai: "doan", nhan: "Bạn muốn nói thêm điều gì với bác sĩ?" },
   ]),
 };
 

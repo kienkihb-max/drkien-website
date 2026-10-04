@@ -38,6 +38,8 @@ const TRANG_TINH = [
   { duong_dan: "dieu-tri", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
   { duong_dan: "y-te-su-kien", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
   { duong_dan: "dien-gia-seminar", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
+  // 04/10: trang Sàng lọc bệnh (Phiếu Thập Vấn) mới lập.
+  { duong_dan: "sang-loc-benh", lastmod: "2026-10-04", tan_suat: "monthly", uu_tien: "0.7" },
   // 19/09: trang sản phẩm mới lập. Nội dung đọc từ data/san-pham.mjs, nên
   // thêm bớt một món trong file đó là phải sửa lastmod ở đây.
   { duong_dan: "san-pham", lastmod: "2026-09-19", tan_suat: "monthly", uu_tien: "0.8" },

@@ -1,0 +1,36 @@
+---
+// Trang "Sàng lọc bệnh": bệnh nhân điền Phiếu Thập Vấn rồi gửi về cho bác sĩ.
+// Câu hỏi nằm ở data/phieu-thap-van.mjs, form ở components/PhieuThapVan.astro.
+// Toàn bộ thẻ SEO do layouts/Trang.astro sinh.
+import Trang from "../layouts/Trang.astro";
+import DuongDan from "../components/DuongDan.astro";
+import PhieuThapVan from "../components/PhieuThapVan.astro";
+---
+
+<Trang
+  tieu_de="Sàng lọc bệnh — Phiếu thập vấn chuyên khoa"
+  mo_ta="Điền phiếu thập vấn chuyên khoa trên điện thoại để bác sĩ Lê Trung Kiên hiểu rõ tình trạng của bạn trước khi tư vấn."
+  duong_dan="sang-loc-benh"
+  loai_trang="service"
+  lop_body="subpage"
+  an_chan_trang
+  an_chat
+  scripts={["thong-tin.js"]}
+>
+  <section class="section cv-hero">
+    <div class="container">
+      <DuongDan hien_tai="Sàng lọc bệnh" />
+      <h1>Sàng lọc bệnh</h1>
+      <p class="lead">
+        Điền phiếu để bác sĩ hiểu rõ tình trạng của bạn trước khi tư vấn.
+        Bác sĩ sẽ xem phiếu và liên hệ lại với bạn qua Zalo.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <PhieuThapVan />
+    </div>
+  </section>
+</Trang>

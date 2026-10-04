@@ -57,6 +57,14 @@ interface Props {
    */
   bare?: boolean;
   /**
+   * Bỏ chân trang nhưng giữ đầu trang. Dùng cho trang biểu mẫu /sang-loc-benh:
+   * bệnh nhân đang điền phiếu không cần các đường dẫn ở chân trang kéo họ đi
+   * chỗ khác.
+   */
+  an_chan_trang?: boolean;
+  /** Bỏ nút chat nổi "Bạn có câu hỏi?" (AI Lâm) trên trang này. */
+  an_chat?: boolean;
+  /**
    * Các file JS trong public/ mà riêng trang này cần, ví dụ ["lightbox.js"].
    * Header, footer và bộ icon đã dựng sẵn phía máy chủ nên KHÔNG khai ở đây.
    */
@@ -82,6 +90,8 @@ const {
   loai_trang,
   lop_body,
   bare = false,
+  an_chan_trang = false,
+  an_chat = false,
   scripts = [],
 } = Astro.props;
 
@@ -164,9 +174,9 @@ const tieu_de_day_du =
   <slot />
 </main>
 
-{!bare && <Footer />}
+{!bare && !an_chan_trang && <Footer />}
 
-{!bare && <ChatWidget />}
+{!bare && !an_chat && <ChatWidget />}
 
 <ScrollMemory />
 

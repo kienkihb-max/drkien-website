@@ -1,0 +1,123 @@
+---
+// Một thẻ câu hỏi của Phiếu Thập Vấn. Dựng từ data/phieu-thap-van.mjs; mọi
+// phần của phiếu đều dùng chung file này để thẻ nào trông cũng như nhau.
+//
+// Phần chạy phía trình duyệt (kiểm tra bắt buộc, rẽ nhánh, tải ảnh) nằm ở
+// PhieuThapVan.astro và đọc các thuộc tính data-* đặt ở đây.
+interface Props {
+  c: any;
+  /** Tên phần, ghép với chữ câu hỏi thành tên cột trong Google Sheet. */
+  phan: string;
+}
+const { c, phan } = Astro.props;
+
+// Đáp án là chữ trơn hoặc { ten, mo_ta, bo }; đưa về một dạng cho dễ lặp.
+const dap_an = (c.dap_an ?? []).map((d: any) =>
+  typeof d === "string" ? { ten: d } : d,
+);
+const la_nhom = c.loai === "chon1" || c.loai === "chon_nhieu";
+const kieu = c.loai === "chon1" ? "radio" : "checkbox";
+---
+
+<div
+  class="q"
+  id={"q-" + c.id}
+  data-id={c.id}
+  data-loai={c.loai}
+  data-bat-buoc={c.bat_buoc ? "1" : undefined}
+  data-nguy-hiem={c.nguy_hiem ? "1" : undefined}
+  data-cot={phan + " | " + c.nhan}
+  role={la_nhom || c.loai === "thang" ? "group" : undefined}
+  aria-labelledby={"nhan-" + c.id}
+>
+  <p class="q-nhan" id={"nhan-" + c.id}>
+    {c.nhan}{c.bat_buoc && <span class="q-sao" aria-hidden="true"> *</span>}
+  </p>
+  {c.chu_thich && <p class="q-chu-thich">{c.chu_thich}</p>}
+
+  {la_nhom && (
+    <div class="q-lua-chon">
+      {dap_an.map((d: any) => (
+        <label class="lua-chon">
+          <input
+            type={kieu}
+            name={c.id}
+            value={d.ten}
+            data-bo={d.bo ?? (c.id === "chuyen_khoa" ? "" : undefined)}
+          />
+          <span class="lua-chon-chu">
+            {d.ten}
+            {d.mo_ta && <small>{d.mo_ta}</small>}
+          </span>
+        </label>
+      ))}
+      {c.co_khac && (
+        <>
+          <label class="lua-chon">
+            <input type={kieu} name={c.id} value="Khác" data-khac="1" />
+            <span class="lua-chon-chu">Khác (tự ghi)</span>
+          </label>
+          {/* Ô gõ chữ chỉ hiện khi chọn "Khác"; script trong PhieuThapVan.astro bật/tắt. */}
+          <input
+            class="q-o q-khac"
+            type="text"
+            name={c.id + "__khac"}
+            maxlength="200"
+            placeholder="Bạn ghi rõ ở đây"
+            aria-label={c.nhan + " — Khác, bạn ghi rõ"}
+            hidden
+          />
+        </>
+      )}
+    </div>
+  )}
+
+  {c.loai === "ngan" && (
+    <input class="q-o" type="text" name={c.id} aria-labelledby={"nhan-" + c.id} autocomplete={c.id === "ho_ten" ? "name" : "off"} />
+  )}
+
+  {c.loai === "so" && (
+    <input
+      class="q-o"
+      type="text"
+      name={c.id}
+      aria-labelledby={"nhan-" + c.id}
+      inputmode="numeric"
+      autocomplete={c.id === "sdt" ? "tel" : "off"}
+      maxlength={c.id === "nam_sinh" ? 4 : 15}
+    />
+  )}
+
+  {c.loai === "doan" && <textarea class="q-o" name={c.id} rows="3" aria-labelledby={"nhan-" + c.id}></textarea>}
+
+  {c.loai === "thang" && (
+    <>
+      <div class="q-thang">
+        {Array.from({ length: 11 }, (_, i) => (
+          <label class="thang-so">
+            <input type="radio" name={c.id} value={String(i)} />
+            <span>{i}</span>
+          </label>
+        ))}
+      </div>
+      <div class="q-thang-nhan">
+        <span>{c.nhan_trai}</span>
+        <span>{c.nhan_phai}</span>
+      </div>
+    </>
+  )}
+
+  {c.loai === "anh" && (
+    <div class="q-anh" data-toi-da={c.toi_da} data-mb-toi-da={c.mb_toi_da}>
+      {/* Không đặt thuộc tính capture: có nó thì điện thoại chỉ mở máy ảnh,
+          bệnh nhân không chọn được ảnh đã chụp sẵn trong thư viện. */}
+      <label class="q-anh-nut">
+        <input type="file" accept="image/*" multiple />
+        <span>Chụp ảnh hoặc chọn từ thư viện</span>
+      </label>
+      <ul class="q-anh-ds"></ul>
+    </div>
+  )}
+
+  <p class="q-loi" role="alert" hidden>Vui lòng điền thông tin</p>
+</div>

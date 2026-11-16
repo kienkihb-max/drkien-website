@@ -37,7 +37,8 @@ const TRANG_TINH = [
   // 13/09: ba trang dịch vụ được thêm khối "Bài viết liên quan".
   { duong_dan: "dieu-tri", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
   { duong_dan: "y-te-su-kien", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
-  { duong_dan: "dien-gia-seminar", lastmod: "2026-09-13", tan_suat: "monthly", uu_tien: "0.8" },
+  // 16/11: thêm Workshop "Chạy khỏe không chấn thương" tại Savita Rehab vào trang diễn giả.
+  { duong_dan: "dien-gia-seminar", lastmod: "2026-11-16", tan_suat: "monthly", uu_tien: "0.8" },
   // 04/10: trang Sàng lọc bệnh (Phiếu Thập Vấn) mới lập.
   { duong_dan: "sang-loc-benh", lastmod: "2026-10-04", tan_suat: "monthly", uu_tien: "0.7" },
   // 19/09: trang sản phẩm mới lập. Nội dung đọc từ data/san-pham.mjs, nên

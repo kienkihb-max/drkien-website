@@ -1,0 +1,144 @@
+---
+// Trang đọc lưỡi AI "Thiệt chẩn" — app chạy mô hình ONNX ngay trong trình
+// duyệt (ảnh không rời máy). Logic ở src/lib/thiet-chan, chữ và ngưỡng ở
+// src/data/thiet-chan-dac-diem.mjs. Mô hình: assets/models (dong-bo-tinh.mjs
+// chép sang public lúc build).
+import Trang from "../layouts/Trang.astro";
+import ThietChanNav from "../components/ThietChanNav.astro";
+import { SO_ZALO, ZALO, GOI_DIEN, EMAIL, TEN_BAC_SI } from "../data/thong-tin.mjs";
+import { WEAK, MODEL_URL, MODEL_VERSION } from "../data/thiet-chan-dac-diem.mjs";
+import "../styles/thiet-chan-app.css";
+
+const tips = [
+  { t: "Chụp dưới ánh sáng tự nhiên", c: "#ba7517", d: "M16 10v0M16 3v4M16 25v4M3 16h4M25 16h4M6.8 6.8l2.8 2.8M22.4 22.4l2.8 2.8M6.8 25.2l2.8-2.8M22.4 9.6l2.8-2.8M16 10a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" },
+  { t: "Tắt đèn flash, tránh đèn vàng", c: "#b4482b", d: "M17 4 9 18h7l-1 10 8-14h-7zM5 5l22 22" },
+  { t: "Đưa lưỡi ra hết, thả lỏng, chụp thẳng", c: "#5f7a5a", d: "M6 12c0-4 4-6 10-6s10 2 10 6M10 13c0 9 3 15 6 15s6-6 6-15M16 17v6" },
+  { t: "Không ăn uống đồ có màu trong 30 phút trước khi chụp", c: "#7a6e62", d: "M7 11h15v8a6 6 0 0 1-6 6h-3a6 6 0 0 1-6-6zM22 13h2a3 3 0 0 1 0 6h-2M5 5l22 22" },
+];
+---
+
+<Trang
+  tieu_de="Thiệt chẩn AI — đọc hình ảnh lưỡi"
+  mo_ta="Chụp ảnh lưỡi, AI mô tả đặc điểm bằng tiếng Việt ngay trên máy của bạn và gợi ý để bác sĩ Lê Trung Kiên tham khảo."
+  duong_dan="thiet-chan"
+  lop_body="subpage"
+  an_chat
+>
+
+  <div class="tc-page tc-app" data-model={MODEL_URL} data-version={MODEL_VERSION} data-zalo={ZALO}>
+    <ThietChanNav current="app" />
+
+    <section id="doc-luoi" class="tc-wrap tca-section">
+      <!-- ===== Chụp ===== -->
+      <div id="s-start" class="tca-start">
+        <div class="tca-intro">
+          <h1>Thiệt chẩn AI: đọc hình ảnh lưỡi</h1>
+          <p class="tca-lead">Chụp hoặc tải ảnh lưỡi để AI nhận diện chất lưỡi, hình thể và rêu lưỡi, kèm gợi ý theo Y học cổ truyền để bác sĩ tham khảo.</p>
+          <ul class="tca-tips">
+            {tips.map((x) => (
+              <li>
+                <svg viewBox="0 0 32 32" fill="none" stroke={x.c} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={x.d} /></svg>
+                <span>{x.t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="tc-card tca-action">
+          <label class="tc-btn tc-btn-primary tca-btn-lg">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            Chụp ảnh lưỡi
+            <input id="cam" type="file" accept="image/*" capture="environment" />
+          </label>
+          <label class="tc-btn tc-btn-secondary tca-btn-lg">
+            Chọn ảnh có sẵn
+            <input id="pick" type="file" accept="image/*" />
+          </label>
+          <p class="tca-privacy">Ảnh được phân tích ngay trên máy của bạn, không tải lên máy chủ nào. Chỉ khi bạn bấm “Gửi cho bác sĩ”, ảnh mới được gửi qua ứng dụng bạn chọn.</p>
+          <p id="status" class="tca-status" role="status">Đang tải mô hình…</p>
+        </div>
+      </div>
+
+      <!-- ===== Đang phân tích ===== -->
+      <div id="s-busy" class="tca-busy" hidden>
+        <div class="tca-spinner" aria-hidden="true"></div>
+        <p>Đang phân tích ảnh trên máy của bạn…</p>
+      </div>
+
+      <!-- ===== Không thấy lưỡi ===== -->
+      <div id="s-nolip" class="tc-card tca-nolip" hidden>
+        <h2 id="nolip-title">Chưa thấy rõ lưỡi trong ảnh</h2>
+        <p id="nolip-text">AI không nhận ra lưỡi. Hãy há miệng, lè hết lưỡi ra ngoài và chụp lại gần hơn, đủ sáng.</p>
+        <button type="button" class="tc-btn tc-btn-primary" data-retake>Chụp lại</button>
+      </div>
+
+      <!-- ===== Kết quả ===== -->
+      <div id="s-result" hidden>
+        <p id="quality" class="tca-notice" hidden></p>
+        <div class="tca-result">
+          <figure class="tc-card tca-photo">
+            <canvas id="cv"></canvas>
+            <button type="button" class="tca-toggle" id="boxBtn">Ẩn khung</button>
+          </figure>
+          <div class="tca-read">
+            <div class="tca-conclusion">
+              <span class="tca-label">Kết luận ngắn</span>
+              <p id="conclusion" class="tca-conclusion-text"></p>
+            </div>
+            <div class="tc-card tca-desc">
+              <h2>AI thấy gì trên ảnh</h2>
+              <dl id="summary" class="tca-sum"></dl>
+            </div>
+            <div class="tca-bien-chung">
+              <h2>Gợi ý biện chứng <small>(để bác sĩ tham khảo)</small></h2>
+              <ul id="bienChung"></ul>
+              <p class="tca-disclaimer" id="disclaimer"></p>
+            </div>
+          </div>
+        </div>
+
+        <p class="tca-weak">
+          AI chưa đánh giá được (còn nhầm nhiều, bác sĩ sẽ xem trực tiếp trên ảnh):
+          {WEAK.map((w) => <span>{w}</span>)}
+        </p>
+
+        <div class="tca-contact">
+          <div class="tca-contact-info">
+            <h2>Muốn bác sĩ xem và khám kỹ hơn?</h2>
+            <p>Gửi ảnh và bản mô tả cho {TEN_BAC_SI}, bác sĩ sẽ trả lời bạn.</p>
+            <ul class="tca-contact-list">
+              <li>Điện thoại / Zalo: <a href={GOI_DIEN}>{SO_ZALO}</a></li>
+              {EMAIL && <li>Email: <a href={"mailto:" + EMAIL}>{EMAIL}</a></li>}
+            </ul>
+            <details class="tca-more">
+              <summary>Thêm họ tên, câu hỏi cho bác sĩ (không bắt buộc)</summary>
+              <label for="pName">Họ tên</label><input id="pName" autocomplete="name" />
+              <label for="pYear">Năm sinh</label><input id="pYear" inputmode="numeric" maxlength="4" />
+              <label for="pNote">Bạn muốn hỏi bác sĩ điều gì?</label>
+              <textarea id="pNote" placeholder="Ví dụ: hay mệt, ăn kém, khó ngủ…"></textarea>
+            </details>
+          </div>
+          <div class="tca-contact-actions">
+            <button type="button" class="tc-btn tc-btn-primary tca-btn-lg" id="sendBtn">Gửi ảnh và mô tả cho bác sĩ</button>
+            <div class="tca-row">
+              <a class="tc-btn tc-btn-secondary" href={GOI_DIEN}>Gọi điện</a>
+              <a class="tc-btn tc-btn-secondary" href={ZALO} target="_blank" rel="noopener">Nhắn Zalo</a>
+            </div>
+            <div class="tca-row">
+              <button type="button" class="tc-btn tc-btn-secondary" id="copyBtn">Sao chép bản mô tả</button>
+              <button type="button" class="tc-btn tc-btn-secondary" data-retake>Chụp ảnh khác</button>
+            </div>
+            <p class="tca-hint">Khi bấm gửi, thiết bị sẽ hỏi bạn chọn ứng dụng (ví dụ Zalo); ảnh chỉ được gửi tới người bạn chọn.</p>
+          </div>
+        </div>
+        <p class="tca-notice">Đây là mô tả hình ảnh tự động, không phải chẩn đoán. Kết quả phụ thuộc nhiều vào ánh sáng và cách chụp. Nếu có triệu chứng cấp tính hoặc khó chịu nhiều, hãy đi khám trực tiếp.</p>
+      </div>
+
+      <p id="toast" class="tca-toast" hidden role="status"></p>
+    </section>
+  </div>
+
+  <script is:inline src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+  <script>
+    import "../lib/thiet-chan/app.mjs";
+  </script>
+</Trang>

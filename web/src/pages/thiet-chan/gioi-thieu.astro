@@ -1,0 +1,115 @@
+---
+// Trang chủ của mục "Thiệt chẩn": giới thiệu, quy trình AI đọc, người làm web.
+// Nội dung quy trình bám README của mô hình: ảnh không rời máy, mô hình chạy
+// trong trình duyệt, không phải chẩn đoán.
+import Trang from "../../layouts/Trang.astro";
+import ThietChanNav from "../../components/ThietChanNav.astro";
+import { TEN_BAC_SI } from "../../data/thong-tin.mjs";
+import "../../styles/thiet-chan-pages.css";
+
+const steps = [
+  { t: "Chụp hoặc chọn ảnh", d: "Chụp lưỡi bằng điện thoại ở nơi đủ sáng, hoặc chọn một ảnh có sẵn." },
+  { t: "AI chạy ngay trên máy", d: "Mô hình được tải về trình duyệt và chạy tại chỗ. Ảnh không rời khỏi thiết bị của bạn." },
+  { t: "Mô tả bằng tiếng Việt", d: "Trang ghi nhận chất lưỡi, hình thể, rêu lưỡi và nhắc các yếu tố gây nhiễu như đồ ăn uống, ánh sáng." },
+  { t: "Gửi bác sĩ nếu muốn", d: "Bạn tự chọn gửi ảnh kèm bản mô tả cho bác sĩ qua ứng dụng như Zalo. Bác sĩ xem và trả lời." },
+];
+---
+
+<Trang
+  tieu_de="Giới thiệu Thiệt chẩn AI — đọc hình ảnh lưỡi"
+  mo_ta="Thiệt chẩn là nhìn lưỡi trong Y học cổ truyền. AI mô tả đặc điểm lưỡi ngay trên máy bạn để bác sĩ Lê Trung Kiên tham khảo."
+  duong_dan="thiet-chan/gioi-thieu"
+  lop_body="subpage"
+  an_chat
+>
+
+  <div class="tc-page tcp-page">
+    <ThietChanNav current="intro" />
+
+    <section class="tcp-section">
+      <div class="tc-wrap tcp-hero">
+        <div>
+          <span class="tcp-eyebrow">Thiệt chẩn AI</span>
+          <h1>Nhìn lưỡi để hiểu cơ thể, theo cách của Y học cổ truyền</h1>
+          <p class="tcp-lead">AI giúp mô tả những gì nhìn thấy trên lưỡi bằng tiếng Việt, ngay trên máy của bạn. Bác sĩ là người xem và nhận xét cuối cùng.</p>
+          <div class="tcp-hero-actions">
+            <a class="tc-btn tc-btn-primary" href="/thiet-chan#doc-luoi">Đọc lưỡi ngay</a>
+            <a class="tc-btn tc-btn-secondary" href="#quy-trinh">Xem cách hoạt động</a>
+          </div>
+        </div>
+        <!-- CHỜ ẢNH: tĩnh vật ấm trà gốm, thảo dược khô, nhân sâm trên vải lanh, nắng sớm dịu.
+             Tên file dự kiến assets/img/thiet-chan-hero.jpg (đặt ở gốc kho, không để trong web/public). -->
+        <figure class="tcp-hero-photo" role="img" aria-label="Chỗ để ảnh minh họa, chờ ảnh">
+          <span>Chờ ảnh: ấm trà gốm, thảo dược khô, nhân sâm trên vải lanh<br />(thiet-chan-hero.jpg)</span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="tcp-section tcp-section-alt">
+      <div class="tc-wrap tcp-two">
+        <div>
+          <span class="tcp-eyebrow">Thiệt chẩn là gì</span>
+          <h2>Một trong bốn cách khám của Y học cổ truyền</h2>
+        </div>
+        <div>
+          <p>Y học cổ truyền khám bệnh bằng bốn cách: vọng (nhìn), văn (nghe, ngửi), vấn (hỏi), thiết (bắt mạch). Thiệt chẩn là nhìn lưỡi, thuộc phần vọng chẩn.</p>
+          <p>Thầy thuốc quan sát màu sắc và hình thể của lưỡi cùng lớp rêu phủ trên mặt lưỡi, để hiểu thêm về tình trạng của cơ thể và có hướng hỏi bệnh, bắt mạch tiếp theo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tcp-section">
+      <div class="tc-wrap tcp-two">
+        <div>
+          <span class="tcp-eyebrow">Ứng dụng trong Y học cổ truyền</span>
+          <h2>Một gợi ý, đi cùng các cách khám khác</h2>
+        </div>
+        <div>
+          <p>Trong khám bệnh, bác sĩ xem lưỡi để có thêm manh mối: chất lưỡi (đỏ, nhạt, tím), hình thể (gầy mỏng, bệu), rêu lưỡi (trắng, vàng, bong). Những dấu hiệu này được đối chiếu với triệu chứng, mạch và lời kể của người bệnh.</p>
+          <p>Hình ảnh lưỡi chịu ảnh hưởng của ánh sáng, đồ ăn uống và cách chụp. Vì vậy, lưỡi không bao giờ là căn cứ duy nhất để kết luận.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="quy-trinh" class="tcp-section tcp-section-alt">
+      <div class="tc-wrap">
+        <div class="tcp-head">
+          <span class="tcp-eyebrow">Quy trình AI đọc</span>
+          <h2>Bốn bước, tất cả trong tầm tay bạn</h2>
+        </div>
+        <ol class="tcp-steps">
+          {steps.map((s) => (
+            <li><h3>{s.t}</h3><p>{s.d}</p></li>
+          ))}
+        </ol>
+        <div class="tcp-notes">
+          <div class="tc-card"><h3>Ảnh không rời khỏi máy</h3><p>Trang không có máy chủ nhận ảnh. Ảnh chỉ được gửi đi khi bạn tự bấm “Gửi cho bác sĩ”.</p></div>
+          <div class="tc-card"><h3>Đây không phải chẩn đoán</h3><p>Kết quả chỉ là mô tả hình ảnh tự động và có thể sai. Kết luận do bác sĩ đưa ra sau khi khám. Nếu có triệu chứng cấp tính, hãy đi khám trực tiếp.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tcp-section">
+      <div class="tc-wrap tcp-doctor">
+        <img src="/assets/img/portrait.jpg" alt={TEN_BAC_SI} width="480" height="480" loading="lazy" />
+        <div>
+          <span class="tcp-eyebrow">Người thực hiện</span>
+          <h2>{TEN_BAC_SI}</h2>
+          <p>Bệnh viện Đa khoa Y học cổ truyền Hà Nội. Bác sĩ là người xem ảnh và nhận xét cuối cùng cho những ai gửi ảnh.</p>
+          <a class="tc-btn tc-btn-secondary" href="/bac-si-le-trung-kien">Xem hồ sơ bác sĩ</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="tcp-section tcp-section-alt">
+      <div class="tc-wrap tcp-cta">
+        <h2>Thử đọc lưỡi ngay hôm nay</h2>
+        <p>Mất chưa đến một phút, ảnh ở lại trên máy của bạn.</p>
+        <a class="tc-btn tc-btn-primary" href="/thiet-chan#doc-luoi">Đọc lưỡi ngay</a>
+      </div>
+    </section>
+
+    <!-- Nút dính: đi theo khi cuộn, dừng lại trước chân trang. -->
+    <div class="tcp-sticky"><a class="tc-btn tc-btn-primary" href="/thiet-chan#doc-luoi">Đọc lưỡi ngay</a></div>
+  </div>
+</Trang>

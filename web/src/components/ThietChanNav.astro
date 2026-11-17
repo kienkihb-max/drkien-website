@@ -1,0 +1,35 @@
+---
+// Dòng điều hướng nhỏ của mục "Thiệt chẩn" — một nguồn cho cả 3 trang.
+//
+// Chủ site không muốn hai thanh header chồng nhau (17/11/2026), nên mục này
+// không có thanh dính riêng: vào mục qua menu Dịch vụ › Chụp ảnh lưỡi của
+// header chính, còn ở đây chỉ là breadcrumb của site cộng hai link chữ nhỏ
+// sang trang giới thiệu và liên hệ.
+import "../styles/thiet-chan.css";
+import DuongDan from "./DuongDan.astro";
+
+interface Props {
+  /** Trang đang xem. */
+  current: "intro" | "app" | "contact";
+}
+const { current } = Astro.props;
+
+const APP = { chu: "Chụp ảnh lưỡi", dia_chi: "/thiet-chan" };
+const LINKS = [
+  { key: "intro", href: "/thiet-chan/gioi-thieu", label: "Thiệt chẩn là gì?" },
+  { key: "contact", href: "/thiet-chan/lien-he", label: "Liên hệ bác sĩ" },
+] as const;
+---
+
+<div class="tc-wrap tc-crumbs">
+  {current === "app" ? (
+    <DuongDan hien_tai="Chụp ảnh lưỡi" />
+  ) : (
+    <DuongDan giua={[APP]} hien_tai={current === "intro" ? "Giới thiệu" : "Liên hệ"} />
+  )}
+  <span class="tc-crumbs-links">
+    {LINKS.filter((l) => l.key !== current).map((l) => (
+      <a href={l.href}>{l.label}</a>
+    ))}
+  </span>
+</div>

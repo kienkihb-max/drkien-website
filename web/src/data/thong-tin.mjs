@@ -38,3 +38,7 @@ export const BAN_DO = "https://www.google.com/maps?q=" + TOA_DO + "&z=17&output=
 export const TEN_BAC_SI = "ThS.BS Lê Trung Kiên";
 export const TEN_SITE = "Bác sĩ Lê Trung Kiên";
 export const GOC = "https://bacsikien.com";
+
+// Email nhận liên hệ cho mục Thiệt chẩn. Để rỗng thì các trang tự ẩn dòng
+// email — chưa có địa chỉ thật thì đừng điền bừa.
+export const EMAIL = "";

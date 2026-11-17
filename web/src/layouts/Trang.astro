@@ -57,6 +57,11 @@ interface Props {
    */
   bare?: boolean;
   /**
+   * Ẩn riêng nút chat nổi của Lâm, vẫn giữ đầu/chân trang. Dùng ở trang chụp
+   * ảnh lưỡi và trang kết quả: nút nổi che nội dung ở góc dưới phải trên điện thoại.
+   */
+  an_chat?: boolean;
+  /**
    * Các file JS trong public/ mà riêng trang này cần, ví dụ ["lightbox.js"].
    * Header, footer và bộ icon đã dựng sẵn phía máy chủ nên KHÔNG khai ở đây.
    */
@@ -64,6 +69,7 @@ interface Props {
 }
 
 const {
+  an_chat = false,
   tieu_de,
   tieu_de_tu_dat = false,
   mo_ta,
@@ -166,7 +172,7 @@ const tieu_de_day_du =
 
 {!bare && <Footer />}
 
-{!bare && <ChatWidget />}
+{!bare && !an_chat && <ChatWidget />}
 
 <ScrollMemory />
 

@@ -1,0 +1,76 @@
+/* Style riêng cho 2 trang giới thiệu và liên hệ của mục Thiệt chẩn.
+   Màu, bo góc, nút lấy từ thiet-chan.css (--tc-*), không đặt lại ở đây. */
+.tcp-page { padding-top: 84px; }
+@media (max-width: 720px) { .tcp-page { padding-top: 58px; } }
+
+.tcp-section { padding-block: clamp(56px, 8vw, 112px); }
+.tcp-section-alt { background: var(--tc-card); }
+.tcp-eyebrow {
+  display: inline-block; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--tc-muted); margin-bottom: 12px;
+}
+.tcp-page h1 { font-size: clamp(2rem, 4.2vw, 3.4rem); line-height: 1.2; margin: 0 0 20px; }
+.tcp-page h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.3; margin: 0 0 16px; }
+.tcp-page h3 { font-size: 1.15rem; margin: 0 0 8px; }
+.tcp-page p { line-height: 1.75; margin: 0 0 14px; }
+.tcp-lead { font-size: 1.15rem; color: var(--tc-muted); max-width: 54ch; }
+
+/* Hero: chữ trái, ảnh phải; điện thoại xếp dọc */
+.tcp-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: center; }
+.tcp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.tcp-hero-photo {
+  aspect-ratio: 1 / 1; max-height: 460px; width: 100%; border-radius: 28px; background: var(--tc-sage-soft);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 24px; color: var(--tc-muted); font-size: 0.95rem; overflow: hidden; margin: 0;
+}
+
+.tcp-two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: start; }
+.tcp-head { max-width: 62ch; margin-bottom: 40px; }
+
+/* Các bước */
+.tcp-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; list-style: none; padding: 0; margin: 0; counter-reset: s; }
+.tcp-steps li { background: var(--tc-bg); border-radius: var(--tc-radius); padding: 28px 24px; counter-increment: s; }
+.tcp-steps li::before {
+  content: counter(s); display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; background: var(--tc-sage); color: #fff;
+  font-family: var(--tc-serif); font-weight: 700; margin-bottom: 16px;
+}
+.tcp-steps p { margin: 0; color: var(--tc-muted); }
+
+.tcp-notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 28px; }
+.tcp-notes .tc-card { background: var(--tc-bg); }
+.tcp-notes .tc-card p { margin: 0; }
+
+/* Bác sĩ */
+.tcp-doctor { display: grid; grid-template-columns: 280px 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; }
+.tcp-doctor img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 28px; display: block; }
+
+/* CTA cuối + nút dính */
+.tcp-cta { text-align: center; max-width: 640px; margin-inline: auto; }
+.tcp-cta p { color: var(--tc-muted); }
+.tcp-sticky {
+  position: sticky; bottom: 16px; z-index: 15; display: flex; justify-content: flex-end; width: min(1240px, 100% - 32px); margin-inline: auto;
+  pointer-events: none; margin-top: -64px; height: 64px;
+}
+.tcp-sticky .tc-btn { pointer-events: auto; box-shadow: 0 8px 24px rgba(74, 63, 53, 0.25); }
+
+/* Liên hệ */
+.tcp-contact { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.tcp-contact .tc-card { padding: 36px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.tcp-contact .tc-card h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.tcp-contact .tcp-big { font-family: var(--tc-serif); font-size: 1.7rem; font-weight: 700; margin: 0 0 16px; }
+.tcp-contact .tc-card > .tc-btn { margin-top: auto; }
+.tcp-contact-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; }
+
+@media (max-width: 960px) {
+  .tcp-steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .tcp-hero, .tcp-two, .tcp-notes, .tcp-contact, .tcp-steps { grid-template-columns: 1fr; }
+  .tcp-hero-photo { aspect-ratio: 4 / 3; order: -1; }
+  .tcp-doctor { grid-template-columns: 1fr; }
+  .tcp-doctor img { max-width: 200px; }
+  .tcp-hero-actions .tc-btn, .tcp-contact .tc-card > .tc-btn { width: 100%; }
+  .tcp-contact-actions { width: 100%; }
+  .tcp-contact-actions .tc-btn { flex: 1; }
+}

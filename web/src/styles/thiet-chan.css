@@ -1,0 +1,75 @@
+/* Khung chung của mục "Thiệt chẩn" (3 trang: giới thiệu, đọc lưỡi, liên hệ).
+   Chỉ áp trong .tc-page; màu lấy từ biến của site chính. */
+.tc-page {
+  /* Lấy thẳng biến màu của site chính (style.css) để mục Thiệt chẩn cùng bộ
+     màu với bacsikien.com — đổi màu site là mục này đổi theo, không có bản
+     màu thứ hai để lệch. Tên --tc-* giữ lại để CSS các trang không phải sửa. */
+  --tc-bg: var(--white);
+  --tc-card: var(--gray-bg);
+  --tc-text: var(--text-heading);
+  --tc-muted: var(--text-body);
+  --tc-sage: var(--primary);
+  --tc-sage-soft: var(--primary-soft);
+  --tc-cta: var(--primary-2);
+  --tc-cta-hover: var(--primary);
+  --tc-radius: 16px;
+  --tc-radius-sm: var(--radius);
+  --tc-serif: var(--font-heading);
+
+  background: var(--tc-bg);
+  color: var(--tc-text);
+}
+.tc-page h1,
+.tc-page h2,
+.tc-page h3 {
+  font-family: var(--tc-serif);
+  color: var(--tc-text);
+}
+
+/* Khung rộng cho màn máy tính: trang tràn ngang, không bó cột hẹp. */
+.tc-wrap {
+  width: min(1240px, 100% - 32px);
+  margin-inline: auto;
+}
+
+.tc-card {
+  background: var(--tc-card);
+  border-radius: var(--tc-radius);
+  padding: 24px;
+}
+
+/* Nút: CTA cam đất là hành động chính, viền xô thơm là hành động phụ. */
+.tc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tc-btn-primary { background: var(--tc-cta); color: #fff; }
+.tc-btn-primary:hover { background: var(--tc-cta-hover); color: #fff; }
+.tc-btn-secondary { background: transparent; color: var(--tc-text); border-color: var(--tc-sage); }
+.tc-btn-secondary:hover { background: var(--tc-sage-soft); }
+.tc-btn:focus-visible { outline: 3px solid var(--tc-sage); outline-offset: 2px; }
+
+/* Dòng breadcrumb + link chữ nhỏ đầu mỗi trang của mục (ThietChanNav). */
+.tc-crumbs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-top: 12px;
+}
+.tc-crumbs .breadcrumb { margin: 0; }
+.tc-crumbs-links { display: flex; gap: 16px; font-size: var(--fs-sm); }
+.tc-crumbs-links a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.tc-crumbs-links a:hover { text-decoration: underline; }

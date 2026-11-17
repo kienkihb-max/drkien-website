@@ -24,4 +24,11 @@ export default defineConfig({
   // Không thêm dấu "/" vào cuối URL — site cũ không có, thêm vào là Google
   // coi như hai trang khác nhau và chia đôi thứ hạng.
   trailingSlash: "never",
+
+  // Chủ site chốt 17/11/2026 chỉ để lại bộ Thiệt chẩn mới: link của bản thử
+  // chụp ảnh lưỡi cũ chuyển sang trang mới để không chết link.
+  redirects: {
+    "/chup-anh-luoi": "/thiet-chan",
+    "/ket-qua-anh-luoi": "/thiet-chan",
+  },
 });

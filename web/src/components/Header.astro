@@ -12,7 +12,7 @@ interface Props {
   trang?: string;
 }
 import { DICH_VU } from "../data/dich-vu.mjs";
-import { HeartPulse, Presentation, Stethoscope } from "@lucide/astro";
+import { Camera, HeartPulse, Presentation, Stethoscope } from "@lucide/astro";
 
 // Khai từng icon một chứ không nhập cả bộ Lucide: nhập cả bộ là kéo theo
 // hơn 1800 icon vào lúc dựng. Thêm dịch vụ mới thì thêm một dòng ở đây cho
@@ -65,6 +65,13 @@ const MUC_DICH_VU = DICH_VU.map((d) => ({
               {m.chu}
             </a>
           ))}
+          {/* Chủ site yêu cầu 17/11/2026: đưa Chụp ảnh lưỡi vào menu dịch vụ
+              thăm khám, trỏ về mục Thiệt chẩn mới (/thiet-chan). Không thêm vào
+              data/dich-vu.mjs vì file đó còn sinh thẻ dịch vụ ở trang chủ. */}
+          <a href="/thiet-chan">
+            <Camera size={17} stroke-width={1.8} />
+            Chụp ảnh lưỡi
+          </a>
         </div>
       </div>
       <!-- Sản phẩm để riêng chứ không nhét vào menu xổ xuống "Dịch vụ":

@@ -1,0 +1,62 @@
+---
+// Trang liên hệ của mục "Thiệt chẩn". Chủ site đã chốt: chỉ Zalo/điện thoại và
+// bacsikien.com, không hiện địa chỉ hay giờ khám. EMAIL rỗng thì ẩn dòng email.
+import Trang from "../../layouts/Trang.astro";
+import ThietChanNav from "../../components/ThietChanNav.astro";
+import { SO_ZALO, ZALO, GOI_DIEN, GOC, EMAIL } from "../../data/thong-tin.mjs";
+import "../../styles/thiet-chan-pages.css";
+---
+
+<Trang
+  tieu_de="Liên hệ Thiệt chẩn AI"
+  mo_ta="Liên hệ bác sĩ Lê Trung Kiên qua Zalo hoặc điện thoại để được xem ảnh lưỡi và tư vấn."
+  duong_dan="thiet-chan/lien-he"
+  lop_body="subpage"
+  an_chat
+>
+
+  <div class="tc-page tcp-page">
+    <ThietChanNav current="contact" />
+
+    <section class="tcp-section">
+      <div class="tc-wrap">
+        <div class="tcp-head">
+          <span class="tcp-eyebrow">Liên hệ</span>
+          <h1>Muốn bác sĩ xem ảnh lưỡi của bạn?</h1>
+          <p class="tcp-lead">Nhắn Zalo hoặc gọi điện, bác sĩ sẽ trả lời bạn.</p>
+        </div>
+
+        <div class="tcp-contact">
+          <div class="tc-card">
+            <h2>Zalo / Điện thoại</h2>
+            <p class="tcp-big">{SO_ZALO}</p>
+            <div class="tcp-contact-actions">
+              <a class="tc-btn tc-btn-primary" href={ZALO} target="_blank" rel="noopener">Nhắn Zalo</a>
+              <a class="tc-btn tc-btn-secondary" href={GOI_DIEN}>Gọi điện</a>
+            </div>
+          </div>
+          <div class="tc-card">
+            <h2>Website bác sĩ</h2>
+            <p class="tcp-big">bacsikien.com</p>
+            <a class="tc-btn tc-btn-secondary" href={GOC} target="_blank" rel="noopener">Mở bacsikien.com</a>
+          </div>
+          {EMAIL && (
+            <div class="tc-card">
+              <h2>Email</h2>
+              <p class="tcp-big">{EMAIL}</p>
+              <a class="tc-btn tc-btn-secondary" href={"mailto:" + EMAIL}>Gửi email</a>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <section class="tcp-section tcp-section-alt">
+      <div class="tc-wrap tcp-cta">
+        <h2>Chưa có ảnh lưỡi?</h2>
+        <p>Chụp ngay trên điện thoại, AI mô tả tại chỗ rồi bạn mới chọn gửi cho bác sĩ.</p>
+        <a class="tc-btn tc-btn-primary" href="/thiet-chan#doc-luoi">Đọc lưỡi ngay</a>
+      </div>
+    </section>
+  </div>
+</Trang>
